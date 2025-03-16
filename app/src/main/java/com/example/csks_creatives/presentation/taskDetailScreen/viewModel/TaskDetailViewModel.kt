@@ -180,10 +180,6 @@ class TaskDetailViewModel @Inject constructor(
                     _taskDetailState.value.copy(taskCurrentStatus = event.taskStatusType)
             }
 
-            TaskDetailEvent.ToggleCommentsSection -> {
-                _visibilityState.value =
-                    _visibilityState.value.copy(isCommentsSectionVisible = !_visibilityState.value.isCommentsSectionVisible)
-            }
         }
     }
 
@@ -317,6 +313,13 @@ class TaskDetailViewModel @Inject constructor(
         _taskDetailState.update { it.copy(taskId = taskId) }
 
         // Todo Move business logics into a UseCase
+        if (userRole == UserRole.Admin && isTaskCreation) {
+            _visibilityState.update {
+                it.copy(
+                    isStatusHistoryVisible = false
+                )
+            }
+        }
         if (userRole == UserRole.Admin) {
             commentOwner = ADMIN_COMMENT_OWNER
             fetchClients()
@@ -332,4 +335,19 @@ class TaskDetailViewModel @Inject constructor(
         }
     }
 
+    fun hasUnsavedChanges(): Boolean {
+        if(taskDetailState.value != initialTaskDetailState.value){
+            changeBackButtonVisibilityState(true)
+            return true
+        }
+        return false
+    }
+
+    fun changeBackButtonVisibilityState(isVisible: Boolean){
+        _visibilityState.update {
+            it.copy(
+                isBackButtonDialogVisible = isVisible
+            )
+        }
+    }
 }

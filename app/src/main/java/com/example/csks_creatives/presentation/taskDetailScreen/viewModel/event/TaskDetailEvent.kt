@@ -6,7 +6,6 @@ sealed class TaskDetailEvent {
     object CreateTask : TaskDetailEvent() // Only Admin should be able to Create a Task
     object SaveTask : TaskDetailEvent() // On Clicking Add comment button
     object AddComment : TaskDetailEvent() // On Clicking Add comment button
-    object ToggleCommentsSection : TaskDetailEvent()
     data class TaskTitleTextFieldChanged(val taskTitle: String) : TaskDetailEvent()
     data class TaskDescriptionTextFieldChanged(val taskDescription: String) : TaskDetailEvent()
     data class TaskClientIdChanged(val clientId: String) : TaskDetailEvent()

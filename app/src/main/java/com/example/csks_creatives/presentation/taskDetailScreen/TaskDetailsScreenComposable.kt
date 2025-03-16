@@ -47,7 +47,7 @@ fun TaskDetailsComposable(
         topBar = {
             val actionButtonText: String
             val title: String
-            val actionButtonEvent : () -> Unit
+            val actionButtonEvent: () -> Unit
             if (userRole == UserRole.Employee || (userRole == UserRole.Admin && isTaskCreation.not())) {
                 title = taskName
                 actionButtonText = "Save"
@@ -71,6 +71,11 @@ fun TaskDetailsComposable(
             )
         }
     ) { paddingValue ->
-        TaskDetailComposable(viewModel, isTaskCreation, userRole, taskId, employeeId, paddingValue)
+        TaskDetailComposable(
+            viewModel,
+            isTaskCreation,
+            userRole,
+            paddingValue
+        ) { navController.popBackStack() }
     }
 }
