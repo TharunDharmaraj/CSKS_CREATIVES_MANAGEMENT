@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,8 +66,9 @@ fun AdminHomeScreen(
 
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
-                            navController.popBackStack()
-                            navController.navigate("login")
+                            navController.navigate("login"){
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     }
                 }
@@ -95,20 +95,6 @@ fun AdminHomeScreen(
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                Row {
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            viewModel.onHomeScreenEvent(AdminHomeScreenEvent.CreateTaskButtonClick)
-                            navController.navigate("create_task")
-                        }
-                    ) {
-                        Text("Add Task")
-                    }
-                }
-            }
-
             item {
                 SectionToggleButton("Employees", visibilityState.value.isEmployeeSectionVisible) {
                     viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleEmployeeSection)

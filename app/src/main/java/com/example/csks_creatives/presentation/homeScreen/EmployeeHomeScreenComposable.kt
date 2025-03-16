@@ -55,9 +55,8 @@ fun EmployeeHomeScreenComposable(
                     when (itemId) {
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
-                            navController.popBackStack()
                             navController.navigate("login"){
-                                popUpTo("employee_home/{employeeId}")
+                                popUpTo(0) { inclusive = true }
                             }
                         }
                     }

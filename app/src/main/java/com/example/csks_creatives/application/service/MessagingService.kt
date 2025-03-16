@@ -5,21 +5,19 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.example.csks_creatives.dI.MessagingServiceEntryPoint
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
-import com.example.csks_creatives.domain.useCase.UserLoginUseCase
-import com.example.csks_creatives.domain.useCase.UserPersistenceUseCase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 // TODO When app grows bigger, to use cloud functions to trigger FCM to employee device when a task is assigned to them. It is on hold now, since it requires billing
-class MessagingService @Inject constructor(
-    private val loginUseCase: UserLoginUseCase,
-    private val userPersistenceUseCase: UserPersistenceUseCase
-) : FirebaseMessagingService() {
+@AndroidEntryPoint
+class MessagingService : FirebaseMessagingService() {
     private val messagingCoroutineScope = CoroutineScope(Dispatchers.IO)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         remoteMessage.notification?.let {
@@ -29,6 +27,12 @@ class MessagingService @Inject constructor(
 
     override fun onNewToken(newToken: String) {
         super.onNewToken(newToken)
+        val entryPoint = EntryPointAccessors.fromApplication(
+            applicationContext,
+            MessagingServiceEntryPoint::class.java
+        )
+        val loginUseCase = entryPoint.loginUseCase()
+        val userPersistenceUseCase = entryPoint.userPersistenceUseCase()
         messagingCoroutineScope.launch {
             val currentUser = userPersistenceUseCase.getCurrentUser()
             if (currentUser != null && currentUser.userRole == UserRole.Admin) {

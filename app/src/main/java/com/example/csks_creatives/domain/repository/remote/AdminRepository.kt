@@ -12,8 +12,6 @@ interface AdminRepository {
 
     suspend fun getEmployees(): List<Employee>
 
-    suspend fun getEmployeeCount(): Int
-
     suspend fun checkEmployeeIdExists(employeeId: String): Boolean
 
     suspend fun addActiveTaskIntoEmployeeDetails(employeeId: String, taskId : String)

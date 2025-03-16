@@ -1,10 +1,7 @@
 package com.example.csks_creatives.data.repositoryImplementation.remote
 
 import android.util.Log
-import com.example.csks_creatives.data.utils.Constants.EMPLOYEES_COUNT
-import com.example.csks_creatives.data.utils.Constants.EMPLOYEES_COUNT_FIELD
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_COLLECTION
-import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_COUNT_DEFAULT
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_JOINED_TIME
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_NAME
@@ -59,9 +56,6 @@ class AdminRepositoryImplementation @Inject constructor(
                 logTag + "Create",
                 "Successfully Created Employee on Firestore Employee : $employee"
             )
-            adminRepoCoroutineScope.launch {
-                incrementEmployeeCount()
-            }
         } catch (error: Exception) {
             Log.d(logTag + "Create", "Failure $error Creation Employee : $employee")
         }
@@ -74,9 +68,6 @@ class AdminRepositoryImplementation @Inject constructor(
                 logTag + "Delete",
                 "Successfully Deleted Employee on Firestore EmployeeId $employeeId"
             )
-            adminRepoCoroutineScope.launch {
-                decrementEmployeeCount()
-            }
         } catch (error: Exception) {
             Log.d(logTag + "Delete", "Failure $error in Deletion EmployeeId $employeeId")
         }
@@ -155,20 +146,6 @@ class AdminRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(logTag + "Get", "Error $exception in fetching Employees")
             emptyList()
-        }
-    }
-
-    override suspend fun getEmployeeCount(): Int {
-        return try {
-            val employeeCountDocument = getPathForEmployeeCount().get().await()
-            if (employeeCountDocument.exists()) {
-                employeeCountDocument.getLong(EMPLOYEES_COUNT)?.toInt() ?: EMPLOYEE_COUNT_DEFAULT
-            } else {
-                EMPLOYEE_COUNT_DEFAULT
-            }
-        } catch (error: Exception) {
-            Log.d(logTag + "GetCount", "Error fetching Employee Count: $error")
-            EMPLOYEE_COUNT_DEFAULT
         }
     }
 
@@ -274,41 +251,4 @@ class AdminRepositoryImplementation @Inject constructor(
 
     private fun getEmployeePathForId(employeeId: String) =
         firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
-
-    private fun getPathForEmployeeCount() =
-        firestore.collection(EMPLOYEE_COLLECTION).document(EMPLOYEES_COUNT)
-
-    private suspend fun incrementEmployeeCount() {
-        try {
-            val employeeCountDocument = getPathForEmployeeCount().get().await()
-            val employeeCount =
-                (employeeCountDocument.getLong(EMPLOYEES_COUNT_FIELD) ?: EMPLOYEE_COUNT_DEFAULT)
-
-            getPathForEmployeeCount().set(
-                hashMapOf(EMPLOYEES_COUNT_FIELD to employeeCount.toInt() + 1),
-                SetOptions.merge()
-            ).await()
-
-            Log.d(logTag + "AddCount", "Successfully Updated Employee Count")
-        } catch (error: Exception) {
-            Log.d(logTag + "AddCount", "Failure $error On Updating Employee Count")
-        }
-    }
-
-    private suspend fun decrementEmployeeCount() {
-        try {
-            val employeeCountDocument = getPathForEmployeeCount().get().await()
-            val employeeCount =
-                (employeeCountDocument.getLong(EMPLOYEES_COUNT_FIELD) ?: EMPLOYEE_COUNT_DEFAULT)
-
-            getPathForEmployeeCount().set(
-                hashMapOf(EMPLOYEES_COUNT_FIELD to employeeCount.toInt() - 1),
-                SetOptions.merge()
-            ).await()
-
-            Log.d(logTag + "RemoveCount", "Successfully Updated Employee Count")
-        } catch (error: Exception) {
-            Log.d(logTag + "RemoveCount", "Failure $error On Updating Employee Count")
-        }
-    }
 }

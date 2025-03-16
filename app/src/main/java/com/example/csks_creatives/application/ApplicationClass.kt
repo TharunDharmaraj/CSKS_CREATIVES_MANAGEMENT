@@ -35,7 +35,7 @@ class ApplicationClass : Application() {
 
         WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
             "FCMTokenUpdate",
-            ExistingPeriodicWorkPolicy.KEEP,  // Ensures only one instance runs
+            ExistingPeriodicWorkPolicy.KEEP,
             workRequest
         )
     }

@@ -28,7 +28,9 @@ class MainActivity : ComponentActivity() {
             val isNavigated = rememberSaveable { mutableStateOf(false) }
 
             LaunchedEffect(mainState) {
-                if (!isNavigated.value && (mainState.employeeId.isNotEmpty() || mainState.adminName.isNotEmpty())) {
+                if (!isNavigated.value && (mainState.employeeId.isNotEmpty() ||
+                            mainState.adminName.isNotEmpty())
+                ) {
                     when {
                         mainState.employeeId.isNotEmpty() -> {
                             navController.navigate("employee_home/${mainState.employeeId}") {

@@ -59,8 +59,9 @@ fun EmployeeDetailsScreen(
                     when (itemId) {
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
-                            navController.popBackStack()
-                            navController.navigate("login")
+                            navController.navigate("login"){
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     }
                 }
