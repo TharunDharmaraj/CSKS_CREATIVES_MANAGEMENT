@@ -66,8 +66,8 @@ fun AdminHomeScreen(
                         }
 
                         "logout" -> {
-
                             viewModel.emitLogoutEvent(true)
+                            navController.popBackStack()
                             navController.navigate("login")
                         }
                     }

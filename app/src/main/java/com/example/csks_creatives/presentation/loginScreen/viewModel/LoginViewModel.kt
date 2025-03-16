@@ -2,6 +2,7 @@ package com.example.csks_creatives.presentation.loginScreen.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.useCase.UserLoginUseCase
 import com.example.csks_creatives.domain.utils.LogoutEvent.emitLogoutEvent
 import com.example.csks_creatives.presentation.loginScreen.viewModel.event.LoginEvent
@@ -52,6 +53,7 @@ class LoginViewModel @Inject constructor(
             )
             loginResult.onSuccess { user ->
                 loginUseCase.insertCurrentUserDetails(user)
+                if (user.userRole is UserRole.Employee) loginUseCase.saveFcmToken(user.id)
                 emitLogoutEvent(false)
                 _loginScreenState.update {
                     it.copy(

@@ -7,17 +7,23 @@ import com.example.csks_creatives.data.utils.Constants.ADMIN_USERNAME
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_NAME
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_PASSWORD
+import com.example.csks_creatives.data.utils.Constants.FCM_TOKEN_FIELD
+import com.example.csks_creatives.data.utils.Constants.FCM_TOKEN_LAST_UPDATED_FIELD
 import com.example.csks_creatives.domain.model.user.User
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.repository.remote.LoginRepository
+import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class LoginRepositoryImplementation @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val messaging: FirebaseMessaging
 ) : LoginRepository {
     private val logTag = "LoginRepository"
     override suspend fun login(username: String, password: String): Result<User> {
@@ -52,5 +58,34 @@ class LoginRepositoryImplementation @Inject constructor(
             Log.d(logTag, "Exception $exception")
             Result.failure(exception)
         }
+    }
+
+    override suspend fun saveFCMToken(employeeId: String) {
+        messaging.token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
+                    .set(
+                        hashMapOf(
+                            FCM_TOKEN_FIELD to token,
+                            FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(System.currentTimeMillis().toString())
+                        ), SetOptions.merge()
+                    )
+                    .addOnSuccessListener { Log.d(logTag + "FCM", "New Token $token") }
+                    .addOnFailureListener { Log.e(logTag + "FCM", "Error saving new token", it) }
+            }
+        }
+    }
+
+    override suspend fun saveNewFcmToken(employeeId: String, newToken: String) {
+        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
+            .set(
+                hashMapOf(
+                    FCM_TOKEN_FIELD to newToken,
+                    FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(System.currentTimeMillis().toString())
+                ), SetOptions.merge()
+            )
+            .addOnSuccessListener { Log.d(logTag + "NewFCM", "Token Updated $newToken") }
+            .addOnFailureListener { Log.e(logTag + "NewFCM", "Error saving token", it) }
     }
 }

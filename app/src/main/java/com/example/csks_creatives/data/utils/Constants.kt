@@ -65,4 +65,8 @@ object Constants {
 
     // Admin Name
     const val ADMIN_NAME = "Kishor"
+
+    //FCM
+    const val FCM_TOKEN_FIELD = "fcmToken"
+    const val FCM_TOKEN_LAST_UPDATED_FIELD = "fcmTokenLastUpdated"
 }

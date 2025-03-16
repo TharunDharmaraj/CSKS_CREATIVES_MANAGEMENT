@@ -63,6 +63,7 @@ fun ClientTasksListComposable(
                     when (itemId) {
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
+                            navController.popBackStack()
                             navController.navigate("login")
                         }
                     }

@@ -43,12 +43,14 @@ class UserLoginUseCase @Inject constructor(
                 userPersistenceUseCase.insertCurrentUser(
                     currentUser
                 )
-                Log.d("tharun", "Inserted User: $currentUser")
             }
         } catch (exception: Exception) {
             Log.d(logTag, "Exception $exception in inserting user $user in localDB")
         }
     }
 
+    suspend fun saveFcmToken(employeeId: String) = loginRepository.saveFCMToken(employeeId)
 
+    suspend fun saveNewFcmToken(employeeId: String, newToken: String) =
+        loginRepository.saveNewFcmToken(employeeId, newToken)
 }

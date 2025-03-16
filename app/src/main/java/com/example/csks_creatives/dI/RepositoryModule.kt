@@ -22,6 +22,7 @@ import com.example.csks_creatives.domain.repository.remote.LoginRepository
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.example.csks_creatives.domain.repository.remote.TasksRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,8 +66,11 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLoginRepository(firestore: FirebaseFirestore): LoginRepository {
-        return LoginRepositoryImplementation(firestore)
+    fun provideLoginRepository(
+        firestore: FirebaseFirestore,
+        messaging: FirebaseMessaging
+    ): LoginRepository {
+        return LoginRepositoryImplementation(firestore = firestore, messaging = messaging)
     }
 
     // local Repository
