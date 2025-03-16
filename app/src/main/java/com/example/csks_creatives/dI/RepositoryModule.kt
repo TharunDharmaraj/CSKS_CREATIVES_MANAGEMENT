@@ -1,8 +1,10 @@
 package com.example.csks_creatives.dI
 
 import com.example.csks_creatives.data.database.ClientsDao
+import com.example.csks_creatives.data.database.CurrentUserDao
 import com.example.csks_creatives.data.database.EmployeesDao
 import com.example.csks_creatives.data.repositoryImplementation.database.ClientsLocalRepositoryImplementation
+import com.example.csks_creatives.data.repositoryImplementation.database.CurrentUserRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.database.EmployeesLocalRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.AdminRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.ClientsRepositoryImplementation
@@ -11,6 +13,7 @@ import com.example.csks_creatives.data.repositoryImplementation.remote.LoginRepo
 import com.example.csks_creatives.data.repositoryImplementation.remote.TasksManipulationRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.TasksRepositoryImplementation
 import com.example.csks_creatives.domain.repository.database.ClientsLocalRepository
+import com.example.csks_creatives.domain.repository.database.CurrentUserRepository
 import com.example.csks_creatives.domain.repository.database.EmployeesLocalRepository
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.repository.remote.ClientsRepository
@@ -77,5 +80,11 @@ object RepositoryModule {
     @Singleton
     fun provideLocalEmployeesRepository(employeesDao: EmployeesDao): EmployeesLocalRepository {
         return EmployeesLocalRepositoryImplementation(employeesDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCurrentUserRepository(currentUserDao: CurrentUserDao): CurrentUserRepository {
+        return CurrentUserRepositoryImplementation(currentUserDao)
     }
 }

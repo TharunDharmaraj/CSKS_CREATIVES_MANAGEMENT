@@ -1,11 +1,11 @@
 package com.example.csks_creatives.presentation.homeScreen.viewModel.employee
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
+import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.components.DateOrder
 import com.example.csks_creatives.presentation.components.ToastUiEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event.EmployeeHomeScreenEvent
@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -122,5 +123,11 @@ class EmployeeHomeScreenViewModel @Inject constructor(
         if (hasInitialized) return
         hasInitialized = true
         getEmployeeTasks(employeeId, DateOrder.Descending)
+    }
+
+    fun emitLogoutEvent(isUserLoggedOut: Boolean) {
+        viewModelScope.launch {
+            LogoutEvent.emitLogoutEvent(isUserLoggedOut)
+        }
     }
 }

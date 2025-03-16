@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
+import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.state.ClientTasksListState
 import com.example.csks_creatives.presentation.components.DateOrder
@@ -125,5 +126,11 @@ class ClientTasksListViewModel @Inject constructor(
         hasInitialized = true
 
         getClientTasks(DateOrder.Descending, clientId)
+    }
+
+    fun emitLogoutEvent(isUserLoggedOut: Boolean){
+        viewModelScope.launch {
+            LogoutEvent.emitLogoutEvent(isUserLoggedOut)
+        }
     }
 }

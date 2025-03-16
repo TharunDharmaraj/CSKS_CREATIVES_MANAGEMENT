@@ -66,6 +66,8 @@ fun AdminHomeScreen(
                         }
 
                         "logout" -> {
+
+                            viewModel.emitLogoutEvent(true)
                             navController.navigate("login")
                         }
                     }

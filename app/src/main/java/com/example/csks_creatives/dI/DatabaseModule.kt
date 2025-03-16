@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.example.csks_creatives.data.database.ClientsDao
 import com.example.csks_creatives.data.database.ClientsDataBase
+import com.example.csks_creatives.data.database.CurrentUserDao
+import com.example.csks_creatives.data.database.CurrentUserDatabase
 import com.example.csks_creatives.data.database.EmployeesDao
 import com.example.csks_creatives.data.database.EmployeesDatabase
 import dagger.Module
@@ -33,6 +35,15 @@ object DatabaseModule {
         }
     }
 
+    @Volatile
+    private var currentUserDatabaseInstance: CurrentUserDatabase? = null
+    private fun getCurrentUserDatabase(context: Context): CurrentUserDatabase {
+        return currentUserDatabaseInstance ?: synchronized(this) {
+            Room.databaseBuilder(context, CurrentUserDatabase::class.java, "CurrentUserDatabase")
+                .fallbackToDestructiveMigration().build().also { currentUserDatabaseInstance = it }
+        }
+    }
+
     @Provides
     @Singleton
     fun provideClientsDatabase(context: Context): ClientsDataBase {
@@ -55,5 +66,17 @@ object DatabaseModule {
     @Singleton
     fun provideEmployeesDao(employeesDatabase: EmployeesDatabase): EmployeesDao {
         return employeesDatabase.employeesDao
+    }
+
+    @Provides
+    @Singleton
+    fun provideCurrentUserDatabase(context: Context): CurrentUserDatabase {
+        return getCurrentUserDatabase(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCurrentUserDao(currentUserDatabase: CurrentUserDatabase): CurrentUserDao {
+        return currentUserDatabase.currentUserDao
     }
 }

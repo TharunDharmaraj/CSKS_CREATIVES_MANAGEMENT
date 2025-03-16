@@ -8,6 +8,7 @@ import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.AdminUseCaseFactory
 import com.example.csks_creatives.domain.useCase.ClientsUseCaseFactory
 import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
+import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.components.ToastUiEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddClientDialogEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddEmployeeDialogEvent
@@ -290,6 +291,12 @@ class AdminHomeScreenViewModel @Inject constructor(
                     isBacklogTasksFetched = true
                 }
             }
+        }
+    }
+
+    fun emitLogoutEvent(isUserLoggedOut: Boolean) {
+        viewModelScope.launch {
+            LogoutEvent.emitLogoutEvent(isUserLoggedOut)
         }
     }
 }

@@ -62,6 +62,7 @@ fun ClientTasksListComposable(
                 onMenuItemClicked = { itemId ->
                     when (itemId) {
                         "logout" -> {
+                            viewModel.emitLogoutEvent(true)
                             navController.navigate("login")
                         }
                     }

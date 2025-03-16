@@ -1,0 +1,52 @@
+package com.example.csks_creatives.presentation.mainActivity.viewModel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.csks_creatives.domain.useCase.UserPersistenceUseCase
+import com.example.csks_creatives.domain.utils.LogoutEvent.logoutEventFlow
+import com.example.csks_creatives.presentation.mainActivity.viewModel.state.MainActivityState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val userPersistenceUseCase: UserPersistenceUseCase
+) : ViewModel() {
+
+    private val _mainState = MutableStateFlow(MainActivityState())
+    val mainState = _mainState.asStateFlow()
+
+    init {
+        getCurrentUser()
+        listenForLogoutEventFlow()
+    }
+
+    private fun listenForLogoutEventFlow() {
+        viewModelScope.launch {
+            logoutEventFlow.collect { isUserLoggedOut ->
+                if (isUserLoggedOut) {
+                    userPersistenceUseCase.deleteCurrentUser()
+                }
+            }
+        }
+    }
+
+    private fun getCurrentUser() {
+        viewModelScope.launch {
+            val currentUser = userPersistenceUseCase.getCurrentUser()
+            if (currentUser != null) {
+                _mainState.update {
+                    it.copy(
+                        userRole = currentUser.userRole,
+                        employeeId = currentUser.employeeId,
+                        adminName = currentUser.adminName
+                    )
+                }
+            }
+        }
+    }
+}

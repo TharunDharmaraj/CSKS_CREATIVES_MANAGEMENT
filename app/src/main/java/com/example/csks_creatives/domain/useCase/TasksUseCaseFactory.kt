@@ -27,4 +27,5 @@ interface TasksUseCaseFactory {
     suspend fun getAllBacklogTasks(): Flow<ResultState<List<ClientTask>>>
 
     suspend fun getAllCompletedTasks(): Flow<ResultState<List<ClientTask>>>
+
 }

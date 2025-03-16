@@ -54,6 +54,7 @@ fun EmployeeHomeScreenComposable(
                 onMenuItemClicked = { itemId ->
                     when (itemId) {
                         "logout" -> {
+                            viewModel.emitLogoutEvent(true)
                             navController.navigate("login"){
                                 popUpTo("employee_home/{employeeId}")
                             }

@@ -19,6 +19,7 @@ import com.example.csks_creatives.domain.useCase.TasksManipulationUseCaseFactory
 import com.example.csks_creatives.domain.useCase.TasksUseCase
 import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
 import com.example.csks_creatives.domain.useCase.UserLoginUseCase
+import com.example.csks_creatives.domain.useCase.UserPersistenceUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -64,11 +65,20 @@ object UseCaseModule {
         tasksRepository: TasksRepository,
         adminRepository: AdminRepository
     ): TasksUseCaseFactory {
-        return TasksUseCase(tasksRepository, adminRepository)
+        return TasksUseCase(
+            tasksRepository = tasksRepository,
+            adminRepository = adminRepository
+        )
     }
 
     @Provides
-    fun provideUserLoginUseCase(loginRepository: LoginRepository): UserLoginUseCase {
-        return UserLoginUseCase(loginRepository)
+    fun provideUserLoginUseCase(
+        loginRepository: LoginRepository,
+        userPersistenceUseCase: UserPersistenceUseCase
+    ): UserLoginUseCase {
+        return UserLoginUseCase(
+            loginRepository = loginRepository,
+            userPersistenceUseCase = userPersistenceUseCase
+        )
     }
 }

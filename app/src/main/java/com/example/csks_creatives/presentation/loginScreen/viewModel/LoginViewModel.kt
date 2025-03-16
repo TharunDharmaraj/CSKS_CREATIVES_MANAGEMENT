@@ -3,6 +3,7 @@ package com.example.csks_creatives.presentation.loginScreen.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.useCase.UserLoginUseCase
+import com.example.csks_creatives.domain.utils.LogoutEvent.emitLogoutEvent
 import com.example.csks_creatives.presentation.loginScreen.viewModel.event.LoginEvent
 import com.example.csks_creatives.presentation.loginScreen.viewModel.event.LoginUIEvent
 import com.example.csks_creatives.presentation.loginScreen.viewModel.state.LoginState
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: UserLoginUseCase
+    private val loginUseCase: UserLoginUseCase,
 ) : ViewModel() {
     private val _loginScreenState = MutableStateFlow(LoginState())
     val loginScreenState: StateFlow<LoginState> = _loginScreenState.asStateFlow()
@@ -50,9 +51,14 @@ class LoginViewModel @Inject constructor(
                 _loginScreenState.value.userName, _loginScreenState.value.password
             )
             loginResult.onSuccess { user ->
+                loginUseCase.insertCurrentUserDetails(user)
+                emitLogoutEvent(false)
                 _loginScreenState.update {
                     it.copy(
-                        isLoading = false, loginSuccess = true, userRole = user.userRole, employeeId = user.id
+                        isLoading = false,
+                        loginSuccess = true,
+                        userRole = user.userRole,
+                        employeeId = user.id
                     )
                 }
                 viewModelScope.launch {

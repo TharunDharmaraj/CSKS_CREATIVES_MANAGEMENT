@@ -58,6 +58,7 @@ fun EmployeeDetailsScreen(
                 onMenuItemClicked = { itemId ->
                     when (itemId) {
                         "logout" -> {
+                            viewModel.emitLogoutEvent(true)
                             navController.navigate("login")
                         }
                     }

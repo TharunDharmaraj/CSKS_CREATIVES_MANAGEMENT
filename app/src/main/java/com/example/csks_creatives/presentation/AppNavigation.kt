@@ -1,10 +1,10 @@
-package com.example.csks_creatives
+package com.example.csks_creatives.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.clientTasksListScreen.ClientTasksListComposable
@@ -15,10 +15,8 @@ import com.example.csks_creatives.presentation.loginScreen.LoginScreen
 import com.example.csks_creatives.presentation.taskDetailScreen.TaskDetailsComposable
 
 @Composable
-fun AppNavigation(startDestination: String = "login") {
-    val navController = rememberNavController()
-
-    NavHost(navController = navController, startDestination = startDestination) {
+fun AppNavigation(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = "login") {
         composable("login") { LoginScreen(viewModel = hiltViewModel(), navController) }
 
         composable("employee_home/{employeeId}") { backStackEntry ->
@@ -33,10 +31,8 @@ fun AppNavigation(startDestination: String = "login") {
         composable("task_detail/{taskId}/{employeeId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId") ?: ""
             val employeeId = backStackEntry.arguments?.getString("employeeId") ?: ""
-            var userRole: UserRole = UserRole.Employee
-            if (employeeId == ADMIN_NAME) {
-                userRole = UserRole.Admin
-            }
+            val userRole = if (employeeId == ADMIN_NAME) UserRole.Admin else UserRole.Employee
+
             TaskDetailsComposable(
                 navController = navController,
                 viewModel = hiltViewModel(),
