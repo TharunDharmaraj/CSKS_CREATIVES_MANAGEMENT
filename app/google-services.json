@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "969683884270",
+    "project_id": "csks-creatives",
+    "storage_bucket": "csks-creatives.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969683884270:android:88b55012682dc6b2187bff",
+        "android_client_info": {
+          "package_name": "com.example.csks_creatives"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8W0AQWIy_2tHGu3yKQTxE5NPuaHCF610"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
