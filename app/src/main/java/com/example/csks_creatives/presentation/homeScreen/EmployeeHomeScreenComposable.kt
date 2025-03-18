@@ -47,6 +47,7 @@ fun EmployeeHomeScreenComposable(
             AppToolbar(
                 title = "Welcome, $employeeId",
                 canShowSearch = false,
+                canShowMenu = true,
                 menuItems = listOf(
                     ToolbarOverFlowMenuItem("logout", "Logout")
                 ),

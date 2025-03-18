@@ -1,8 +1,8 @@
 package com.example.csks_creatives.presentation.toolbar
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -26,9 +26,10 @@ fun AppToolbar(
     actionButtonText: String = "Save",
     canShowBackIcon: Boolean = false,
     canShowSearch: Boolean = false,
-    canShowMenu: Boolean = true,
+    canShowMenu: Boolean = false,
     canShowActionButton: Boolean = false,
     canShowAddTaskButton: Boolean = false,
+    isActionButtonEnabled: Boolean = false,
     menuItems: List<ToolbarOverFlowMenuItem> = emptyList(),
     onBackClicked: () -> Unit = {},
     onSearchClicked: () -> Unit = {},
@@ -41,7 +42,7 @@ fun AppToolbar(
         navigationIcon = {
             if (canShowBackIcon) {
                 IconButton(onClick = onBackClicked) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
         },
@@ -54,7 +55,8 @@ fun AppToolbar(
 
             if (canShowActionButton) {
                 Button(
-                    onClick = onActionButtonClicked
+                    onClick = onActionButtonClicked,
+                    enabled = isActionButtonEnabled
                 ) {
                     Text(actionButtonText)
                 }

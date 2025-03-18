@@ -50,6 +50,7 @@ fun ClientTasksListComposable(
         topBar = {
             AppToolbar(
                 title = "Client $clientId",
+                canShowMenu = true,
                 canShowSearch = true,
                 canShowBackIcon = true,
                 menuItems = listOf(

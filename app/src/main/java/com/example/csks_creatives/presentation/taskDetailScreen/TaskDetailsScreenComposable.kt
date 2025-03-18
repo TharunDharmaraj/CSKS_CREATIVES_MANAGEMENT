@@ -4,10 +4,10 @@ import android.widget.Toast
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.taskDetailScreen.components.TaskDetailComposable
@@ -26,7 +26,8 @@ fun TaskDetailsComposable(
     navController: NavHostController
 ) {
     val context = LocalContext.current
-    val taskName by viewModel.taskName.collectAsState()
+    val taskName by viewModel.taskName.collectAsStateWithLifecycle()
+    val actionButtonEnabled by viewModel.actionButtonEnabled.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -59,15 +60,16 @@ fun TaskDetailsComposable(
             }
             AppToolbar(
                 title = title,
-                canShowSearch = false,
-                canShowMenu = false,
                 canShowBackIcon = true,
-                onSearchClicked = { /* Ignore */ },
-                onBackClicked = { navController.popBackStack() },
+                isActionButtonEnabled = actionButtonEnabled,
+                onBackClicked = {
+                    if (viewModel.hasUnsavedChanges().not()) {
+                        navController.popBackStack()
+                    }
+                },
                 canShowActionButton = true,
                 actionButtonText = actionButtonText,
-                onActionButtonClicked = actionButtonEvent,
-                onMenuItemClicked = { }
+                onActionButtonClicked = actionButtonEvent
             )
         }
     ) { paddingValue ->

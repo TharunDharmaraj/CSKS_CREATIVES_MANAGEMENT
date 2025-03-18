@@ -46,6 +46,7 @@ fun EmployeeDetailsScreen(
         topBar = {
             AppToolbar(
                 title = employeeId,
+                canShowMenu = true,
                 canShowSearch = true,
                 canShowBackIcon = true,
                 menuItems = listOf(

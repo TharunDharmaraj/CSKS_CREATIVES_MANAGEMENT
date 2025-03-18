@@ -38,6 +38,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.style.TextDecoration
@@ -131,8 +132,6 @@ fun TaskDetailComposable(
             .padding(paddingValue)
             .verticalScroll(rememberScrollState())
     ) {
-        Text("Task Details", style = MaterialTheme.typography.bodyLarge)
-
         OutlinedTextField(
             value = taskState.value.taskTitle,
             onValueChange = {
@@ -197,7 +196,8 @@ fun TaskDetailComposable(
             singleLine = true,
             label = { Text("Story Points") },
             readOnly = userRole != UserRole.Admin,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         // Task Status (Dropdown)
@@ -228,54 +228,57 @@ fun TaskDetailComposable(
 
 
         // TODO ALLOW COMMENTS DURING TASKS CREATION - Use a Queuing Mechanism to post tasks once Task Created
-        if (taskState.value.taskComments.isNotEmpty()) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(modifier = Modifier.padding(8.dp)) {
-                    Text(
-                        "Comments",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-
-                    taskState.value.taskComments.forEach { comment ->
+        if (isTaskCreation.not()) {
+            if (taskState.value.taskComments.isNotEmpty()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
                         Text(
-                            "${comment.commentedBy}: ${comment.commentString} (${comment.commentTimeStamp})",
-                            modifier = Modifier.padding(4.dp)
+                            "Comments",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 4.dp)
                         )
+
+                        taskState.value.taskComments.forEach { comment ->
+                            Text(
+                                "${comment.commentedBy}: ${comment.commentString} (${comment.commentTimeStamp})",
+                                modifier = Modifier.padding(4.dp)
+                            )
+                        }
                     }
                 }
+            } else {
+                Text(
+                    "No comments yet",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
-        } else {
-            Text(
-                "No comments yet",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
+
 
 // Comment Input Section
-        OutlinedTextField(
-            value = commentState.value.commentString,
-            onValueChange = {
-                viewModel.onCommentEvent(TaskCommentsEvent.commentStringChanged(it))
-            },
-            label = { Text("Add a comment") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = commentState.value.commentString,
+                onValueChange = {
+                    viewModel.onCommentEvent(TaskCommentsEvent.commentStringChanged(it))
+                },
+                label = { Text("Add a comment") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Button(
-            onClick = { viewModel.onCommentEvent(TaskCommentsEvent.CreateComment) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = isTaskCreation.not()
-        ) {
-            Text("Post Comment")
+            Button(
+                onClick = { viewModel.onCommentEvent(TaskCommentsEvent.CreateComment) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isTaskCreation.not()
+            ) {
+                Text("Post Comment")
+            }
         }
     }
 }

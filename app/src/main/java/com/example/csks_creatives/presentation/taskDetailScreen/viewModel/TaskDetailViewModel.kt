@@ -73,6 +73,8 @@ class TaskDetailViewModel @Inject constructor(
     private var commentOwner = EMPTY_STRING
     private val _taskName = MutableStateFlow("Task Name")
     var taskName = _taskName.asStateFlow()
+    private val _actionButtonEnabled = MutableStateFlow(false)
+    val actionButtonEnabled = _actionButtonEnabled.asStateFlow()
 
     fun onEvent(event: TaskDetailEvent) {
         when (event) {
@@ -81,7 +83,7 @@ class TaskDetailViewModel @Inject constructor(
                     val task = _taskDetailState.value.toClientTask()
                     when (val result = tasksUseCaseFactory.createTask(task)) {
                         is ResultState.Success -> {
-                            _uiEvent.emit(TaskCreationUiEvent.ShowToast("Task Created Successfully"))
+                            _uiEvent.emit(TaskCreationUiEvent.ShowToast(result.data))
                             _uiEvent.emit(TaskCreationUiEvent.NavigateBack)
                         }
 
@@ -104,19 +106,19 @@ class TaskDetailViewModel @Inject constructor(
                 viewModelScope.launch {
                     val initialTask = initialTaskDetailState.value.toClientTask()
                     val currentTask = _taskDetailState.value.toClientTask()
-                    when (tasksManipulationUseCaseFactory.editTask(
+                    when (val result = tasksManipulationUseCaseFactory.editTask(
                         currentTask = currentTask,
                         initialTask = initialTask
                     )) {
                         is ResultState.Success -> {
                             updateTaskStatus(_taskDetailState.value.taskCurrentStatus)
-                            Log.d("TaskDetailViewModel", "Task Updated Successfully")
-                            _uiEvent.emit(TaskCreationUiEvent.ShowToast("Task Saved Successfully"))
+                            _uiEvent.emit(TaskCreationUiEvent.ShowToast(result.data))
                             _uiEvent.emit(TaskCreationUiEvent.NavigateBack)
                         }
 
                         is ResultState.Error -> {
-                            Log.d("TaskDetailViewModel", "Error in updating task")
+                            _uiEvent.emit(TaskCreationUiEvent.ShowToast(result.message))
+                            _uiEvent.emit(TaskCreationUiEvent.NavigateBack)
                         }
 
                         else -> {}
@@ -144,7 +146,6 @@ class TaskDetailViewModel @Inject constructor(
                         }
 
                         is ResultState.Error -> {
-
                         }
 
                         else -> {}
@@ -253,6 +254,7 @@ class TaskDetailViewModel @Inject constructor(
                         taskCurrentStatus = task.currentStatus
                     )
                     _taskName.value = task.taskName
+                    _actionButtonEnabled.value = true
                     saveTaskStatus()
                 }
             }
@@ -314,6 +316,7 @@ class TaskDetailViewModel @Inject constructor(
 
         // Todo Move business logics into a UseCase
         if (userRole == UserRole.Admin && isTaskCreation) {
+            _actionButtonEnabled.value = true
             _visibilityState.update {
                 it.copy(
                     isStatusHistoryVisible = false
@@ -336,14 +339,23 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     fun hasUnsavedChanges(): Boolean {
-        if(taskDetailState.value != initialTaskDetailState.value){
+        // We need not check the list of posted taskComments when checking between initial and final status, so we omit it
+        val currentState = taskDetailState.value
+        val initialState = initialTaskDetailState.value
+        val hasTaskChanges =
+            currentState.copy(taskComments = emptyList()) != initialState.copy(taskComments = emptyList())
+
+        val isCommentStateChanged = _taskCommentState.value.commentString.isNotBlank()
+        val hasUnsavedChanges = hasTaskChanges || isCommentStateChanged
+
+        if (hasUnsavedChanges) {
             changeBackButtonVisibilityState(true)
-            return true
         }
-        return false
+
+        return hasUnsavedChanges
     }
 
-    fun changeBackButtonVisibilityState(isVisible: Boolean){
+    fun changeBackButtonVisibilityState(isVisible: Boolean) {
         _visibilityState.update {
             it.copy(
                 isBackButtonDialogVisible = isVisible

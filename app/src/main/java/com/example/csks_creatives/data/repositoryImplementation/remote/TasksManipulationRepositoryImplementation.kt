@@ -4,7 +4,6 @@ import android.util.Log
 import com.example.csks_creatives.data.utils.Constants.TASKS_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_ATTACHMENT
 import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
-import com.example.csks_creatives.data.utils.Constants.TASK_CREATION_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
@@ -64,14 +63,13 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             } else {
                 Log.d(logTag + "Status", "No Document found lastUpdatedStatusDocument is null")
             }
-            var newStatusHashMap = hashMapOf<String, Long>()
-            if (status == TaskStatusType.COMPLETED) {
-                newStatusHashMap = hashMapOf(
+            val newStatusHashMap: HashMap<String, Long> = if (status == TaskStatusType.COMPLETED) {
+                hashMapOf(
                     TASK_STATUS_HISTORY_START_TIME to currentTime,
                     TASK_STATUS_HISTORY_END_TIME to currentTime
                 )
             } else {
-                newStatusHashMap = hashMapOf(
+                hashMapOf(
                     TASK_STATUS_HISTORY_START_TIME to currentTime,
                     TASK_STATUS_HISTORY_END_TIME to TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
                 )
@@ -119,14 +117,13 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             collectionRefToEdit.set(
                 hashMapOf(
                     TASK_ID to task.taskId,
-                    TASK_CREATION_TIME to task.taskCreationTime,
                     TASK_CLIENT_ID to task.clientId,
                     TASK_EMPLOYEE_ID to task.employeeId,
                     TASK_TASK_NAME to task.taskName,
                     TASK_ATTACHMENT to task.taskAttachment,
                     TASK_POINT to task.taskPoint,
                     TASK_CURRENT_STATUS to task.currentStatus
-                )
+                ), SetOptions.merge()
             )
             Log.d(logTag + "Edit", "Successfully Edited TaskId $task")
         } catch (exception: Exception) {

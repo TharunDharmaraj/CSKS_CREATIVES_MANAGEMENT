@@ -33,8 +33,7 @@ class TasksUseCase @Inject constructor(
         try {
             tasksRepository.getTasksForClient(clientId)
                 .collect { tasks ->
-                    var orderedTasks = tasks
-                    orderedTasks = if (order == DateOrder.Ascending) {
+                    val orderedTasks = if (order == DateOrder.Ascending) {
                         tasks.sortedBy { it.taskCreationTime }
                     } else {
                         tasks.sortedByDescending { it.taskCreationTime }
@@ -77,9 +76,9 @@ class TasksUseCase @Inject constructor(
 
     override suspend fun createTask(task: ClientTask): ResultState<String> {
         return try {
-            if (task.taskAttachment.isBlank()) ResultState.Error("Task Description Cannot Be Empty")
-            if (task.taskName.isBlank()) ResultState.Error("Task Name Cannot Be Empty")
-            if (task.clientId.isBlank()) ResultState.Error("Task Client Cannot be Empty")
+            if (task.taskAttachment.isEmpty()) return ResultState.Error("Task Description Cannot Be Empty")
+            if (task.taskName.isEmpty()) return ResultState.Error("Task Name Cannot Be Empty")
+            if (task.clientId.isEmpty()) return ResultState.Error("Task Client Cannot be Empty")
             val currentTime = System.currentTimeMillis().toString()
             val taskToCreate = task.copy(
                 taskId = currentTime,
@@ -95,7 +94,7 @@ class TasksUseCase @Inject constructor(
                     taskId = currentTime
                 )
             }
-            ResultState.Success("Comment Posted Successfully")
+            ResultState.Success("Task Created Successfully")
         } catch (exception: Exception) {
             ResultState.Error("Failed to create task ${exception.message}")
         }

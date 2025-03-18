@@ -44,6 +44,7 @@ fun AdminHomeScreen(
         topBar = {
             AppToolbar(
                 title = "Welcome, Admin",
+                canShowMenu = true,
                 menuItems = listOf(
                     ToolbarOverFlowMenuItem("add_employee", "Add Employee"),
                     ToolbarOverFlowMenuItem("add_client", "Add Client"),

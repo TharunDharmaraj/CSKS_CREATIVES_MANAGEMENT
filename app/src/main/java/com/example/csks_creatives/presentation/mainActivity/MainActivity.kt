@@ -34,20 +34,18 @@ class MainActivity : ComponentActivity() {
                     when {
                         mainState.employeeId.isNotEmpty() -> {
                             navController.navigate("employee_home/${mainState.employeeId}") {
-                                popUpTo("splash") { inclusive = true }
+                                popUpTo("login") { inclusive = true }
                             }
                         }
 
                         mainState.adminName.isNotEmpty() -> {
                             navController.navigate("admin_home") {
-                                popUpTo("splash") { inclusive = true }
+                                popUpTo("login") { inclusive = true }
                             }
                         }
 
                         else -> {
-                            navController.navigate("login") {
-                                popUpTo("splash") { inclusive = true }
-                            }
+                            navController.navigate("login")
                         }
                     }
                     isNavigated.value = true
