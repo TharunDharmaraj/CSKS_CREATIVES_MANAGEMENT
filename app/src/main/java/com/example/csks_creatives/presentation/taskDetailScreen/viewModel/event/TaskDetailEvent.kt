@@ -10,6 +10,6 @@ sealed class TaskDetailEvent {
     data class TaskDescriptionTextFieldChanged(val taskDescription: String) : TaskDetailEvent()
     data class TaskClientIdChanged(val clientId: String) : TaskDetailEvent()
     data class TaskAssignedToEmployeeChanged(val employeeId: String) : TaskDetailEvent()
-    data class TaskStoryPointsChanged(val storyPoints: Int) : TaskDetailEvent()
+    data class TaskEstimateChanged(val estimate: Int) : TaskDetailEvent()
     data class TaskStatusTypeChanged(val taskStatusType: TaskStatusType) : TaskDetailEvent()
 }

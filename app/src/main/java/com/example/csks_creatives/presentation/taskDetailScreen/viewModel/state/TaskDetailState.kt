@@ -12,7 +12,7 @@ data class TaskDetailState(
     val taskDescription: String = EMPTY_STRING,  // Editable only for Admin - Read only for Employee
     val taskClientId: String = EMPTY_STRING, // Client ID of the task,  Editable only for Admin - Read only for Employee
     val taskAssignedTo: String = EMPTY_STRING, // EmployeeId of the task,  Editable only for Admin - Read only for Employee
-    val taskStoryPoints: Int = 0, // Editable only for Admin - Read only for Employee
+    val taskEstimate: Int = 0, // Editable only for Admin - Read only for Employee
     val taskCurrentStatus: TaskStatusType = TaskStatusType.BACKLOG, // Read Only for Both Admin and Employee
     val taskStatusHistory: List<TaskStatusHistory> = emptyList(), // Status History - Read Only by both Admin and Employee
     val taskComments: List<Comment> = emptyList(), // List of Comments
@@ -25,7 +25,7 @@ fun TaskDetailState.toClientTask(): ClientTask {
         employeeId = this.taskAssignedTo,
         taskName = this.taskTitle,
         taskAttachment = this.taskDescription,
-        taskPoint = this.taskStoryPoints,
+        estimate = this.taskEstimate,
         currentStatus = this.taskCurrentStatus,
         statusHistory = this.taskStatusHistory
     )

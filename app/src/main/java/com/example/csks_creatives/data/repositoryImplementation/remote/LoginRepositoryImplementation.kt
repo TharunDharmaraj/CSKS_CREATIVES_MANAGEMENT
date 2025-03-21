@@ -9,9 +9,11 @@ import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_NAME
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_PASSWORD
 import com.example.csks_creatives.data.utils.Constants.FCM_TOKEN_FIELD
 import com.example.csks_creatives.data.utils.Constants.FCM_TOKEN_LAST_UPDATED_FIELD
+import com.example.csks_creatives.domain.model.login.CurrentLoginUser
 import com.example.csks_creatives.domain.model.user.User
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.repository.remote.LoginRepository
+import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -26,6 +28,8 @@ class LoginRepositoryImplementation @Inject constructor(
     private val messaging: FirebaseMessaging
 ) : LoginRepository {
     private val logTag = "LoginRepository"
+    private var currentLoggedInUser: CurrentLoginUser? = null
+
     override suspend fun login(username: String, password: String): Result<User> {
         return try {
             val adminSnapshot = firestore.collection(ADMIN_COLLECTION)
@@ -36,6 +40,13 @@ class LoginRepositoryImplementation @Inject constructor(
 
             if (adminSnapshot.isEmpty.not()) {
                 val adminDoc = adminSnapshot.documents.first()
+                setCurrentUserAsAdmin(
+                    CurrentLoginUser(
+                        userRole = UserRole.Employee,
+                        adminName = adminDoc.id,
+                        employeeId = EMPTY_STRING
+                    )
+                )
                 Log.d(logTag, "UserRole is Admin")
                 return Result.success(User(adminDoc.id, username, UserRole.Admin))
             }
@@ -48,6 +59,13 @@ class LoginRepositoryImplementation @Inject constructor(
 
             if (employeeSnapshot.isEmpty.not()) {
                 val employeeDoc = employeeSnapshot.documents.first()
+                setCurrentUserAsEmployee(
+                    CurrentLoginUser(
+                        userRole = UserRole.Employee,
+                        adminName = EMPTY_STRING,
+                        employeeId = employeeDoc.id
+                    )
+                )
                 Log.d(logTag, "UserRole is Employee")
                 return Result.success(User(employeeDoc.id, username, UserRole.Employee))
             }
@@ -68,7 +86,9 @@ class LoginRepositoryImplementation @Inject constructor(
                     .set(
                         hashMapOf(
                             FCM_TOKEN_FIELD to token,
-                            FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(System.currentTimeMillis().toString())
+                            FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(
+                                System.currentTimeMillis().toString()
+                            )
                         ), SetOptions.merge()
                     )
                     .addOnSuccessListener { Log.d(logTag + "FCM", "New Token $token") }
@@ -82,10 +102,29 @@ class LoginRepositoryImplementation @Inject constructor(
             .set(
                 hashMapOf(
                     FCM_TOKEN_FIELD to newToken,
-                    FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(System.currentTimeMillis().toString())
+                    FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(
+                        System.currentTimeMillis().toString()
+                    )
                 ), SetOptions.merge()
             )
             .addOnSuccessListener { Log.d(logTag + "NewFCM", "Token Updated $newToken") }
             .addOnFailureListener { Log.e(logTag + "NewFCM", "Error saving token", it) }
+    }
+
+    override fun getCurrentUser() = currentLoggedInUser
+
+    override fun deleteCurrentUser() {
+        Log.d("tharun", "Deleting from local cache")
+        currentLoggedInUser = null
+    }
+
+    private fun setCurrentUserAsAdmin(user: CurrentLoginUser) {
+        Log.d("tharun", "Setting current user as admin")
+        currentLoggedInUser = user
+    }
+
+    private fun setCurrentUserAsEmployee(user: CurrentLoginUser) {
+        Log.d("tharun", "Setting current user as employee")
+        currentLoggedInUser = user
     }
 }

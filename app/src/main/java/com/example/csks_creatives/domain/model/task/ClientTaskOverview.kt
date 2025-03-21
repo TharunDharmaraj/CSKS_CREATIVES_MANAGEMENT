@@ -8,7 +8,7 @@ data class ClientTaskOverview(
     val taskName: String = EMPTY_STRING,
     val taskCreationTime: String = EMPTY_STRING,
     val clientId: String = EMPTY_STRING,
-    val taskPoint: Int = 0,
+    val estimate: Int = 0,
     val currentStatus: TaskStatusType = TaskStatusType.BACKLOG,
     val taskDuration: String = EMPTY_STRING
 )

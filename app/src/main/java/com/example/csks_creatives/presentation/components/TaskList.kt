@@ -1,6 +1,5 @@
 package com.example.csks_creatives.presentation.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.utils.Utils.getFormattedDateTimeFormat
 
 
 @Composable
@@ -31,7 +31,8 @@ fun TaskItem(task: ClientTask, onTaskClick: () -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = task.taskName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text(text = "Assigned to: ${task.employeeId}", fontSize = 14.sp)
-            Text(text = "Points: ${task.taskPoint}", fontSize = 14.sp)
+            Text(text = "Estimate: ${task.estimate}", fontSize = 14.sp)
+            Text(text = "Created Date: ${getFormattedDateTimeFormat(task.taskCreationTime)}", fontSize = 14.sp)
             Text(
                 text = "Status: ${task.currentStatus}",
                 fontSize = 14.sp,

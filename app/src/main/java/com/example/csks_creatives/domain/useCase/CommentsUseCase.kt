@@ -45,6 +45,8 @@ class CommentsUseCase @Inject constructor(
         comment: Comment
     ): ResultState<String> {
         return try {
+            if(comment.commentString.isEmpty()) return ResultState.Error("Empty Comment")
+            if(employeeId.isEmpty()) return ResultState.Error("No User found to comment")
             val commentToBePosted = comment.copy(
                 commentId = UUID.randomUUID().toString(),
                 commentTimeStamp = System.currentTimeMillis().toString(),

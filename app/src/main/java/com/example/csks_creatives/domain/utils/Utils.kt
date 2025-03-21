@@ -66,7 +66,12 @@ object Utils {
     }
 
     fun formatTimeStamp(timeStampInMilliSeconds: String): String {
-        val sdf = SimpleDateFormat("HH:mm:ss MMM dd yyyy", Locale.getDefault())
-        return sdf.format(Date(timeStampInMilliSeconds.toLong()))
+        val timeFormat = SimpleDateFormat("HH:mm:ss MMM dd yyyy", Locale.getDefault())
+        return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
+    }
+
+    fun getFormattedDateTimeFormat(timeStampInMilliSeconds: String): String {
+        val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
+        return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 }

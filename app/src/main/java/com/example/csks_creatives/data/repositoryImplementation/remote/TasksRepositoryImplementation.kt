@@ -8,8 +8,8 @@ import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_CREATION_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
+import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
-import com.example.csks_creatives.data.utils.Constants.TASK_POINT
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
@@ -32,10 +32,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.random.Random
 
 @Singleton
 class TasksRepositoryImplementation @Inject constructor(
@@ -57,7 +55,7 @@ class TasksRepositoryImplementation @Inject constructor(
                     TASK_EMPLOYEE_ID to employeeId,
                     TASK_TASK_NAME to task.taskName,
                     TASK_ATTACHMENT to task.taskAttachment,
-                    TASK_POINT to task.taskPoint,
+                    TASK_ESTIMATE to task.estimate,
                     TASK_CURRENT_STATUS to task.currentStatus
                 ), SetOptions.merge()
             )
@@ -116,7 +114,7 @@ class TasksRepositoryImplementation @Inject constructor(
                     taskName = task.taskName,
                     taskCreationTime = task.taskCreationTime,
                     clientId = task.clientId,
-                    taskPoint = task.taskPoint,
+                    estimate = task.estimate,
                     currentStatus = task.currentStatus
                 )
                 trySend(taskOverView)
@@ -231,39 +229,4 @@ class TasksRepositoryImplementation @Inject constructor(
 
     private fun getTaskPath(taskId: String) =
         firestore.collection(TASKS_COLLECTION).document(taskId)
-
-    // For Testing Purposes, Shall be removed
-    fun generateAndCreateTasks(number: Int) {
-        val db = FirebaseFirestore.getInstance()
-        val tasksCollection = db.collection(TASKS_COLLECTION)
-
-        repeat(number) {
-            val taskId = UUID.randomUUID().toString()
-            val clientId = UUID.randomUUID().toString()
-            val employeeId = "tharun"
-            val taskName = "Task ${Random.nextInt(1, 100)}"
-            val taskAttachment = "Description for task $taskName"
-            val taskPoint = Random.nextDouble(1.0, 10.0)
-            val currentStatus = TaskStatusType.BACKLOG
-            val taskCreationTime =
-                ((System.currentTimeMillis()) - ((it * number).toLong())).toString()
-
-            val task = hashMapOf(
-                "taskId" to taskId,
-                "taskCreationTime" to taskCreationTime,
-                "clientId" to clientId,
-                "employeeId" to employeeId,
-                "taskName" to taskName,
-                "taskAttachment" to taskAttachment,
-                "taskPoint" to taskPoint,
-                "currentStatus" to currentStatus.name,
-                "statusHistory" to emptyList<Map<String, Any>>(),
-                "comments" to emptyList<Map<String, Any>>()
-            )
-
-            tasksCollection.document(taskId).set(task)
-                .addOnSuccessListener { println("Task $taskId created successfully") }
-                .addOnFailureListener { println("Failed to create task $taskId: ${it.message}") }
-        }
-    }
 }

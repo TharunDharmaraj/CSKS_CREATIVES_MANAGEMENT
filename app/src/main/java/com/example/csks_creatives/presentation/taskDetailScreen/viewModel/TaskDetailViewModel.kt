@@ -146,9 +146,12 @@ class TaskDetailViewModel @Inject constructor(
                         }
 
                         is ResultState.Error -> {
+                            // Ignore - Empty comment
                         }
 
-                        else -> {}
+                        else -> {
+
+                        }
                     }
                 }
             }
@@ -171,9 +174,9 @@ class TaskDetailViewModel @Inject constructor(
                     _taskDetailState.value.copy(taskAssignedTo = event.employeeId)
             }
 
-            is TaskDetailEvent.TaskStoryPointsChanged -> {
+            is TaskDetailEvent.TaskEstimateChanged -> {
                 _taskDetailState.value =
-                    _taskDetailState.value.copy(taskStoryPoints = event.storyPoints)
+                    _taskDetailState.value.copy(taskEstimate = event.estimate)
             }
 
             is TaskDetailEvent.TaskStatusTypeChanged -> {
@@ -242,7 +245,7 @@ class TaskDetailViewModel @Inject constructor(
                         taskDescription = task.taskAttachment,
                         taskClientId = task.clientId,
                         taskAssignedTo = task.employeeId,
-                        taskStoryPoints = task.taskPoint,
+                        taskEstimate = task.estimate,
                         taskCurrentStatus = task.currentStatus
                     )
                     _taskDetailState.value = _taskDetailState.value.copy(
@@ -250,7 +253,7 @@ class TaskDetailViewModel @Inject constructor(
                         taskDescription = task.taskAttachment,
                         taskClientId = task.clientId,
                         taskAssignedTo = task.employeeId,
-                        taskStoryPoints = task.taskPoint,
+                        taskEstimate = task.estimate,
                         taskCurrentStatus = task.currentStatus
                     )
                     _taskName.value = task.taskName

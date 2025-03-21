@@ -19,9 +19,6 @@ object Constants {
     const val TASKS_IN_PROGRESS_SUB_COLLECTION = "TasksInProgress"
     const val TASKS_IN_PROGRESS_OR_COMPLETED_SUB_COLLECTION_TASK_ID = "taskId"
     const val EMPLOYEE_EMPLOYEE_NUMBER_OF_TASKS_COMPLETED = "numberOfTasksCompleted"
-    const val EMPLOYEES_COUNT = "Count"
-    const val EMPLOYEES_COUNT_FIELD = "EmployeeCount"
-    const val EMPLOYEE_COUNT_DEFAULT = 0
 
     // Admin Collection
     const val ADMIN_USERNAME = "UserName"
@@ -46,7 +43,7 @@ object Constants {
     const val TASK_EMPLOYEE_ID = "employeeId"
     const val TASK_TASK_NAME = "taskName"
     const val TASK_ATTACHMENT = "taskAttachment"
-    const val TASK_POINT = "taskPoint"
+    const val TASK_ESTIMATE = "estimate"
     const val TASK_CURRENT_STATUS = "currentStatus"
     const val TASK_STATUS_HISTORY_SUB_COLLECTION = "StatusHistory"
     const val TASK_STATUS_HISTORY_START_TIME = "startTime"

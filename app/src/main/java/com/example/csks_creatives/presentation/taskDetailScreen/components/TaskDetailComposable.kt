@@ -185,16 +185,16 @@ fun TaskDetailComposable(
             isVisible = userRole != UserRole.Employee
         )
 
-        // Story Points
+        // Estimate
         OutlinedTextField(
-            value = taskState.value.taskStoryPoints.toString(),
+            value = taskState.value.taskEstimate.toString(),
             onValueChange = {
                 if (userRole == UserRole.Admin) viewModel.onEvent(
-                    TaskDetailEvent.TaskStoryPointsChanged(it.toIntOrNull() ?: 0)
+                    TaskDetailEvent.TaskEstimateChanged(it.toIntOrNull() ?: 0)
                 )
             },
             singleLine = true,
-            label = { Text("Story Points") },
+            label = { Text("Estimate (Hours)") },
             readOnly = userRole != UserRole.Admin,
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
