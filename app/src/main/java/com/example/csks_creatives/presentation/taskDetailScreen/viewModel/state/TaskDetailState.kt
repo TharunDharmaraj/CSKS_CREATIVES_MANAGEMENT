@@ -3,8 +3,9 @@ package com.example.csks_creatives.presentation.taskDetailScreen.viewModel.state
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.Comment
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
-import com.example.csks_creatives.domain.model.utills.enums.TaskType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskType
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 
 data class TaskDetailState(
@@ -15,6 +16,7 @@ data class TaskDetailState(
     val taskAssignedTo: String = EMPTY_STRING, // EmployeeId of the task,  Editable only for Admin - Read only for Employee
     val taskEstimate: Int = 0, // Editable only for Admin - Read only for Employee
     val taskCost: Int = 0, // Editable and viewable only for admin
+    val taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID,
     val taskType: TaskType = TaskType.SHORTS_VIDEO, // Editable for admin, Viewable for employee
     val taskCurrentStatus: TaskStatusType = TaskStatusType.BACKLOG, // Read Only for Both Admin and Employee
     val taskStatusHistory: List<TaskStatusHistory> = emptyList(), // Status History - Read Only by both Admin and Employee
@@ -30,6 +32,7 @@ fun TaskDetailState.toClientTask(): ClientTask {
         taskAttachment = this.taskDescription,
         taskEstimate = this.taskEstimate,
         taskCost = this.taskCost,
+        taskPaidStatus = this.taskPaidStatus,
         taskType = this.taskType,
         currentStatus = this.taskCurrentStatus,
         statusHistory = this.taskStatusHistory

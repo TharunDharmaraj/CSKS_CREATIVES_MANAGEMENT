@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.data.utils.Constants.ADMIN_COMMENT_OWNER
 import com.example.csks_creatives.domain.model.task.Comment
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.useCase.AdminUseCaseFactory
@@ -66,15 +66,15 @@ class TaskDetailViewModel @Inject constructor(
     private val _visibilityState = MutableStateFlow(TaskDetailsSectionVisibilityState())
     val visibilityState = _visibilityState.asStateFlow()
 
-    private var initialTaskStatus: TaskStatusType? = null
+    private val _actionButtonEnabled = MutableStateFlow(false)
+    val actionButtonEnabled = _actionButtonEnabled.asStateFlow()
 
+    private var initialTaskStatus: TaskStatusType? = null
     private var hasInitialized = false
     private var isTaskSaved = false
     private var commentOwner = EMPTY_STRING
     private val _taskName = MutableStateFlow("Task Name")
     var taskName = _taskName.asStateFlow()
-    private val _actionButtonEnabled = MutableStateFlow(false)
-    val actionButtonEnabled = _actionButtonEnabled.asStateFlow()
 
     fun onEvent(event: TaskDetailEvent) {
         when (event) {
@@ -199,6 +199,14 @@ class TaskDetailViewModel @Inject constructor(
                     )
                 }
             }
+
+            is TaskDetailEvent.TaskPaidStatusChanged -> {
+                _taskDetailState.update {
+                    it.copy(
+                        taskPaidStatus = event.paidStatus
+                    )
+                }
+            }
         }
     }
 
@@ -261,6 +269,7 @@ class TaskDetailViewModel @Inject constructor(
                         taskClientId = task.clientId,
                         taskAssignedTo = task.employeeId,
                         taskEstimate = task.taskEstimate,
+                        taskPaidStatus = task.taskPaidStatus,
                         taskType = task.taskType,
                         taskCost = task.taskCost,
                         taskCurrentStatus = task.currentStatus
@@ -271,6 +280,7 @@ class TaskDetailViewModel @Inject constructor(
                         taskClientId = task.clientId,
                         taskAssignedTo = task.employeeId,
                         taskEstimate = task.taskEstimate,
+                        taskPaidStatus = task.taskPaidStatus,
                         taskType = task.taskType,
                         taskCost = task.taskCost,
                         taskCurrentStatus = task.currentStatus

@@ -12,7 +12,7 @@ import com.example.csks_creatives.data.utils.Constants.REVISION_THREE
 import com.example.csks_creatives.data.utils.Constants.REVISION_TWO
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.employee.Employee
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 
 object Utils {
     fun convertStringStatusToStatusType(status: String): TaskStatusType {

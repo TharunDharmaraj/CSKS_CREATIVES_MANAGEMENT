@@ -46,7 +46,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.csks_creatives.domain.model.employee.Employee
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.TaskDetailViewModel
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCommentsEvent
@@ -185,6 +185,20 @@ fun TaskDetailComposable(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
+
+        // Amount paid for task status
+        DropdownMenuWithSelection(
+            label = "Paid Status",
+            selectedItem = dropDownListState.value.taskPaidStatusList.find { it == taskState.value.taskPaidStatus }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskPaidStatusList.map { it.name },
+            onItemSelected = { selectedPaidStatus ->
+                val taskType =
+                    dropDownListState.value.taskPaidStatusList.find { it.name == selectedPaidStatus }
+                taskType?.let { viewModel.onEvent(TaskDetailEvent.TaskPaidStatusChanged(it)) }
+            },
+            isVisible = userRole == UserRole.Admin
+        )
 
         // Assigned Employee (Dropdown)
         DropdownMenuWithSelection(

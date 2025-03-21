@@ -8,7 +8,7 @@ import com.example.csks_creatives.data.utils.Constants.REVISION_ONE
 import com.example.csks_creatives.data.utils.Constants.REVISION_THREE
 import com.example.csks_creatives.data.utils.Constants.REVISION_TWO
 import com.example.csks_creatives.domain.model.task.ClientTask
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

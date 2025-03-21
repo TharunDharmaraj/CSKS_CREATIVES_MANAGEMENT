@@ -26,6 +26,7 @@ fun EmployeeTaskCard(task: ClientTaskOverview, onClick: () -> Unit) {
             Text("Client ID: ${task.clientId}")
             Text("Task Points: ${task.taskEstimate}")
             Text("Task Cost: ${task.taskCost}")
+            Text("Paid: ${task.taskPaidStatus}")
             Text("Task Type: ${task.taskType}")
             Text("Current Status: ${task.currentStatus}")
             Text("Created On: ${task.taskCreationTime}")

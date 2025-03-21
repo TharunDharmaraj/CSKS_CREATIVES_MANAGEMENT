@@ -46,6 +46,7 @@ object Constants {
     const val TASK_ESTIMATE = "taskEstimate"
     const val TASK_TYPE = "taskType"
     const val TASK_COST = "taskCost"
+    const val TASK_PAID_STATUS = "taskPaidStatus"
     const val TASK_CURRENT_STATUS = "currentStatus"
     const val TASK_STATUS_HISTORY_SUB_COLLECTION = "StatusHistory"
     const val TASK_STATUS_HISTORY_START_TIME = "startTime"

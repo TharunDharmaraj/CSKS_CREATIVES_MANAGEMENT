@@ -1,4 +1,4 @@
-package com.example.csks_creatives.domain.model.utills.enums
+package com.example.csks_creatives.domain.model.utills.enums.tasks
 
 enum class TaskStatusType {
     BACKLOG,

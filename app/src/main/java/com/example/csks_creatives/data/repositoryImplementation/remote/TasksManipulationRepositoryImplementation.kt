@@ -9,6 +9,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
+import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
@@ -18,7 +19,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_TYPE
 import com.example.csks_creatives.data.utils.Utils.convertStatusTypeToString
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -125,6 +126,7 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                     TASK_ATTACHMENT to task.taskAttachment,
                     TASK_ESTIMATE to task.taskEstimate,
                     TASK_COST to task.taskCost,
+                    TASK_PAID_STATUS to task.taskPaidStatus,
                     TASK_TYPE to task.taskType,
                     TASK_CURRENT_STATUS to task.currentStatus
                 ), SetOptions.merge()

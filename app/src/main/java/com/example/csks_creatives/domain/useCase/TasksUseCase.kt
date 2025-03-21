@@ -2,7 +2,7 @@ package com.example.csks_creatives.domain.useCase
 
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.repository.remote.TasksRepository

@@ -1,7 +1,7 @@
 package com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.state
 
 import com.example.csks_creatives.domain.model.task.ClientTask
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.presentation.components.DateOrder
 

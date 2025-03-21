@@ -3,7 +3,7 @@ package com.example.csks_creatives.domain.model.task
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
-import com.example.csks_creatives.domain.model.utills.enums.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.firestore.PropertyName
 import java.util.concurrent.TimeUnit
