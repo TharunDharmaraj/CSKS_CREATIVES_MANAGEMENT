@@ -1,6 +1,5 @@
 package com.example.csks_creatives.domain.useCase
 
-import android.util.Log
 import com.example.csks_creatives.data.utils.Utils.toClientItem
 import com.example.csks_creatives.data.utils.Utils.toClientList
 import com.example.csks_creatives.domain.model.client.Client
