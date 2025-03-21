@@ -8,6 +8,7 @@ import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.firestore.PropertyName
 import java.util.concurrent.TimeUnit
 
+// Tasks / taskId / StatusHistory / StatusType
 data class TaskStatusHistory(
     val taskStatusType: TaskStatusType = TaskStatusType.BACKLOG,
     @PropertyName(TASK_STATUS_HISTORY_START_TIME) val startTime: String = EMPTY_STRING,

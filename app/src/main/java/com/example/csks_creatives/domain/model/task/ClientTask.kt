@@ -20,7 +20,7 @@ import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.PropertyName
 
-// Tasks / ClientID / EmployeeId / ClientTask
+// Tasks / ClientTask
 @Keep
 @IgnoreExtraProperties
 data class ClientTask(

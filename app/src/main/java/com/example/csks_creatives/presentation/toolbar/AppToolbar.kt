@@ -3,6 +3,8 @@ package com.example.csks_creatives.presentation.toolbar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -18,18 +20,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppToolbar(
     title: String,
-    actionButtonText: String = "Save",
     canShowBackIcon: Boolean = false,
     canShowSearch: Boolean = false,
     canShowMenu: Boolean = false,
     canShowActionButton: Boolean = false,
     canShowAddTaskButton: Boolean = false,
+    canShowTaskPaidStatusButton: Boolean = false,
+    taskPaidStatus: Boolean = false, // Paid / Not
     isActionButtonEnabled: Boolean = false,
+    actionButtonText: String = "Save",
     menuItems: List<ToolbarOverFlowMenuItem> = emptyList(),
     onBackClicked: () -> Unit = {},
     onSearchClicked: () -> Unit = {},
@@ -47,6 +52,25 @@ fun AppToolbar(
             }
         },
         actions = {
+            if (canShowTaskPaidStatusButton) {
+                if (taskPaidStatus) {
+                    IconButton(
+                        onClick = { /* Ignore */ }
+                    ) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = "Paid",
+                            tint = Color.Green
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = { /* Ignore */ }
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Paid", tint = Color.Red)
+                    }
+                }
+            }
             if (canShowSearch) {
                 IconButton(onClick = onSearchClicked) {
                     Icon(Icons.Default.Search, contentDescription = "Search")
@@ -62,7 +86,7 @@ fun AppToolbar(
                 }
             }
 
-            if(canShowAddTaskButton){
+            if (canShowAddTaskButton) {
                 IconButton(onClick = onAddTaskIconClicked) {
                     Icon(Icons.Default.Add, contentDescription = "Add Task")
                 }

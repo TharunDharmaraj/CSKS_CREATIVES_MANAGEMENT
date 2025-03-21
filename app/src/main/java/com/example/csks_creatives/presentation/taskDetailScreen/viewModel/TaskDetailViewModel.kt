@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.data.utils.Constants.ADMIN_COMMENT_OWNER
 import com.example.csks_creatives.domain.model.task.Comment
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
@@ -15,6 +16,7 @@ import com.example.csks_creatives.domain.useCase.TasksManipulationUseCaseFactory
 import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.getAvailableStatusOptions
+import com.example.csks_creatives.domain.utils.Utils.getTasksPaidStatusList
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCommentsEvent
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCreationUiEvent
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskDetailEvent
@@ -49,6 +51,42 @@ class TaskDetailViewModel @Inject constructor(
         commentsUseCaseFactory.create()
     }
 
+    fun initialize(
+        userRole: UserRole,
+        isTaskCreation: Boolean,
+        taskId: String,
+        employeeId: String
+    ) {
+        if (hasInitialized) return
+        hasInitialized = true
+        // To copy taskId to state, so that it can be used in UC/Repo call
+        _taskDetailState.update { it.copy(taskId = taskId) }
+
+        // Todo Move business logics into a UseCase
+        if (userRole == UserRole.Admin && isTaskCreation) {
+            _actionButtonEnabled.value = true
+            _visibilityState.update {
+                it.copy(
+                    isStatusHistoryVisible = false
+                )
+            }
+        }
+        if (userRole == UserRole.Admin) {
+            commentOwner = ADMIN_COMMENT_OWNER
+            fetchClients()
+            fetchEmployees()
+        }
+        if (userRole == UserRole.Employee) {
+            commentOwner = employeeId
+        }
+        if (userRole == UserRole.Employee || (userRole == UserRole.Admin && !isTaskCreation && taskId.isNotEmpty())) {
+            fetchTaskDetails(taskId)
+            fetchCommentsForTask(taskId)
+            fetchTaskStatusHistory(taskId)
+        }
+    }
+
+
     private val _uiEvent = MutableSharedFlow<TaskCreationUiEvent>()
     val uiEvent: SharedFlow<TaskCreationUiEvent> = _uiEvent.asSharedFlow()
 
@@ -69,12 +107,16 @@ class TaskDetailViewModel @Inject constructor(
     private val _actionButtonEnabled = MutableStateFlow(false)
     val actionButtonEnabled = _actionButtonEnabled.asStateFlow()
 
+    private val _taskName = MutableStateFlow("Task Name")
+    var taskName = _taskName.asStateFlow()
+
+    private val _paidStatus = MutableStateFlow(false)
+    var paidStatus = _paidStatus.asStateFlow()
+
     private var initialTaskStatus: TaskStatusType? = null
     private var hasInitialized = false
     private var isTaskSaved = false
     private var commentOwner = EMPTY_STRING
-    private val _taskName = MutableStateFlow("Task Name")
-    var taskName = _taskName.asStateFlow()
 
     fun onEvent(event: TaskDetailEvent) {
         when (event) {
@@ -111,7 +153,6 @@ class TaskDetailViewModel @Inject constructor(
                         initialTask = initialTask
                     )) {
                         is ResultState.Success -> {
-                            updateTaskStatus(_taskDetailState.value.taskCurrentStatus)
                             _uiEvent.emit(TaskCreationUiEvent.ShowToast(result.data))
                             _uiEvent.emit(TaskCreationUiEvent.NavigateBack)
                         }
@@ -286,6 +327,7 @@ class TaskDetailViewModel @Inject constructor(
                         taskCurrentStatus = task.currentStatus
                     )
                     _taskName.value = task.taskName
+                    _paidStatus.value = getTaskPaidStatus(_taskDetailState.value)
                     _actionButtonEnabled.value = true
                     saveTaskStatus()
                 }
@@ -306,68 +348,20 @@ class TaskDetailViewModel @Inject constructor(
         }
     }
 
-    private fun updateTaskStatus(newStatus: TaskStatusType) {
-        if (isTaskSaved) {
-            _taskDetailState.value = _taskDetailState.value.copy(taskCurrentStatus = newStatus)
-            initialTaskStatus = _taskDetailState.value.taskCurrentStatus
-        } else {
-            val allowedNextStatuses = getAvailableStatusOptions(initialTaskStatus!!)
-            if (newStatus.name in allowedNextStatuses) {
-                _taskDetailState.value = _taskDetailState.value.copy(taskCurrentStatus = newStatus)
-            }
-        }
-    }
-
     private fun saveTaskStatus() {
         initialTaskStatus = _taskDetailState.value.taskCurrentStatus
         isTaskSaved = true
     }
 
-    private fun getIsTaskSavedStatus(): Boolean = isTaskSaved
+    private fun getTaskPaidStatus(taskDetailState: TaskDetailState) =
+        taskDetailState.taskPaidStatus == TaskPaidStatus.FULLY_PAID
 
-    private fun getInitialTaskStatus(): TaskStatusType = initialTaskStatus ?: TaskStatusType.BACKLOG
+    fun getAvailableStatusOptions() =
+        getAvailableStatusOptions(_taskDetailState.value.taskCurrentStatus)
 
-    fun getAvailableStatusOptions(): List<String> {
-        return if (getIsTaskSavedStatus().not()) {
-            getAvailableStatusOptions(_taskDetailState.value.taskCurrentStatus)
-        } else {
-            getAvailableStatusOptions(getInitialTaskStatus())
-        }
-    }
 
-    fun initialize(
-        userRole: UserRole,
-        isTaskCreation: Boolean,
-        taskId: String,
-        employeeId: String
-    ) {
-        if (hasInitialized) return
-        hasInitialized = true
-        // To copy taskId to state, so that it can be used in UC/Repo call
-        _taskDetailState.update { it.copy(taskId = taskId) }
-
-        // Todo Move business logics into a UseCase
-        if (userRole == UserRole.Admin && isTaskCreation) {
-            _actionButtonEnabled.value = true
-            _visibilityState.update {
-                it.copy(
-                    isStatusHistoryVisible = false
-                )
-            }
-        }
-        if (userRole == UserRole.Admin) {
-            commentOwner = ADMIN_COMMENT_OWNER
-            fetchClients()
-            fetchEmployees()
-        }
-        if (userRole == UserRole.Employee) {
-            commentOwner = employeeId
-        }
-        if (userRole == UserRole.Employee || (userRole == UserRole.Admin && !isTaskCreation && taskId.isNotEmpty())) {
-            fetchTaskDetails(taskId)
-            fetchCommentsForTask(taskId)
-            fetchTaskStatusHistory(taskId)
-        }
+    fun getAvailablePaidStatus(): List<String> {
+        return getTasksPaidStatusList(_taskDetailState.value.taskPaidStatus)
     }
 
     fun hasUnsavedChanges(): Boolean {

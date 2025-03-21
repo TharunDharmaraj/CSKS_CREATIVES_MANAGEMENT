@@ -191,13 +191,13 @@ fun TaskDetailComposable(
             label = "Paid Status",
             selectedItem = dropDownListState.value.taskPaidStatusList.find { it == taskState.value.taskPaidStatus }?.name
                 ?: "Select",
-            items = dropDownListState.value.taskPaidStatusList.map { it.name },
+            items = viewModel.getAvailablePaidStatus(),
             onItemSelected = { selectedPaidStatus ->
                 val taskType =
                     dropDownListState.value.taskPaidStatusList.find { it.name == selectedPaidStatus }
                 taskType?.let { viewModel.onEvent(TaskDetailEvent.TaskPaidStatusChanged(it)) }
             },
-            isVisible = userRole == UserRole.Admin
+            isVisible = userRole == UserRole.Admin && isTaskCreation.not()
         )
 
         // Assigned Employee (Dropdown)

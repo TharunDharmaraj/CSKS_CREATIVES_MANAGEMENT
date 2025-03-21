@@ -10,7 +10,7 @@ import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.PropertyName
 
 // Comments are stored in firestore by the structure
-// Tasks / taskId / comments
+// Tasks / taskId / comments / commentId
 @Keep
 @IgnoreExtraProperties
 data class Comment(

@@ -63,6 +63,10 @@ object Constants {
     const val BLOCKED = "BLOCKED"
     const val COMPLETED = "COMPLETED"
 
+    // Task Paid Status
+    const val FULLY_PAID = "FULLY_PAID"
+    const val NOT_PAID = "NOT_PAID"
+
     // Admin Name
     const val ADMIN_NAME = "Kishor"
 

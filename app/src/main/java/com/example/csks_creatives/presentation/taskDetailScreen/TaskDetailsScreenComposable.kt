@@ -27,6 +27,7 @@ fun TaskDetailsComposable(
 ) {
     val context = LocalContext.current
     val taskName by viewModel.taskName.collectAsStateWithLifecycle()
+    val paidStatus by viewModel.paidStatus.collectAsStateWithLifecycle()
     val actionButtonEnabled by viewModel.actionButtonEnabled.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
@@ -62,6 +63,8 @@ fun TaskDetailsComposable(
                 title = title,
                 canShowBackIcon = true,
                 isActionButtonEnabled = actionButtonEnabled,
+                canShowTaskPaidStatusButton = userRole == UserRole.Admin && isTaskCreation.not(),
+                taskPaidStatus = paidStatus,
                 onBackClicked = {
                     if (viewModel.hasUnsavedChanges().not()) {
                         navController.popBackStack()
