@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-
 class TasksUseCase @Inject constructor(
     private val tasksRepository: TasksRepository,
     private val adminRepository: AdminRepository

@@ -10,7 +10,7 @@ object Constants {
 
     // Employee Collection Fields
     const val EMPLOYEE_EMPLOYEE_ID = "employeeId"
-    const val EMPLOYEE_EMPLOYEE_NAME = "employeeName"
+    const val   EMPLOYEE_EMPLOYEE_NAME = "employeeName"
     const val EMPLOYEE_EMPLOYEE_JOINED_TIME = "joinedTime"
     const val EMPLOYEE_EMPLOYEE_PASSWORD = "employeePassword"
     const val EMPLOYEE_EMPLOYEE_TASKS_COMPLETED = "tasksCompleted"
@@ -43,7 +43,9 @@ object Constants {
     const val TASK_EMPLOYEE_ID = "employeeId"
     const val TASK_TASK_NAME = "taskName"
     const val TASK_ATTACHMENT = "taskAttachment"
-    const val TASK_ESTIMATE = "estimate"
+    const val TASK_ESTIMATE = "taskEstimate"
+    const val TASK_TYPE = "taskType"
+    const val TASK_COST = "taskCost"
     const val TASK_CURRENT_STATUS = "currentStatus"
     const val TASK_STATUS_HISTORY_SUB_COLLECTION = "StatusHistory"
     const val TASK_STATUS_HISTORY_START_TIME = "startTime"

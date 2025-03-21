@@ -154,6 +154,38 @@ fun TaskDetailComposable(
             }, readOnly = userRole != UserRole.Admin
         )
 
+
+        // Estimate
+        OutlinedTextField(
+            value = taskState.value.taskEstimate.toString(),
+            onValueChange = {
+                if (userRole == UserRole.Admin) viewModel.onEvent(
+                    TaskDetailEvent.TaskEstimateChanged(it.toIntOrNull() ?: 0)
+                )
+            },
+            singleLine = true,
+            label = { Text("Estimate (Hours)") },
+            readOnly = userRole != UserRole.Admin,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        // Cost
+        if (userRole == UserRole.Admin) {
+            OutlinedTextField(
+                value = taskState.value.taskCost.toString(),
+                onValueChange = {
+                    if (userRole == UserRole.Admin) viewModel.onEvent(
+                        TaskDetailEvent.TaskCostChanged(it.toIntOrNull() ?: 0)
+                    )
+                },
+                singleLine = true,
+                label = { Text("Cost in Rupees") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+        }
+
         // Assigned Employee (Dropdown)
         DropdownMenuWithSelection(
             label = "Assigned Employee",
@@ -185,19 +217,18 @@ fun TaskDetailComposable(
             isVisible = userRole != UserRole.Employee
         )
 
-        // Estimate
-        OutlinedTextField(
-            value = taskState.value.taskEstimate.toString(),
-            onValueChange = {
-                if (userRole == UserRole.Admin) viewModel.onEvent(
-                    TaskDetailEvent.TaskEstimateChanged(it.toIntOrNull() ?: 0)
-                )
+        // Assign task type
+        DropdownMenuWithSelection(
+            label = "Task Type",
+            selectedItem = dropDownListState.value.taskTypeList.find { it == taskState.value.taskType }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskTypeList.map { it.name },
+            onItemSelected = { selectedTaskType ->
+                val taskType =
+                    dropDownListState.value.taskTypeList.find { it.name == selectedTaskType }
+                taskType?.let { viewModel.onEvent(TaskDetailEvent.TaskTypeChanged(it)) }
             },
-            singleLine = true,
-            label = { Text("Estimate (Hours)") },
-            readOnly = userRole != UserRole.Admin,
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            enabled = userRole == UserRole.Admin,
         )
 
         // Task Status (Dropdown)

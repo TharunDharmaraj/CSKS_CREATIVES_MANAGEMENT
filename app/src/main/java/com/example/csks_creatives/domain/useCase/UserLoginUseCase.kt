@@ -18,7 +18,7 @@ class UserLoginUseCase @Inject constructor(
     suspend operator fun invoke(username: String, password: String): Result<User> {
         if (username.isBlank() || password.isBlank())
             return Result.failure(Exception("Username or password cannot be empty"))
-        return loginRepository.login(username, password)
+        return loginRepository.login(formatLoginDetails(username), formatLoginDetails(password))
     }
 
     suspend fun insertCurrentUserDetails(user: User) {
@@ -53,4 +53,6 @@ class UserLoginUseCase @Inject constructor(
 
     suspend fun saveNewFcmToken(employeeId: String, newToken: String) =
         loginRepository.saveNewFcmToken(employeeId, newToken)
+
+    private fun formatLoginDetails(string: String) = string.lowercase().replace(" ", "")
 }

@@ -43,9 +43,9 @@ class AdminRepositoryImplementation @Inject constructor(
             getEmployeePathForId(employeeId).set(
                 hashMapOf(
                     EMPLOYEE_EMPLOYEE_ID to employeeId,
-                    EMPLOYEE_EMPLOYEE_NAME to employee.employeeName,
+                    EMPLOYEE_EMPLOYEE_NAME to employee.employeeName.lowercase(),
                     EMPLOYEE_EMPLOYEE_JOINED_TIME to employee.joinedTime,
-                    EMPLOYEE_EMPLOYEE_PASSWORD to employee.employeePassword,
+                    EMPLOYEE_EMPLOYEE_PASSWORD to employee.employeePassword.lowercase(),
                     EMPLOYEE_EMPLOYEE_TASKS_COMPLETED to employee.tasksCompleted,
                     EMPLOYEE_EMPLOYEE_TASKS_IN_PROGRESS to employee.tasksInProgress,
                     EMPLOYEE_EMPLOYEE_NUMBER_OF_TASKS_COMPLETED to employee.numberOfTasksCompleted

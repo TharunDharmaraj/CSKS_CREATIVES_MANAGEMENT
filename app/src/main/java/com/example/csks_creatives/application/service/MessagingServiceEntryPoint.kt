@@ -1,4 +1,4 @@
-package com.example.csks_creatives.dI
+package com.example.csks_creatives.application.service
 
 import com.example.csks_creatives.domain.useCase.UserLoginUseCase
 import com.example.csks_creatives.domain.useCase.UserPersistenceUseCase

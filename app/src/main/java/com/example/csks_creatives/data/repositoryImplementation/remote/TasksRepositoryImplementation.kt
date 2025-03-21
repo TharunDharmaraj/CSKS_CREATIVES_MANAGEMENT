@@ -5,6 +5,7 @@ import com.example.csks_creatives.data.utils.Constants.BACKLOG
 import com.example.csks_creatives.data.utils.Constants.TASKS_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_ATTACHMENT
 import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
+import com.example.csks_creatives.data.utils.Constants.TASK_COST
 import com.example.csks_creatives.data.utils.Constants.TASK_CREATION_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
@@ -15,6 +16,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_T
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_TASK_NAME
+import com.example.csks_creatives.data.utils.Constants.TASK_TYPE
 import com.example.csks_creatives.data.utils.Utils.convertStringStatusToStatusType
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
@@ -55,7 +57,9 @@ class TasksRepositoryImplementation @Inject constructor(
                     TASK_EMPLOYEE_ID to employeeId,
                     TASK_TASK_NAME to task.taskName,
                     TASK_ATTACHMENT to task.taskAttachment,
-                    TASK_ESTIMATE to task.estimate,
+                    TASK_ESTIMATE to task.taskEstimate,
+                    TASK_COST to task.taskCost,
+                    TASK_TYPE to task.taskType,
                     TASK_CURRENT_STATUS to task.currentStatus
                 ), SetOptions.merge()
             )
@@ -114,7 +118,9 @@ class TasksRepositoryImplementation @Inject constructor(
                     taskName = task.taskName,
                     taskCreationTime = task.taskCreationTime,
                     clientId = task.clientId,
-                    estimate = task.estimate,
+                    taskEstimate = task.taskEstimate,
+                    taskCost = task.taskCost,
+                    taskType = task.taskType,
                     currentStatus = task.currentStatus
                 )
                 trySend(taskOverView)

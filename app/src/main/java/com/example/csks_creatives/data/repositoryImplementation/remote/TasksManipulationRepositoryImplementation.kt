@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.csks_creatives.data.utils.Constants.TASKS_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_ATTACHMENT
 import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
+import com.example.csks_creatives.data.utils.Constants.TASK_COST
 import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
@@ -13,6 +14,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_T
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_TASK_NAME
+import com.example.csks_creatives.data.utils.Constants.TASK_TYPE
 import com.example.csks_creatives.data.utils.Utils.convertStatusTypeToString
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
@@ -121,7 +123,9 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                     TASK_EMPLOYEE_ID to task.employeeId,
                     TASK_TASK_NAME to task.taskName,
                     TASK_ATTACHMENT to task.taskAttachment,
-                    TASK_ESTIMATE to task.estimate,
+                    TASK_ESTIMATE to task.taskEstimate,
+                    TASK_COST to task.taskCost,
+                    TASK_TYPE to task.taskType,
                     TASK_CURRENT_STATUS to task.currentStatus
                 ), SetOptions.merge()
             )

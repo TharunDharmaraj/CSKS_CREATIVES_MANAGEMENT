@@ -176,7 +176,7 @@ class TaskDetailViewModel @Inject constructor(
 
             is TaskDetailEvent.TaskEstimateChanged -> {
                 _taskDetailState.value =
-                    _taskDetailState.value.copy(taskEstimate = event.estimate)
+                    _taskDetailState.value.copy(taskEstimate = event.taskEstimate)
             }
 
             is TaskDetailEvent.TaskStatusTypeChanged -> {
@@ -184,6 +184,21 @@ class TaskDetailViewModel @Inject constructor(
                     _taskDetailState.value.copy(taskCurrentStatus = event.taskStatusType)
             }
 
+            is TaskDetailEvent.TaskCostChanged -> {
+                _taskDetailState.update {
+                    it.copy(
+                        taskCost = event.taskCost
+                    )
+                }
+            }
+
+            is TaskDetailEvent.TaskTypeChanged -> {
+                _taskDetailState.update {
+                    it.copy(
+                        taskType = event.taskType
+                    )
+                }
+            }
         }
     }
 
@@ -245,7 +260,9 @@ class TaskDetailViewModel @Inject constructor(
                         taskDescription = task.taskAttachment,
                         taskClientId = task.clientId,
                         taskAssignedTo = task.employeeId,
-                        taskEstimate = task.estimate,
+                        taskEstimate = task.taskEstimate,
+                        taskType = task.taskType,
+                        taskCost = task.taskCost,
                         taskCurrentStatus = task.currentStatus
                     )
                     _taskDetailState.value = _taskDetailState.value.copy(
@@ -253,7 +270,9 @@ class TaskDetailViewModel @Inject constructor(
                         taskDescription = task.taskAttachment,
                         taskClientId = task.clientId,
                         taskAssignedTo = task.employeeId,
-                        taskEstimate = task.estimate,
+                        taskEstimate = task.taskEstimate,
+                        taskType = task.taskType,
+                        taskCost = task.taskCost,
                         taskCurrentStatus = task.currentStatus
                     )
                     _taskName.value = task.taskName

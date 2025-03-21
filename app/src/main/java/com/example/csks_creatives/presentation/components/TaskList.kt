@@ -31,7 +31,7 @@ fun TaskItem(task: ClientTask, onTaskClick: () -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = task.taskName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text(text = "Assigned to: ${task.employeeId}", fontSize = 14.sp)
-            Text(text = "Estimate: ${task.estimate}", fontSize = 14.sp)
+            Text(text = "Estimate: ${task.taskEstimate}", fontSize = 14.sp)
             Text(text = "Created Date: ${getFormattedDateTimeFormat(task.taskCreationTime)}", fontSize = 14.sp)
             Text(
                 text = "Status: ${task.currentStatus}",

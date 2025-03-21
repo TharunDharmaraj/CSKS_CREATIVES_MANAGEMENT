@@ -24,7 +24,9 @@ fun EmployeeTaskCard(task: ClientTaskOverview, onClick: () -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Task: ${task.taskName}", fontWeight = FontWeight.Bold)
             Text("Client ID: ${task.clientId}")
-            Text("Task Points: ${task.estimate}")
+            Text("Task Points: ${task.taskEstimate}")
+            Text("Task Cost: ${task.taskCost}")
+            Text("Task Type: ${task.taskType}")
             Text("Current Status: ${task.currentStatus}")
             Text("Created On: ${task.taskCreationTime}")
         }
