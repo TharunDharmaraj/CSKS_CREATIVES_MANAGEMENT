@@ -3,6 +3,7 @@ package com.example.csks_creatives.presentation.clientTasksListScreen.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.task.ClientTask
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
@@ -33,10 +34,6 @@ class ClientTasksListViewModel @Inject constructor(
 
     fun onEvent(clientTaskListScreenEvent: ClientTasksListScreenEvent) {
         when (clientTaskListScreenEvent) {
-            ClientTasksListScreenEvent.OnClientTaskClicked -> {
-                // TODO Navigate
-            }
-
             is ClientTasksListScreenEvent.OnSearchTextChanged -> {
                 _clientTasksListState.value = _clientTasksListState.value.copy(
                     searchText = clientTaskListScreenEvent.searchText
@@ -72,17 +69,53 @@ class ClientTasksListViewModel @Inject constructor(
                     )
                 }
             }
+
+            is ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter -> {
+                _clientTasksListState.update {
+                    it.copy(
+                        isUnpaidTasksVisible = !it.isUnpaidTasksVisible,
+                        isPaidTasksVisible = false,
+                        isAllTasksVisible = false
+                    )
+                }
+                filterTasks()
+            }
+
+            ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter -> {
+                _clientTasksListState.update {
+                    it.copy(
+                        isPaidTasksVisible = !it.isPaidTasksVisible,
+                        isUnpaidTasksVisible = false,
+                        isAllTasksVisible = false
+                    )
+                }
+                filterTasks()
+            }
+
+            ClientTasksListScreenEvent.ToggleFilterTasksClicked -> {
+                _clientTasksListState.update {
+                    it.copy(
+                        isSearchBarVisible = false,
+                        canShowSearchIcon = !_clientTasksListState.value.canShowSearchIcon,
+                        isFilterSectionVisible = !_clientTasksListState.value.isFilterSectionVisible
+                    )
+                }
+            }
         }
     }
 
     private fun getClientTasks(order: DateOrder, clientId: String) {
         viewModelScope.launch {
+            _clientTasksListState.update { it.copy(isLoading = true) }
             tasksUseCaseFactory.getTasksForClient(order, clientId).collect { result ->
                 if (result is ResultState.Success) {
                     val clientTasksList = result.data
                     _allTasksForClientFromFireStore.value = clientTasksList
                     _clientTasksListState.value = _clientTasksListState.value.copy(
-                        tasksList = clientTasksList
+                        tasksList = clientTasksList,
+                        isAllTasksVisible = true,
+                        isUnpaidTasksVisible = false,
+                        isLoading = false
                     )
                     filterTasks()
                 }
@@ -108,6 +141,17 @@ class ClientTasksListViewModel @Inject constructor(
             filteredList = filteredList.filter { task -> task.currentStatus in selectedStatuses }
         }
 
+        when {
+            _clientTasksListState.value.isUnpaidTasksVisible -> {
+                filteredList = filteredList.filter { it.taskPaidStatus == TaskPaidStatus.NOT_PAID }
+            }
+
+            _clientTasksListState.value.isPaidTasksVisible -> {
+                filteredList =
+                    filteredList.filter { it.taskPaidStatus == TaskPaidStatus.FULLY_PAID }
+            }
+        }
+
         _clientTasksListState.value = _clientTasksListState.value.copy(tasksList = filteredList)
     }
 
@@ -124,11 +168,10 @@ class ClientTasksListViewModel @Inject constructor(
     fun initialize(clientId: String) {
         if (hasInitialized) return
         hasInitialized = true
-
         getClientTasks(DateOrder.Descending, clientId)
     }
 
-    fun emitLogoutEvent(isUserLoggedOut: Boolean){
+    fun emitLogoutEvent(isUserLoggedOut: Boolean) {
         viewModelScope.launch {
             LogoutEvent.emitLogoutEvent(isUserLoggedOut)
         }

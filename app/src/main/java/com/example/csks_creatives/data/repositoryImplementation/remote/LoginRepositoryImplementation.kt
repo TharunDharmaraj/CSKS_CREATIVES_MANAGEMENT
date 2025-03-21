@@ -114,17 +114,14 @@ class LoginRepositoryImplementation @Inject constructor(
     override fun getCurrentUser() = currentLoggedInUser
 
     override fun deleteCurrentUser() {
-        Log.d("tharun", "Deleting from local cache")
         currentLoggedInUser = null
     }
 
     private fun setCurrentUserAsAdmin(user: CurrentLoginUser) {
-        Log.d("tharun", "Setting current user as admin")
         currentLoggedInUser = user
     }
 
     private fun setCurrentUserAsEmployee(user: CurrentLoginUser) {
-        Log.d("tharun", "Setting current user as employee")
         currentLoggedInUser = user
     }
 }

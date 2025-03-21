@@ -78,7 +78,6 @@ fun EmployeeDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValue)
-                .padding(16.dp)
         ) {
             item {
                 if (state.value.isSearchBarVisible) {

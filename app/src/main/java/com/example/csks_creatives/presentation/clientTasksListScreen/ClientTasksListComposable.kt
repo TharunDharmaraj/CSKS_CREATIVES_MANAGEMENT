@@ -2,6 +2,7 @@ package com.example.csks_creatives.presentation.clientTasksListScreen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,6 +40,7 @@ import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.ClientTasksListViewModel
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
 import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.LoadingProgress
 import com.example.csks_creatives.presentation.components.TaskItem
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
@@ -46,16 +51,26 @@ fun ClientTasksListComposable(
     navController: NavController,
     viewModel: ClientTasksListViewModel = hiltViewModel()
 ) {
+    val state = viewModel.clientsTasksListState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.initialize(clientId)
+    }
+
     Scaffold(
         topBar = {
             AppToolbar(
                 title = "Client $clientId",
                 canShowMenu = true,
-                canShowSearch = true,
+                canShowSearch = state.value.canShowSearchIcon,
+                canShowFilterTasks = true,
                 canShowBackIcon = true,
                 menuItems = listOf(
                     ToolbarOverFlowMenuItem("logout", "Logout")
                 ),
+                onFilterTasksIconClicked = {
+                    viewModel.onEvent(ClientTasksListScreenEvent.ToggleFilterTasksClicked)
+                },
                 onSearchClicked = {
                     viewModel.onEvent(ClientTasksListScreenEvent.ToggleSearchBarClicked)
                 },
@@ -64,7 +79,7 @@ fun ClientTasksListComposable(
                     when (itemId) {
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
-                            navController.navigate("login"){
+                            navController.navigate("login") {
                                 popUpTo(0) { inclusive = true }
                             }
                         }
@@ -73,95 +88,135 @@ fun ClientTasksListComposable(
             )
         }
     ) { paddingValue ->
-        val state = viewModel.clientsTasksListState.collectAsState()
-
-        LaunchedEffect(Unit) {
-            viewModel.initialize(clientId)
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValue)
-                .padding(16.dp)
         ) {
-            if (state.value.isSearchBarVisible) {
-                OutlinedTextField(
-                    value = state.value.searchText,
-                    onValueChange = {
-                        viewModel.onEvent(
-                            ClientTasksListScreenEvent.OnSearchTextChanged(
-                                it
-                            )
+            if (state.value.isFilterSectionVisible) {
+                Column {
+                    if (state.value.isSearchBarVisible) {
+                        OutlinedTextField(
+                            value = state.value.searchText,
+                            onValueChange = {
+                                viewModel.onEvent(
+                                    ClientTasksListScreenEvent.OnSearchTextChanged(
+                                        it
+                                    )
+                                )
+                            },
+                            label = { Text("Search Task") },
+                            modifier = Modifier.fillMaxWidth(),
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = "Search"
+                                )
+                            },
+                            singleLine = true
                         )
-                    },
-                    label = { Text("Search Task") },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") }
-                )
 
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Absolute.Left,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Sort by Date Created", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                IconButton(
-                    onClick = {
-                        val newOrder = if (state.value.tasksOrder is DateOrder.Ascending)
-                            DateOrder.Descending else DateOrder.Ascending
-                        viewModel.onEvent(ClientTasksListScreenEvent.Order(newOrder))
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
-                ) {
-                    Icon(
-                        imageVector = if (state.value.tasksOrder is DateOrder.Ascending) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                        contentDescription = "Sort Order"
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = "Filter by Status", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            LazyRow {
-                items(TaskStatusType.entries.size) { index ->
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .clickable {
-                                viewModel.onEvent(
-                                    ClientTasksListScreenEvent.ToggleStatusFilter(
-                                        TaskStatusType.entries[index]
-                                    )
-                                )
-                            }
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Absolute.Left,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox(
-                            checked = state.value.selectedStatuses.contains(TaskStatusType.entries[index]),
-                            onCheckedChange = {
-                                viewModel.onEvent(
-                                    ClientTasksListScreenEvent.ToggleStatusFilter(
-                                        TaskStatusType.entries[index]
-                                    )
-                                )
-                            }
+                        Text(
+                            text = "Sort by Date Created",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        Text(text = TaskStatusType.entries[index].name)
+                        IconButton(
+                            onClick = {
+                                val newOrder = if (state.value.tasksOrder is DateOrder.Ascending)
+                                    DateOrder.Descending else DateOrder.Ascending
+                                viewModel.onEvent(ClientTasksListScreenEvent.Order(newOrder))
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (state.value.tasksOrder is DateOrder.Ascending) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                                contentDescription = "Sort Order"
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(
+                            onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (state.value.isPaidTasksVisible) Color.Green else Color.Gray
+                            )
+                        ) {
+                            Text(text = "Show Paid")
+                        }
+
+                        Button(
+                            onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (state.value.isUnpaidTasksVisible) Color.Red else Color.Gray
+                            )
+                        ) {
+                            Text(text = "Show Unpaid")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(text = "Filter by Status", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    LazyRow {
+                        items(TaskStatusType.entries.size) { index ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .clickable {
+                                        viewModel.onEvent(
+                                            ClientTasksListScreenEvent.ToggleStatusFilter(
+                                                TaskStatusType.entries[index]
+                                            )
+                                        )
+                                    }
+                            ) {
+                                Checkbox(
+                                    checked = state.value.selectedStatuses.contains(TaskStatusType.entries[index]),
+                                    onCheckedChange = {
+                                        viewModel.onEvent(
+                                            ClientTasksListScreenEvent.ToggleStatusFilter(
+                                                TaskStatusType.entries[index]
+                                            )
+                                        )
+                                    }
+                                )
+                                Text(text = TaskStatusType.entries[index].name)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LazyColumn {
-                items(state.value.tasksList.size) { index ->
-                    val clientTask = state.value.tasksList[index]
-                    TaskItem(task = clientTask, onTaskClick = {
-                        navController.navigate("task_detail/${clientTask.taskId}/$ADMIN_NAME")
-                    })
+            if (state.value.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingProgress()
+                }
+            } else {
+                LazyColumn {
+                    items(state.value.tasksList.size) { index ->
+                        val clientTask = state.value.tasksList[index]
+                        TaskItem(task = clientTask, onTaskClick = {
+                            navController.navigate("task_detail/${clientTask.taskId}/$ADMIN_NAME")
+                        })
+                    }
                 }
             }
         }

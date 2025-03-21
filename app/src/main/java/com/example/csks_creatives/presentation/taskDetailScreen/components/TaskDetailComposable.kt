@@ -128,7 +128,6 @@ fun TaskDetailComposable(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
             .padding(paddingValue)
             .verticalScroll(rememberScrollState())
     ) {
