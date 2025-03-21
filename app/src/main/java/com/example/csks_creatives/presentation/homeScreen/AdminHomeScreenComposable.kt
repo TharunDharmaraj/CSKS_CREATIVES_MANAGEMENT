@@ -93,6 +93,7 @@ fun AdminHomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

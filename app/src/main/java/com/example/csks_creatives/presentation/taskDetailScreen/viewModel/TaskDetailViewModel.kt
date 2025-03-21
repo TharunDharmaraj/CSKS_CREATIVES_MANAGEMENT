@@ -356,9 +356,13 @@ class TaskDetailViewModel @Inject constructor(
     private fun getTaskPaidStatus(taskDetailState: TaskDetailState) =
         taskDetailState.taskPaidStatus == TaskPaidStatus.FULLY_PAID
 
-    fun getAvailableStatusOptions() =
-        getAvailableStatusOptions(_taskDetailState.value.taskCurrentStatus)
-
+    fun getAvailableStatusOptions(): List<String> {
+        return if (getIsTaskSavedStatus().not()) {
+            getAvailableStatusOptions(_taskDetailState.value.taskCurrentStatus)
+        } else {
+            getAvailableStatusOptions(getInitialTaskStatus())
+        }
+    }
 
     fun getAvailablePaidStatus(): List<String> {
         return getTasksPaidStatusList(_taskDetailState.value.taskPaidStatus)
@@ -388,4 +392,8 @@ class TaskDetailViewModel @Inject constructor(
             )
         }
     }
+
+    private fun getIsTaskSavedStatus(): Boolean = isTaskSaved
+
+    private fun getInitialTaskStatus(): TaskStatusType = initialTaskStatus ?: TaskStatusType.BACKLOG
 }
