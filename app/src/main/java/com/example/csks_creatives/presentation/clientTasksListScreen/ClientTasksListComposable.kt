@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import com.example.csks_creatives.domain.utils.Utils.getMonthName
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.ClientTasksListViewModel
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
 import com.example.csks_creatives.presentation.components.DateOrder
@@ -52,6 +53,7 @@ fun ClientTasksListComposable(
     viewModel: ClientTasksListViewModel = hiltViewModel()
 ) {
     val state = viewModel.clientsTasksListState.collectAsState()
+    val filterIconState = viewModel.isFilterTasksVisible.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.initialize(clientId)
@@ -63,7 +65,7 @@ fun ClientTasksListComposable(
                 title = "Client $clientId",
                 canShowMenu = true,
                 canShowSearch = state.value.canShowSearchIcon,
-                canShowFilterTasks = true,
+                canShowFilterTasks = filterIconState.value,
                 canShowBackIcon = true,
                 menuItems = listOf(
                     ToolbarOverFlowMenuItem("logout", "Logout")
@@ -211,12 +213,86 @@ fun ClientTasksListComposable(
                     LoadingProgress()
                 }
             } else {
-                LazyColumn {
-                    items(state.value.tasksList.size) { index ->
-                        val clientTask = state.value.tasksList[index]
-                        TaskItem(task = clientTask, onTaskClick = {
-                            navController.navigate("task_detail/${clientTask.taskId}/$ADMIN_NAME")
-                        })
+                if (state.value.tasksList.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No tasks found for client",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    val yearlyBreakdown = viewModel.getYearlyAndMonthlyCostBreakdown()
+                    LazyColumn {
+                        item {
+                            Button(
+                                onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ToggleAmountVisibility) }
+                            ) {
+                                Text(
+                                    text = if (state.value.isAmountVisible) "Hide Amounts" else "Show Amounts"
+                                )
+                            }
+                        }
+
+                        if (state.value.isAmountVisible) {
+
+                            val totalCost = viewModel.getTotalUnPaidCostForClient()
+                            item {
+                                Text(
+                                    "Lifetime Paid Amount: ${totalCost.first}",
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    "Lifetime Unpaid Amount: ${totalCost.second}",
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            yearlyBreakdown.forEach { (year, monthlyData) ->
+                                item {
+                                    Text(
+                                        "Year: $year",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Blue
+                                    )
+                                }
+
+                                monthlyData.forEach { (month, cost) ->
+                                    item {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(start = 16.dp, bottom = 8.dp)
+                                        ) {
+                                            Text(
+                                                "Month: ${getMonthName(month)}",
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.Gray
+                                            )
+                                            Text(
+                                                "Paid: ${cost.first}  |  Unpaid: ${cost.second}",
+                                                fontSize = 16.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        items(state.value.tasksList.size) { index ->
+                            val clientTask = state.value.tasksList[index]
+                            TaskItem(
+                                task = clientTask,
+                                onTaskClick = {
+                                    navController.navigate("task_detail/${clientTask.taskId}/$ADMIN_NAME")
+                                }
+                            )
+                        }
                     }
                 }
             }

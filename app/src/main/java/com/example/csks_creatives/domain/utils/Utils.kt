@@ -12,6 +12,7 @@ import com.example.csks_creatives.data.utils.Constants.REVISION_TWO
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -131,5 +132,9 @@ object Utils {
             val remainingMinutes = minutes % 60
             "$hours hour${if (hours > 1) "s" else ""}, $remainingMinutes minute${if (remainingMinutes > 1) "s" else ""}"
         }
+    }
+
+    fun getMonthName(month: Int): String {
+        return DateFormatSymbols().months[month - 1]
     }
 }

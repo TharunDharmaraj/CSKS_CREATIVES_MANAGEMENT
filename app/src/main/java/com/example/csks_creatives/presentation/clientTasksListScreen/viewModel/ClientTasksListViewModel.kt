@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,6 +30,9 @@ class ClientTasksListViewModel @Inject constructor(
 
     private val _clientTasksListState = MutableStateFlow(ClientTasksListState())
     val clientsTasksListState = _clientTasksListState.asStateFlow()
+
+    private val _isFilterTasksVisible = MutableStateFlow(false)
+    val isFilterTasksVisible = _isFilterTasksVisible.asStateFlow()
 
     private var hasInitialized = false
 
@@ -101,6 +105,12 @@ class ClientTasksListViewModel @Inject constructor(
                     )
                 }
             }
+
+            ClientTasksListScreenEvent.ToggleAmountVisibility -> {
+                _clientTasksListState.update {
+                    it.copy(isAmountVisible = !it.isAmountVisible)
+                }
+            }
         }
     }
 
@@ -117,7 +127,12 @@ class ClientTasksListViewModel @Inject constructor(
                         isUnpaidTasksVisible = false,
                         isLoading = false
                     )
-                    filterTasks()
+                    if (clientTasksList.isNotEmpty()) {
+                        _isFilterTasksVisible.value = true
+                        filterTasks()
+                    } else {
+                        _isFilterTasksVisible.value = false
+                    }
                 }
             }
         }
@@ -176,4 +191,48 @@ class ClientTasksListViewModel @Inject constructor(
             LogoutEvent.emitLogoutEvent(isUserLoggedOut)
         }
     }
+
+    fun getTotalUnPaidCostForClient(): Pair<Int, Int> {
+        var totalCostPaid = 0
+        var totalCostUnPaid = 0
+        _clientTasksListState.value.tasksList.forEach { task ->
+            if (task.taskPaidStatus == TaskPaidStatus.NOT_PAID) {
+                totalCostUnPaid += task.taskCost
+            } else {
+                totalCostPaid += task.taskCost
+            }
+        }
+        return Pair(totalCostPaid, totalCostUnPaid)
+    }
+
+    fun getYearlyAndMonthlyCostBreakdown(): Map<Int, Map<Int, Pair<Int, Int>>> {
+        val costBreakdown = mutableMapOf<Int, MutableMap<Int, Pair<Int, Int>>>()
+
+        _clientTasksListState.value.tasksList.forEach { task ->
+            val taskCreationTime = task.taskCreationTime.toLongOrNull()
+            val taskCost = task.taskCost.toString().toIntOrNull()
+
+            if (taskCreationTime == null || taskCost == null) {
+                return@forEach
+            }
+
+            val calendar = Calendar.getInstance().apply { timeInMillis = taskCreationTime }
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH) + 1 // Months are 0-based in Calendar
+
+            val currentYearData = costBreakdown.getOrPut(year) { mutableMapOf() }
+            val currentMonthData = currentYearData.getOrPut(month) { Pair(0, 0) }
+
+            val updatedMonthData = if (task.taskPaidStatus == TaskPaidStatus.FULLY_PAID) {
+                currentMonthData.copy(first = currentMonthData.first + taskCost)
+            } else {
+                currentMonthData.copy(second = currentMonthData.second + taskCost)
+            }
+
+            currentYearData[month] = updatedMonthData
+        }
+
+        return costBreakdown
+    }
+
 }
