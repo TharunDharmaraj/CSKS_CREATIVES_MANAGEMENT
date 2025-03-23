@@ -50,15 +50,15 @@ class ClientsRepositoryImplementation @Inject constructor(
         }
     }
 
-    override suspend fun checkClientNameExists(clientNamw: String): Boolean {
+    override suspend fun checkClientNameExists(clientName: String): Boolean {
         try {
             val clientSnapShot =
-                firestore.collection(CLIENT_COLLECTION).document(clientNamw).get().await()
+                firestore.collection(CLIENT_COLLECTION).document(clientName).get().await()
             if (clientSnapShot.exists()) {
-                Log.d(logTag + "Check", "Client $clientNamw Already Exists")
+                Log.d(logTag + "Check", "Client $clientName Already Exists")
                 return true
             }
-            Log.d(logTag + "Check", "Client $clientNamw Not Exists")
+            Log.d(logTag + "Check", "Client $clientName Not Exists")
             return false
         } catch (exception: Exception) {
             Log.d(logTag + "Check", "Error $exception checking employee Existence")
