@@ -65,16 +65,4 @@ class ClientsRepositoryImplementation @Inject constructor(
             return true
         }
     }
-
-    // For Mock Values
-    fun createMockClients(number: Int) {
-        val clientCollection = firestore.collection(CLIENT_COLLECTION)
-        repeat(number) {
-            val hash = hashMapOf(
-                CLIENT_ID to (it + 1).toString(),
-                CLIENT_NAME to "clientName" + (number * it + 1).toString()
-            )
-            clientCollection.document("clientName" + (number * it + 1).toString()).set(hash)
-        }
-    }
 }

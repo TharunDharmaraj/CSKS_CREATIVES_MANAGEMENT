@@ -15,5 +15,6 @@ data class ClientTaskOverview(
     val taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID,
     val taskType: TaskType = TaskType.SHORTS_VIDEO,
     val currentStatus: TaskStatusType = TaskStatusType.BACKLOG,
-    val taskDuration: String = EMPTY_STRING
+    val taskInProgressTime: String = EMPTY_STRING,
+    val taskCompletedTime: String = EMPTY_STRING
 )

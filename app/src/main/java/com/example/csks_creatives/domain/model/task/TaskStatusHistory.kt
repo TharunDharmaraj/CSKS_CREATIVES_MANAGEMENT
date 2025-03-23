@@ -5,6 +5,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_T
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsLong
 import com.google.firebase.firestore.PropertyName
 import java.util.concurrent.TimeUnit
 
@@ -17,7 +18,7 @@ data class TaskStatusHistory(
     fun getDurationString(): String {
         if (endTime.toLong() == TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE) {
             val (days, hours, minutes) = getHoursAndMinutes(
-                System.currentTimeMillis(),
+                getCurrentTimeAsLong(),
                 startTime.toLong()
             )
             return "Current State - Working for $days Days $hours Hours $minutes Minutes"

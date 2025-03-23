@@ -11,9 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
+import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
 
 @Composable
-fun EmployeeTaskCard(task: ClientTaskOverview, onClick: () -> Unit) {
+fun EmployeeTaskCard(task: ClientTaskOverview, onClick: () -> Unit, timeTaken: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -29,7 +30,8 @@ fun EmployeeTaskCard(task: ClientTaskOverview, onClick: () -> Unit) {
             Text("Paid: ${task.taskPaidStatus}")
             Text("Task Type: ${task.taskType}")
             Text("Current Status: ${task.currentStatus}")
-            Text("Created On: ${task.taskCreationTime}")
+            Text("Created On: ${formatTimeStamp(task.taskCreationTime)}")
+            Text("Time Taken: $timeTaken")
         }
     }
 }

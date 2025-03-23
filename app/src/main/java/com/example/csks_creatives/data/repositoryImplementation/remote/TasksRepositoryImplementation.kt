@@ -112,23 +112,51 @@ class TasksRepositoryImplementation @Inject constructor(
                 close(error)
                 return@addSnapshotListener
             }
-            documentSnapshot.let { documentSnapshot1 ->
-                val task = documentSnapshot1?.toObject(ClientTask::class.java)
-                    ?.copy(taskId = documentSnapshot1.id) ?: ClientTask()
-                val taskOverView = ClientTaskOverview(
-                    taskId = task.taskId,
-                    taskName = task.taskName,
-                    taskCreationTime = task.taskCreationTime,
-                    clientId = task.clientId,
-                    taskEstimate = task.taskEstimate,
-                    taskPaidStatus = task.taskPaidStatus,
-                    taskCost = task.taskCost,
-                    taskType = task.taskType,
-                    currentStatus = task.currentStatus
-                )
-                trySend(taskOverView)
+
+            documentSnapshot?.let { docSnapshot ->
+                val task = docSnapshot.toObject(ClientTask::class.java)
+                    ?.copy(taskId = docSnapshot.id) ?: ClientTask()
+
+                tasksRepositoryCoroutineScope.launch {
+                    val statusHistory = firestore.collection(TASKS_COLLECTION)
+                        .document(taskId)
+                        .collection(TASK_STATUS_HISTORY_SUB_COLLECTION)
+                        .get()
+                        .await()
+
+                    var inProgressStartTime: String? = null
+                    var completedStartTime: String? = null
+
+                    for (statusDoc in statusHistory.documents) {
+                        val status = statusDoc.id
+                        val startTime =
+                            statusDoc.getLong(TASK_STATUS_HISTORY_START_TIME)?.toString()
+
+                        when (status) {
+                            "IN_PROGRESS" -> inProgressStartTime = startTime
+                            "COMPLETED" -> completedStartTime = startTime
+                        }
+                    }
+
+                    val taskOverView = ClientTaskOverview(
+                        taskId = task.taskId,
+                        taskName = task.taskName,
+                        taskCreationTime = task.taskCreationTime,
+                        clientId = task.clientId,
+                        taskEstimate = task.taskEstimate,
+                        taskPaidStatus = task.taskPaidStatus,
+                        taskCost = task.taskCost,
+                        taskType = task.taskType,
+                        currentStatus = task.currentStatus,
+                        taskInProgressTime = inProgressStartTime ?: "133",
+                        taskCompletedTime = completedStartTime ?: "153"
+                    )
+
+                    trySend(taskOverView)
+                }
             }
         }
+
         awaitClose { listener.remove() }
     }
 

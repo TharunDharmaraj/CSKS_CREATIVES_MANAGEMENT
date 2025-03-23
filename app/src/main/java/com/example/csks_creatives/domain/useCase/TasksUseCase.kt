@@ -6,9 +6,11 @@ import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.repository.remote.TasksRepository
-import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
+import com.example.csks_creatives.domain.utils.Utils.calculateFormattedTaskTakenTime
 import com.example.csks_creatives.domain.utils.Utils.getActiveTasks
 import com.example.csks_creatives.domain.utils.Utils.getCompletedTasks
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
+import com.example.csks_creatives.domain.utils.Utils.getFormattedTaskTakenTime
 import com.example.csks_creatives.presentation.components.DateOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -78,7 +80,7 @@ class TasksUseCase @Inject constructor(
             if (task.taskAttachment.isEmpty()) return ResultState.Error("Task Description Cannot Be Empty")
             if (task.taskName.isEmpty()) return ResultState.Error("Task Name Cannot Be Empty")
             if (task.clientId.isEmpty()) return ResultState.Error("Task Client Cannot be Empty")
-            val currentTime = System.currentTimeMillis().toString()
+            val currentTime = getCurrentTimeAsString()
             val taskToCreate = task.copy(
                 taskId = currentTime,
                 taskCreationTime = currentTime,
@@ -116,11 +118,7 @@ class TasksUseCase @Inject constructor(
             try {
                 tasksRepository.getTaskOverView(taskId).collect { taskOverView ->
                     emit(
-                        ResultState.Success(
-                            taskOverView.copy(
-                                taskCreationTime = formatTimeStamp(taskOverView.taskCreationTime)
-                            )
-                        )
+                        ResultState.Success(taskOverView)
                     )
                 }
             } catch (exception: Exception) {
@@ -160,4 +158,64 @@ class TasksUseCase @Inject constructor(
             emit(ResultState.Error("Failed to get All Completed Tasks"))
         }
     }.flowOn(Dispatchers.IO)
+
+    override fun getUniqueTaskOverViewList(
+        taskOverViewData: ClientTaskOverview,
+        tasksList: List<ClientTaskOverview>
+    ): List<ClientTaskOverview> {
+        return tasksList.filter { it.taskId != taskOverViewData.taskId } + taskOverViewData
+    }
+
+    override fun removeCompletedTaskFromActiveList(
+        completedTaskId: ClientTaskOverview,
+        tasksInProgressList: List<ClientTaskOverview>
+    ) = tasksInProgressList.filter { it.taskId != completedTaskId.taskId }
+
+    override fun getTimeTakenForActiveTask(
+        taskId: String,
+        tasksInProgress: List<ClientTaskOverview>
+    ): String {
+        tasksInProgress.forEach { task ->
+            return calculateFormattedTaskTakenTime(
+                task.taskCreationTime,
+                getCurrentTimeAsString()
+            )
+        }
+        return "123456"
+    }
+
+    override fun getTimeTakenForCompletedTask(
+        taskId: String,
+        tasksCompleted: List<ClientTaskOverview>
+    ): String {
+        tasksCompleted.forEach { task ->
+            if (task.taskId == taskId) {
+                return calculateFormattedTaskTakenTime(
+                    task.taskInProgressTime,
+                    task.taskCompletedTime
+                )
+            }
+        }
+        return "123456"
+    }
+
+    override fun getTimeTakenForCompletedTask(clientTask: ClientTask): String {
+        val inProgressEntry =
+            clientTask.statusHistory.find { it.taskStatusType == TaskStatusType.IN_PROGRESS }
+        val completedEntry =
+            clientTask.statusHistory.find { it.taskStatusType == TaskStatusType.COMPLETED }
+
+        if (inProgressEntry == null || completedEntry == null ||
+            inProgressEntry.startTime.isEmpty() || completedEntry.startTime.isEmpty()
+        ) {
+            return "No In-Progress Time Available"
+        }
+
+        return try {
+            val diffMillis = completedEntry.startTime.toLong() - inProgressEntry.startTime.toLong()
+            getFormattedTaskTakenTime(diffMillis)
+        } catch (e: Exception) {
+            "0"
+        }
+    }
 }

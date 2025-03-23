@@ -3,6 +3,7 @@ package com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.AdminUseCaseFactory
 import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
@@ -14,6 +15,7 @@ import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.s
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -159,9 +161,12 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
                     tasksUseCase.getTaskOverView(taskId).collect { taskOverViewResult ->
                         if (taskOverViewResult is ResultState.Success) {
                             val taskOverViewData = taskOverViewResult.data
+                            val completedTasksList = tasksUseCase.getUniqueTaskOverViewList(
+                                taskOverViewData, _employeeDetailsScreenState.value.tasksCompleted
+                            )
                             _employeeDetailsScreenState.value =
                                 _employeeDetailsScreenState.value.copy(
-                                    tasksCompleted = (_employeeDetailsScreenState.value.tasksCompleted + taskOverViewData).sortedByDescending { it.taskCreationTime }
+                                    tasksCompleted = completedTasksList.sortedByDescending { it.taskCreationTime }
                                 )
                             tasksCompletedFetchFromFirestore.value =
                                 _employeeDetailsScreenState.value.tasksCompleted
@@ -179,9 +184,27 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
                     tasksUseCase.getTaskOverView(taskId).collect { taskOverViewResult ->
                         if (taskOverViewResult is ResultState.Success) {
                             val taskOverViewData = taskOverViewResult.data
+                            var activeTasksList = tasksUseCase.getUniqueTaskOverViewList(
+                                taskOverViewData,
+                                _employeeDetailsScreenState.value.tasksInProgress
+                            )
+                            // Handling When a task is moved from In_Progress to completed, we need to update the UI accordingly
+                            if (taskOverViewData.currentStatus == TaskStatusType.COMPLETED) {
+                                val newCompletedTasksList =
+                                    (_employeeDetailsScreenState.value.tasksCompleted + taskOverViewData).sortedByDescending { it.taskCreationTime }
+                                _employeeDetailsScreenState.update {
+                                    it.copy(
+                                        tasksCompleted = newCompletedTasksList
+                                    )
+                                }
+                                activeTasksList = tasksUseCase.removeCompletedTaskFromActiveList(
+                                    taskOverViewData,
+                                    activeTasksList
+                                )
+                            }
                             _employeeDetailsScreenState.value =
                                 _employeeDetailsScreenState.value.copy(
-                                    tasksInProgress = (_employeeDetailsScreenState.value.tasksInProgress + taskOverViewData).sortedByDescending { it.taskCreationTime }
+                                    tasksInProgress = activeTasksList.sortedByDescending { it.taskCreationTime }
                                 )
                             activeTasksFetchFromFirestore.value =
                                 _employeeDetailsScreenState.value.tasksInProgress
@@ -203,4 +226,16 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
             LogoutEvent.emitLogoutEvent(isUserLoggedOut)
         }
     }
+
+    fun getTimeTakenForCompletion(taskId: String) =
+        tasksUseCase.getTimeTakenForCompletedTask(
+            taskId,
+            _employeeDetailsScreenState.value.tasksCompleted
+        )
+
+    fun getTimeTakenForActiveTask(taskId: String) =
+        tasksUseCase.getTimeTakenForActiveTask(
+            taskId,
+            _employeeDetailsScreenState.value.tasksInProgress
+        )
 }

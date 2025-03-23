@@ -56,7 +56,7 @@ fun EmployeeHomeScreenComposable(
                     when (itemId) {
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
-                            navController.navigate("login"){
+                            navController.navigate("login") {
                                 popUpTo(0) { inclusive = true }
                             }
                         }
@@ -141,9 +141,13 @@ fun EmployeeHomeScreenComposable(
                     if (state.value.isLoading) {
                         LoadingProgress()
                     }
-                    TaskItemCard(state.value.activeTasks[index], onItemClick = {
-                        navController.navigate("task_detail/${clientTask.taskId}/$employeeId")
-                    })
+                    TaskItemCard(
+                        state.value.activeTasks[index],
+                        onItemClick = {
+                            navController.navigate("task_detail/${clientTask.taskId}/$employeeId")
+                        },
+                        viewModel = viewModel
+                    )
                 }
             }
 
@@ -168,9 +172,14 @@ fun EmployeeHomeScreenComposable(
                     if (state.value.isLoading) {
                         LoadingProgress()
                     }
-                    TaskItemCard(clientTask, onItemClick = {
-                        navController.navigate("task_detail/${clientTask.taskId}/$employeeId")
-                    })
+                    TaskItemCard(
+                        clientTask,
+                        onItemClick = {
+                            navController.navigate("task_detail/${clientTask.taskId}/$employeeId")
+                        },
+                        isCompletedTask = true,
+                        viewModel = viewModel
+                    )
                 }
             }
         }
@@ -178,7 +187,12 @@ fun EmployeeHomeScreenComposable(
 }
 
 @Composable
-fun TaskItemCard(task: ClientTask, onItemClick: () -> Unit) {
+fun TaskItemCard(
+    task: ClientTask,
+    onItemClick: () -> Unit,
+    isCompletedTask: Boolean = false,
+    viewModel: EmployeeHomeScreenViewModel
+) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -191,6 +205,10 @@ fun TaskItemCard(task: ClientTask, onItemClick: () -> Unit) {
             Text(task.taskName, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Text("Status: ${task.currentStatus}")
+            if (isCompletedTask) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Time Taken: ${viewModel.getCompletedTaskTime(task)}")
+            }
         }
     }
 }

@@ -1,20 +1,24 @@
-package com.example.csks_creatives.data.worker
+package com.example.csks_creatives.application.worker
 
 import android.content.Context
 import android.util.Log
+import androidx.hilt.work.HiltWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.useCase.UserLoginUseCase
 import com.example.csks_creatives.domain.useCase.UserPersistenceUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class FCMTokenRefreshWorker @Inject constructor(
-    context: Context,
-    workerParams: WorkerParameters,
+@HiltWorker
+class FCMTokenRefreshWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted workerParams: WorkerParameters,
     private val loginUseCase: UserLoginUseCase,
     private val userPersistenceUseCase: UserPersistenceUseCase
 ) : Worker(context, workerParams) {

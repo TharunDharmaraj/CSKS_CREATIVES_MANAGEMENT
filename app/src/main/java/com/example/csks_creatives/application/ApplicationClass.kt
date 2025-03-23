@@ -6,7 +6,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.csks_creatives.data.worker.FCMTokenRefreshWorker
+import com.example.csks_creatives.application.worker.FCMTokenRefreshWorker
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
 import dagger.hilt.android.HiltAndroidApp

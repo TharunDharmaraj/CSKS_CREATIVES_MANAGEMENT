@@ -21,6 +21,7 @@ import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsLong
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
@@ -57,7 +58,7 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                 Query.Direction.DESCENDING
             ).limit(1).get().await().documents.firstOrNull()
 
-            val currentTime = System.currentTimeMillis()
+            val currentTime = getCurrentTimeAsLong()
             if (lastUpdatedStatusDocument != null) {
                 lastUpdatedStatusDocument.reference.set(
                     hashMapOf(TASK_STATUS_HISTORY_END_TIME to currentTime),
@@ -105,7 +106,7 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                                 ?: return@mapNotNull null
                         val endTime =
                             document.getLong(TASK_STATUS_HISTORY_END_TIME)
-                                ?: System.currentTimeMillis()
+                                ?: getCurrentTimeAsLong()
                         TaskStatusHistory(status, startTime.toString(), endTime.toString())
                     }
                     trySend(taskStatusHistoryList).isSuccess

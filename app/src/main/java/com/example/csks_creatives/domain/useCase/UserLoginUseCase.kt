@@ -6,6 +6,7 @@ import com.example.csks_creatives.domain.model.user.User
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.repository.remote.LoginRepository
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -32,7 +33,7 @@ class UserLoginUseCase @Inject constructor(
             } else {
                 employeeId = userId
             }
-            val loginTime = System.currentTimeMillis().toString()
+            val loginTime = getCurrentTimeAsString()
             withContext(Dispatchers.IO) {
                 val currentUser = CurrentUser(
                     userRole = userRole,

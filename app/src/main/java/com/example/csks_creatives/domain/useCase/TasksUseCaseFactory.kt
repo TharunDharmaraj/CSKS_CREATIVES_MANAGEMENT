@@ -27,4 +27,23 @@ interface TasksUseCaseFactory {
     suspend fun getAllBacklogTasks(): Flow<ResultState<List<ClientTask>>>
 
     suspend fun getAllCompletedTasks(): Flow<ResultState<List<ClientTask>>>
+
+    fun getUniqueTaskOverViewList(
+        taskOverViewData: ClientTaskOverview,
+        tasksList: List<ClientTaskOverview>
+    ): List<ClientTaskOverview>
+
+    fun removeCompletedTaskFromActiveList(
+        completedTaskId: ClientTaskOverview,
+        tasksInProgressList: List<ClientTaskOverview>
+    ): List<ClientTaskOverview>
+
+    fun getTimeTakenForActiveTask(taskId: String, tasksInProgress: List<ClientTaskOverview>): String
+
+    fun getTimeTakenForCompletedTask(
+        taskId: String,
+        tasksCompleted: List<ClientTaskOverview>
+    ): String
+
+    fun getTimeTakenForCompletedTask(clientTask: ClientTask): String
 }

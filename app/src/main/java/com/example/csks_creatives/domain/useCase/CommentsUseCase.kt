@@ -4,6 +4,7 @@ import com.example.csks_creatives.domain.model.task.Comment
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.CommentsRepository
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -49,7 +50,7 @@ class CommentsUseCase @Inject constructor(
             if(employeeId.isEmpty()) return ResultState.Error("No User found to comment")
             val commentToBePosted = comment.copy(
                 commentId = UUID.randomUUID().toString(),
-                commentTimeStamp = System.currentTimeMillis().toString(),
+                commentTimeStamp = getCurrentTimeAsString(),
                 commentedBy = employeeId
             )
             commentsRepository.postComment(taskId, employeeId, commentToBePosted)

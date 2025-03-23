@@ -15,6 +15,7 @@ import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.repository.remote.LoginRepository
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
@@ -87,7 +88,7 @@ class LoginRepositoryImplementation @Inject constructor(
                         hashMapOf(
                             FCM_TOKEN_FIELD to token,
                             FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(
-                                System.currentTimeMillis().toString()
+                                getCurrentTimeAsString()
                             )
                         ), SetOptions.merge()
                     )
@@ -103,7 +104,7 @@ class LoginRepositoryImplementation @Inject constructor(
                 hashMapOf(
                     FCM_TOKEN_FIELD to newToken,
                     FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(
-                        System.currentTimeMillis().toString()
+                        getCurrentTimeAsString()
                     )
                 ), SetOptions.merge()
             )

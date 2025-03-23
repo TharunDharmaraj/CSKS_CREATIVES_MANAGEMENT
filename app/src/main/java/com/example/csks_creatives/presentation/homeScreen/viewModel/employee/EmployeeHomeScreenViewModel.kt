@@ -130,4 +130,7 @@ class EmployeeHomeScreenViewModel @Inject constructor(
             LogoutEvent.emitLogoutEvent(isUserLoggedOut)
         }
     }
+
+    fun getCompletedTaskTime(clientTask: ClientTask) =
+        tasksUseCaseFactory.getTimeTakenForCompletedTask(clientTask)
 }

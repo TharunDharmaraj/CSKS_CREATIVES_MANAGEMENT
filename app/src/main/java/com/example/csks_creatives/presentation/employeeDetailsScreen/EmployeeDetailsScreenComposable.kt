@@ -60,7 +60,7 @@ fun EmployeeDetailsScreen(
                     when (itemId) {
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
-                            navController.navigate("login"){
+                            navController.navigate("login") {
                                 popUpTo(0) { inclusive = true }
                             }
                         }
@@ -137,7 +137,7 @@ fun EmployeeDetailsScreen(
                     val task = state.value.tasksInProgress[index]
                     EmployeeTaskCard(task = task, onClick = {
                         navController.navigate("task_detail/${task.taskId}/$ADMIN_NAME")
-                    })
+                    }, timeTaken = viewModel.getTimeTakenForActiveTask(task.taskId))
                 }
             }
 
@@ -156,9 +156,15 @@ fun EmployeeDetailsScreen(
             if (state.value.isCompletedTasksSectionVisible) {
                 items(state.value.tasksCompleted.size) { index ->
                     val task = state.value.tasksCompleted[index]
-                    EmployeeTaskCard(task = task, onClick = {
-                        navController.navigate("task_detail/${task.taskId}/$ADMIN_NAME")
-                    })
+                    EmployeeTaskCard(
+                        task = task,
+                        onClick = {
+                            navController.navigate("task_detail/${task.taskId}/$ADMIN_NAME")
+                        },
+                        timeTaken = viewModel.getTimeTakenForCompletion(
+                            task.taskId
+                        )
+                    )
                 }
             }
         }

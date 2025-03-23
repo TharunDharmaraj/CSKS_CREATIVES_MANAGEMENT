@@ -93,6 +93,10 @@ object Utils {
         }
     }
 
+    fun getCurrentTimeAsLong(): Long = System.currentTimeMillis()
+
+    fun getCurrentTimeAsString(): String = System.currentTimeMillis().toString()
+
     fun formatTimeStamp(timeStampInMilliSeconds: String): String {
         val timeFormat = SimpleDateFormat("HH:mm:ss MMM dd yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
@@ -101,5 +105,31 @@ object Utils {
     fun getFormattedDateTimeFormat(timeStampInMilliSeconds: String): String {
         val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
         return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
+    }
+
+    fun calculateFormattedTaskTakenTime(
+        taskInProgressTime: String,
+        taskCompletedTime: String
+    ): String {
+        val timeForTaskInProgress = taskInProgressTime.toLong()
+        val timeForTaskCompleted = taskCompletedTime.toLong()
+        val timeTakenMillis = timeForTaskCompleted - timeForTaskInProgress
+        return getFormattedTaskTakenTime(timeTakenMillis)
+
+    }
+
+    fun getFormattedTaskTakenTime(timeDifference: Long): String {
+        val seconds = timeDifference / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+        val days = hours / 24
+
+        return if (days >= 1) {
+            val remainingHours = hours % 24
+            "$days day${if (days > 1) "s" else ""}, $remainingHours hour${if (remainingHours > 1) "s" else ""}"
+        } else {
+            val remainingMinutes = minutes % 60
+            "$hours hour${if (hours > 1) "s" else ""}, $remainingMinutes minute${if (remainingMinutes > 1) "s" else ""}"
+        }
     }
 }
