@@ -67,7 +67,7 @@ fun AdminHomeScreen(
 
                         "logout" -> {
                             viewModel.emitLogoutEvent(true)
-                            navController.navigate("login"){
+                            navController.navigate("login") {
                                 popUpTo(0) { inclusive = true }
                             }
                         }
@@ -93,7 +93,7 @@ fun AdminHomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
