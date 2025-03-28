@@ -10,13 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -37,6 +42,7 @@ import com.example.csks_creatives.presentation.loginScreen.viewModel.event.Login
 fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavHostController) {
     val context = LocalContext.current
     val loginState = viewModel.loginScreenState.collectAsState()
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
@@ -85,13 +91,21 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavH
         )
         UserNameInputTextField(
             loginState.value.userName,
-            onEditTextFieldChanged = { viewModel.onEvent(LoginEvent.OnUserNameTextFieldChanged(it)) }
+            onEditTextFieldChanged = { viewModel.onEvent(LoginEvent.OnUserNameTextFieldChanged(it)) },
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            )
         )
         Spacer(modifier = Modifier.height(30.dp))
         PasswordInputTextField(
             modifier = Modifier.width(LOGIN_SCREEN_FIELDS_SIZE),
             passwordTextField = loginState.value.password,
-            onPasswordTextChanged = { viewModel.onEvent(LoginEvent.OnPasswordTextFieldChanged(it)) }
+            onPasswordTextChanged = { viewModel.onEvent(LoginEvent.OnPasswordTextFieldChanged(it)) },
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Go),
+            keyboardActions = KeyboardActions(
+                onGo = { viewModel.onEvent(LoginEvent.LoginButtonClick) }
+            )
         )
         Spacer(modifier = Modifier.height(45.dp))
         if (loginState.value.isLoading) {

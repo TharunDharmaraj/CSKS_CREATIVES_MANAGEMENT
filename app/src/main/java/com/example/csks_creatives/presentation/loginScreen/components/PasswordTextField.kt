@@ -1,6 +1,8 @@
 package com.example.csks_creatives.presentation.loginScreen.components
 
 
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults.outlinedTextFieldColors
 import androidx.compose.material3.OutlinedTextField
@@ -15,7 +17,9 @@ import com.example.csks_creatives.presentation.components.tealGreen
 fun PasswordInputTextField(
     passwordTextField: String,
     onPasswordTextChanged: (String) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    keyboardOptions: KeyboardOptions,
+    keyboardActions: KeyboardActions
 ) {
     OutlinedTextField(
         modifier = modifier,
@@ -30,6 +34,8 @@ fun PasswordInputTextField(
             focusedLabelColor = tealGreen,
             cursorColor = tealGreen
         ),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         label = { Text(PASSWORD_TEXT, color = tealGreen) }
     )
 }

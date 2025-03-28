@@ -218,7 +218,7 @@ class ClientTasksListViewModel @Inject constructor(
 
             val calendar = Calendar.getInstance().apply { timeInMillis = taskCreationTime }
             val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH) + 1 // Months are 0-based in Calendar
+            val month = calendar.get(Calendar.MONTH) + 1
 
             val currentYearData = costBreakdown.getOrPut(year) { mutableMapOf() }
             val currentMonthData = currentYearData.getOrPut(month) { Pair(0, 0) }
@@ -234,5 +234,4 @@ class ClientTasksListViewModel @Inject constructor(
 
         return costBreakdown
     }
-
 }

@@ -2,6 +2,8 @@ package com.example.csks_creatives.presentation.loginScreen.components
 
 
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults.outlinedTextFieldColors
 import androidx.compose.material3.OutlinedTextField
@@ -16,7 +18,9 @@ import com.example.csks_creatives.presentation.components.tealGreen
 @Composable
 fun UserNameInputTextField(
     editTextField: String,
-    onEditTextFieldChanged: (String) -> Unit
+    onEditTextFieldChanged: (String) -> Unit,
+    keyboardOptions: KeyboardOptions,
+    keyboardActions: KeyboardActions
 ) {
     OutlinedTextField(
         modifier = Modifier.width(LOGIN_SCREEN_FIELDS_SIZE),
@@ -31,6 +35,8 @@ fun UserNameInputTextField(
             focusedLabelColor = tealGreen,
             cursorColor = tealGreen
         ),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         label = { Text(text = USERNAME_TEXT, color = tealGreen) }
     )
 }
