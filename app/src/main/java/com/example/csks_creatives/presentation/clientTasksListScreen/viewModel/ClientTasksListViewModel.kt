@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
-import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.state.ClientTasksListState

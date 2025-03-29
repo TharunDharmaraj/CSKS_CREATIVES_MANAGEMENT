@@ -9,6 +9,7 @@ import com.example.csks_creatives.data.repositoryImplementation.database.Employe
 import com.example.csks_creatives.data.repositoryImplementation.remote.AdminRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.ClientsRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.CommentsRepositoryImplementation
+import com.example.csks_creatives.data.repositoryImplementation.remote.EmployeeRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.LoginRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.TasksManipulationRepositoryImplementation
 import com.example.csks_creatives.data.repositoryImplementation.remote.TasksRepositoryImplementation
@@ -18,6 +19,7 @@ import com.example.csks_creatives.domain.repository.database.EmployeesLocalRepos
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.repository.remote.ClientsRepository
 import com.example.csks_creatives.domain.repository.remote.CommentsRepository
+import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
 import com.example.csks_creatives.domain.repository.remote.LoginRepository
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.example.csks_creatives.domain.repository.remote.TasksRepository
@@ -71,6 +73,14 @@ object RepositoryModule {
         messaging: FirebaseMessaging
     ): LoginRepository {
         return LoginRepositoryImplementation(firestore = firestore, messaging = messaging)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmployeeRepository(
+        firestore: FirebaseFirestore
+    ): EmployeeRepository {
+        return EmployeeRepositoryImplementation(firestore)
     }
 
     // local Repository

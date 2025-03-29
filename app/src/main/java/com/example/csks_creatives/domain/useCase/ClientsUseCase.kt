@@ -6,6 +6,7 @@ import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.database.ClientsLocalRepository
 import com.example.csks_creatives.domain.repository.remote.ClientsRepository
+import com.example.csks_creatives.domain.useCase.factories.ClientsUseCaseFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

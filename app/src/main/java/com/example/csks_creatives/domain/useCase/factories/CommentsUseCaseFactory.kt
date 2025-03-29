@@ -1,7 +1,8 @@
-package com.example.csks_creatives.domain.useCase
+package com.example.csks_creatives.domain.useCase.factories
 
 import com.example.csks_creatives.domain.model.task.Comment
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
+import com.example.csks_creatives.domain.useCase.CommentsUseCase
 import kotlinx.coroutines.flow.Flow
 
 interface CommentsUseCaseFactory {

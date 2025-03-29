@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
-import com.example.csks_creatives.domain.useCase.AdminUseCaseFactory
-import com.example.csks_creatives.domain.useCase.ClientsUseCaseFactory
-import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.AdminUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.ClientsUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.components.ToastUiEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddClientDialogEvent

@@ -5,21 +5,24 @@ import com.example.csks_creatives.domain.repository.database.EmployeesLocalRepos
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.repository.remote.ClientsRepository
 import com.example.csks_creatives.domain.repository.remote.CommentsRepository
+import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
 import com.example.csks_creatives.domain.repository.remote.LoginRepository
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.example.csks_creatives.domain.repository.remote.TasksRepository
 import com.example.csks_creatives.domain.useCase.AdminUseCase
-import com.example.csks_creatives.domain.useCase.AdminUseCaseFactory
 import com.example.csks_creatives.domain.useCase.ClientsUseCase
-import com.example.csks_creatives.domain.useCase.ClientsUseCaseFactory
 import com.example.csks_creatives.domain.useCase.CommentsUseCase
-import com.example.csks_creatives.domain.useCase.CommentsUseCaseFactory
+import com.example.csks_creatives.domain.useCase.EmployeeUseCase
 import com.example.csks_creatives.domain.useCase.TasksManipulationUseCase
-import com.example.csks_creatives.domain.useCase.TasksManipulationUseCaseFactory
 import com.example.csks_creatives.domain.useCase.TasksUseCase
-import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
 import com.example.csks_creatives.domain.useCase.UserLoginUseCase
 import com.example.csks_creatives.domain.useCase.UserPersistenceUseCase
+import com.example.csks_creatives.domain.useCase.factories.AdminUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.ClientsUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.CommentsUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.TasksManipulationUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,6 +82,15 @@ object UseCaseModule {
         return UserLoginUseCase(
             loginRepository = loginRepository,
             userPersistenceUseCase = userPersistenceUseCase
+        )
+    }
+
+    @Provides
+    fun provideEmployeeUseCase(
+        employeeRepository: EmployeeRepository
+    ): EmployeeUseCaseFactory {
+        return EmployeeUseCase(
+            employeeRepository = employeeRepository
         )
     }
 }

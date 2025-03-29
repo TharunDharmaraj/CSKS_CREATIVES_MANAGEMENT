@@ -3,6 +3,7 @@ package com.example.csks_creatives.domain.useCase
 import com.example.csks_creatives.domain.model.task.Comment
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.CommentsRepository
+import com.example.csks_creatives.domain.useCase.factories.CommentsUseCaseFactory
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import kotlinx.coroutines.Dispatchers
@@ -46,8 +47,8 @@ class CommentsUseCase @Inject constructor(
         comment: Comment
     ): ResultState<String> {
         return try {
-            if(comment.commentString.isEmpty()) return ResultState.Error("Empty Comment")
-            if(employeeId.isEmpty()) return ResultState.Error("No User found to comment")
+            if (comment.commentString.isEmpty()) return ResultState.Error("Empty Comment")
+            if (employeeId.isEmpty()) return ResultState.Error("No User found to comment")
             val commentToBePosted = comment.copy(
                 commentId = UUID.randomUUID().toString(),
                 commentTimeStamp = getCurrentTimeAsString(),

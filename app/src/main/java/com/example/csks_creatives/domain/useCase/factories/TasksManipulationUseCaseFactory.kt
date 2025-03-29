@@ -1,9 +1,10 @@
-package com.example.csks_creatives.domain.useCase
+package com.example.csks_creatives.domain.useCase.factories
 
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
+import com.example.csks_creatives.domain.useCase.TasksManipulationUseCase
 import kotlinx.coroutines.flow.Flow
 
 interface TasksManipulationUseCaseFactory {

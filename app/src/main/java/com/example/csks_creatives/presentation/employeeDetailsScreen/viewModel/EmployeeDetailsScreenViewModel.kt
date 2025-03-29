@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
-import com.example.csks_creatives.domain.useCase.AdminUseCaseFactory
-import com.example.csks_creatives.domain.useCase.TasksUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.AdminUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
 import com.example.csks_creatives.presentation.components.DateOrder

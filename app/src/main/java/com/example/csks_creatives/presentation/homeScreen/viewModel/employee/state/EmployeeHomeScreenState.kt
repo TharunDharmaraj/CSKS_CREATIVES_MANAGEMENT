@@ -10,5 +10,6 @@ data class EmployeeHomeScreenState(
     val isCompletedTasksSectionVisible: Boolean = false,
     val tasksOrder: DateOrder = DateOrder.Descending,
     val isOrderByToggleVisible: Boolean = true,
+    val isAddLeaveDialogVisible: Boolean = false,
     val isLoading: Boolean = false
 )
