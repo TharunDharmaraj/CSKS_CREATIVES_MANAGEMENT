@@ -136,10 +136,6 @@ class TaskDetailViewModel @Inject constructor(
                         is ResultState.Loading -> {
 
                         }
-
-                        else -> {
-                            // Ignore
-                        }
                     }
                 }
             }
