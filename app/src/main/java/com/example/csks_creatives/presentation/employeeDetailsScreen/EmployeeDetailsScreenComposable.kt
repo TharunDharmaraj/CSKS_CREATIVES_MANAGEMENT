@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.employeeDetailsScreen.components.EmployeeTaskCard
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.EmployeeDetailsScreenViewModel
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.event.EmployeeDetailsScreenEvent

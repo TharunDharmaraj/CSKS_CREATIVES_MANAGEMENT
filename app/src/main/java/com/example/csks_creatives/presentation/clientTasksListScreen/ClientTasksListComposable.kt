@@ -40,9 +40,9 @@ import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.getMonthName
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.ClientTasksListViewModel
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
-import com.example.csks_creatives.presentation.components.DateOrder
-import com.example.csks_creatives.presentation.components.LoadingProgress
-import com.example.csks_creatives.presentation.components.TaskItem
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
+import com.example.csks_creatives.presentation.components.ui.LoadingProgress
+import com.example.csks_creatives.presentation.components.ui.TaskItem
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
 

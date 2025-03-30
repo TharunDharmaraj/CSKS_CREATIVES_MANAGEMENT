@@ -17,6 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,11 +39,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
-import com.example.csks_creatives.presentation.components.DateOrder
-import com.example.csks_creatives.presentation.components.LoadingProgress
-import com.example.csks_creatives.presentation.components.ToastUiEvent
 import com.example.csks_creatives.presentation.components.helper.FutureSelectableDates
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
+import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.EmployeeHomeScreenViewModel
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event.EmployeeHomeScreenEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event.LeaveRequestDialogEvent
@@ -207,7 +209,21 @@ fun EmployeeHomeScreenComposable(
                     Text("Request Leave")
                 }
             }
+            item {
+                Text("Approved Leaves", style = MaterialTheme.typography.titleMedium)
+                state.approvedLeaves.forEach { leave ->
+                    LeaveRequestCard(leave)
+                }
+            }
+
+            item {
+                Text("Rejected Leaves", style = MaterialTheme.typography.titleMedium)
+                state.rejectedLeaves.forEach { leave ->
+                    LeaveRequestCard(leave)
+                }
+            }
         }
+
         LeaveRequestDialog(
             isVisible = state.isAddLeaveDialogVisible,
             state = leaveRequestDialogState,
@@ -264,7 +280,7 @@ fun LeaveRequestDialog(
 
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = tomorrowMillis,
-            selectableDates =  FutureSelectableDates
+            selectableDates = FutureSelectableDates
         )
 
         if (showDatePicker) {
@@ -339,5 +355,24 @@ fun LeaveRequestDialog(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun LeaveRequestCard(leave: LeaveRequest) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Date: ${leave.leaveDate.toDate()}")
+            Text("Reason: ${leave.leaveReason}")
+            Text(
+                "Status: ${if (leave.approvedStatus) "Approved" else "Rejected"}",
+                color = if (leave.approvedStatus) Color.Green else Color.Red
+            )
+        }
     }
 }

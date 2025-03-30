@@ -12,7 +12,7 @@ import com.example.csks_creatives.domain.utils.Utils.getActiveTasks
 import com.example.csks_creatives.domain.utils.Utils.getCompletedTasks
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import com.example.csks_creatives.domain.utils.Utils.getFormattedTaskTakenTime
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

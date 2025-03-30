@@ -8,8 +8,8 @@ import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactor
 import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
-import com.example.csks_creatives.presentation.components.DateOrder
-import com.example.csks_creatives.presentation.components.ToastUiEvent
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event.EmployeeHomeScreenEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event.LeaveRequestDialogEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.state.EmployeeHomeScreenState
@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -203,6 +204,36 @@ class EmployeeHomeScreenViewModel @Inject constructor(
         hasInitialized = true
         this.employeeId = employeeId
         getEmployeeTasks(employeeId, DateOrder.Descending)
+        fetchLeaveRequests(employeeId)
+    }
+
+    private fun fetchLeaveRequests(employeeId: String) {
+        viewModelScope.launch {
+            employeeUseCaseFactory.getAllLeavesTaken(employeeId).collectLatest { result ->
+                when (result) {
+                    is ResultState.Success -> {
+                        val leaveRequests = result.data
+                        val approved = leaveRequests.filter { it.approvedStatus }
+                        val rejected = leaveRequests.filter { !it.approvedStatus }
+
+                        _employeeHomeScreenState.update {
+                            it.copy(
+                                approvedLeaves = approved,
+                                rejectedLeaves = rejected
+                            )
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        _uiEvent.emit(ToastUiEvent.ShowToast(result.message))
+                    }
+
+                    ResultState.Loading -> {
+
+                    }
+                }
+            }
+        }
     }
 
     fun emitLogoutEvent(isUserLoggedOut: Boolean) {

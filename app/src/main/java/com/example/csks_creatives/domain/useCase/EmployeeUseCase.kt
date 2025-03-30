@@ -5,6 +5,11 @@ import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
 import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactory
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
+import com.example.csks_creatives.domain.utils.Utils.toTimestamp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
@@ -36,7 +41,7 @@ class EmployeeUseCase @Inject constructor(
             val leaveRequest = LeaveRequest(
                 leaveRequestId = getCurrentTimeAsString(),
                 leaveReason = leaveReason,
-                leaveDate = leaveDate,
+                leaveDate = leaveDate.toTimestamp(),
                 postedBy = postedBy
             )
             employeeRepository.postLeaveRequest(leaveRequest)
@@ -46,12 +51,19 @@ class EmployeeUseCase @Inject constructor(
         }
     }
 
-    override suspend fun getAllLeavesTaken(employeeId: String): ResultState<List<LeaveRequest>> {
-        return try {
-            val leaveRequests = employeeRepository.getAllLeaveRequestsForEmployee(employeeId)
-            ResultState.Success(leaveRequests)
-        } catch (exception: Exception) {
-            ResultState.Error(exception.localizedMessage ?: "Error fetching leave requests")
-        }
-    }
+    override suspend fun getAllLeavesTaken(employeeId: String): Flow<ResultState<List<LeaveRequest>>> =
+        flow {
+            try {
+                employeeRepository.getAllLeaveRequestsForEmployee(employeeId)
+                    .collect { leaveRequests ->
+                        emit(ResultState.Success(leaveRequests))
+                    }
+            } catch (exception: Exception) {
+                emit(
+                    ResultState.Error(
+                        exception.localizedMessage ?: "Error fetching leave requests"
+                    )
+                )
+            }
+        }.flowOn(Dispatchers.IO)
 }

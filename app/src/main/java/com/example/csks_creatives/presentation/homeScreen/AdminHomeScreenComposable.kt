@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
-import com.example.csks_creatives.presentation.components.LoadingProgress
-import com.example.csks_creatives.presentation.components.ToastUiEvent
+import com.example.csks_creatives.presentation.components.ui.LoadingProgress
+import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.AdminHomeScreenViewModel
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddClientDialogEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddEmployeeDialogEvent

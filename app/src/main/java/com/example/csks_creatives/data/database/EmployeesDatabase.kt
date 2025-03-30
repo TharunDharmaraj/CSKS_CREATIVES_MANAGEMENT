@@ -22,7 +22,6 @@ data class EmployeeItem(
     val numberOfTasksCompleted: String
 )
 
-
 @Dao
 interface EmployeesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)

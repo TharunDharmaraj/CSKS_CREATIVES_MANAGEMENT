@@ -1,6 +1,6 @@
 package com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.event
 
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 
 sealed class EmployeeDetailsScreenEvent {
     data class OnSearchTextChanged(val searchText: String) : EmployeeDetailsScreenEvent()

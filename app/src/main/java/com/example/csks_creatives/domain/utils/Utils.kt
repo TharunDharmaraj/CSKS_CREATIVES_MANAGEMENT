@@ -12,6 +12,7 @@ import com.example.csks_creatives.data.utils.Constants.REVISION_TWO
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import com.google.firebase.Timestamp
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -136,5 +137,13 @@ object Utils {
 
     fun getMonthName(month: Int): String {
         return DateFormatSymbols().months[month - 1]
+    }
+
+    fun Date.toTimestamp(): Timestamp {
+        return Timestamp(this)
+    }
+
+    fun Timestamp.toDate(): Date {
+        return this.toDate()
     }
 }

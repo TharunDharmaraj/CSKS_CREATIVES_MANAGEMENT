@@ -7,6 +7,7 @@ object Constants {
     const val CLIENT_COLLECTION = "Client"
     const val COMMENT_COLLECTION = "Comment"
     const val TASKS_COLLECTION = "Tasks"
+    const val LEAVE_REQUESTS_COLLECTION = "LeaveRequests"
 
     // Employee Collection Fields
     const val EMPLOYEE_EMPLOYEE_ID = "employeeId"
@@ -20,11 +21,11 @@ object Constants {
     const val TASKS_IN_PROGRESS_OR_COMPLETED_SUB_COLLECTION_TASK_ID = "taskId"
     const val EMPLOYEE_EMPLOYEE_NUMBER_OF_TASKS_COMPLETED = "numberOfTasksCompleted"
     const val LEAVES_SUB_COLLECTION = "Leaves"
-    const val LEAVE_REQUEST_ID = "id"
-    const val LEAVE_REQUEST_DATE = "date"
-    const val LEAVE_REQUEST_REASON = "reason"
+    const val LEAVE_REQUEST_ID = "leaveRequestId"
+    const val LEAVE_REQUEST_DATE = "leaveDate"
+    const val LEAVE_REQUEST_REASON = "leaveReason"
     const val LEAVE_REQUEST_POSTED_BY = "postedBy"
-    const val LEAVE_REQUEST_APPROVAL_STATUS = "approvalStatus"
+    const val LEAVE_REQUEST_APPROVAL_STATUS = "approvedStatus"
 
     // Admin Collection
     const val ADMIN_USERNAME = "UserName"

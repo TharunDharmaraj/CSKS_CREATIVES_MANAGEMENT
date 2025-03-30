@@ -29,7 +29,7 @@ import com.example.csks_creatives.R
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.components.Constants.LOGIN_SCREEN_FIELDS_SIZE
 import com.example.csks_creatives.presentation.components.Constants.LOGIN_SCREEN_PADDING
-import com.example.csks_creatives.presentation.components.LoadingProgress
+import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.components.charCoal
 import com.example.csks_creatives.presentation.loginScreen.components.BottomLoginButton
 import com.example.csks_creatives.presentation.loginScreen.components.PasswordInputTextField

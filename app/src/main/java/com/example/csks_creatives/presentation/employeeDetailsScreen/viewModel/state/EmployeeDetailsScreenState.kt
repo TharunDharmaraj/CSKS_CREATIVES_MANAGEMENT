@@ -2,7 +2,7 @@ package com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.
 
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 
 data class EmployeeDetailsScreenState(
     val searchText: String = EMPTY_STRING,

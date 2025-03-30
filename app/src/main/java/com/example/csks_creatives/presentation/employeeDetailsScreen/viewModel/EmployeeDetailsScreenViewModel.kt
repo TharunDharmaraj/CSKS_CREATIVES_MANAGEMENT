@@ -9,7 +9,7 @@ import com.example.csks_creatives.domain.useCase.factories.AdminUseCaseFactory
 import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.event.EmployeeDetailsScreenEvent
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.state.EmployeeDetailsScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel

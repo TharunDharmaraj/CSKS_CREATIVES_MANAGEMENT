@@ -1,6 +1,6 @@
 package com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event
 
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 
 sealed class EmployeeHomeScreenEvent {
     data class Order(val order: DateOrder) : EmployeeHomeScreenEvent()

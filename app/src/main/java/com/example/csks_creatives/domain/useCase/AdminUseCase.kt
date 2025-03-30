@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class AdminUseCase @Inject constructor(
+class   AdminUseCase @Inject constructor(
     private val adminRepository: AdminRepository,
     private val employeesLocalRepository: EmployeesLocalRepository
 ) :

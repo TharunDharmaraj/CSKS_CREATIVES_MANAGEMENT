@@ -9,7 +9,7 @@ import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.state.ClientTasksListState
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

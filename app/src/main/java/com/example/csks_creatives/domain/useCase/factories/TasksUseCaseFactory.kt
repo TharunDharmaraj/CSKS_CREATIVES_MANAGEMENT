@@ -4,7 +4,7 @@ import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.TasksUseCase
-import com.example.csks_creatives.presentation.components.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import kotlinx.coroutines.flow.Flow
 
 interface TasksUseCaseFactory {

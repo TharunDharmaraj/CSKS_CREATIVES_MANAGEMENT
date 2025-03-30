@@ -1,4 +1,4 @@
-package com.example.csks_creatives.presentation.components
+package com.example.csks_creatives.presentation.components.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
