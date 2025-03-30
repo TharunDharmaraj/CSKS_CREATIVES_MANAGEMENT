@@ -77,6 +77,13 @@ class EmployeeHomeScreenViewModel @Inject constructor(
                 )
             }
 
+            EmployeeHomeScreenEvent.ToggleLeavesSection -> {
+                _employeeHomeScreenState.update {
+                    it.copy(
+                        isLeavesSectionVisible = _employeeHomeScreenState.value.isLeavesSectionVisible.not()
+                    )
+                }
+            }
         }
     }
 

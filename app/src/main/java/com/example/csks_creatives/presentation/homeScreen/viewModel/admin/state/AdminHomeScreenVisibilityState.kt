@@ -8,4 +8,5 @@ data class AdminHomeScreenVisibilityState(
     val isCompletedTaskSectionVisible: Boolean = false,
     val isAddEmployeeDialogVisible: Boolean = false,
     val isAddClientDialogVisible: Boolean = false,
+    val isLeaveRequestsSectionVisible: Boolean = false
 )

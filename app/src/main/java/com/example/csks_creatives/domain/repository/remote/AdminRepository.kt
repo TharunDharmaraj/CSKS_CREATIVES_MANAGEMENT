@@ -1,6 +1,7 @@
 package com.example.csks_creatives.domain.repository.remote
 
 import com.example.csks_creatives.domain.model.employee.Employee
+import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import kotlinx.coroutines.flow.Flow
 
 interface AdminRepository {
@@ -21,4 +22,8 @@ interface AdminRepository {
     suspend fun addCompletedTaskIntoEmployeeDetails(employeeId: String, taskId : String)
 
     suspend fun removeCompletedTaskFromEmployeeDetails(employeeId: String, taskId : String)
+
+    suspend fun getAllActiveLeaveRequests() : Flow<List<LeaveRequest>>
+
+    suspend fun markLeaveRequestAsApproved(leaveRequestId: String, employeeId: String)
 }

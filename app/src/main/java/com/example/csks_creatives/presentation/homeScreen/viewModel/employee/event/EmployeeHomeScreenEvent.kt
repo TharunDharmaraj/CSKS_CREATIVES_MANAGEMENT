@@ -7,4 +7,5 @@ sealed class EmployeeHomeScreenEvent {
     object ToggleOrderSection : EmployeeHomeScreenEvent()
     object ToggleActiveTasksSection : EmployeeHomeScreenEvent()
     object ToggleCompletedTasksSection : EmployeeHomeScreenEvent()
+    object ToggleLeavesSection : EmployeeHomeScreenEvent()
 }

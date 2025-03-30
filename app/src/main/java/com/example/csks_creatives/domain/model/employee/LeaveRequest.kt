@@ -8,7 +8,6 @@ import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_REASON
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import java.util.Date
 
 data class LeaveRequest(
     @PropertyName(LEAVE_REQUEST_ID) val leaveRequestId: String = EMPTY_STRING, // Unique id, Time the request is raised

@@ -9,10 +9,14 @@ import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_NUMBER_
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_PASSWORD
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_TASKS_COMPLETED
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_TASKS_IN_PROGRESS
+import com.example.csks_creatives.data.utils.Constants.LEAVES_SUB_COLLECTION
+import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUESTS_COLLECTION
+import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_APPROVAL_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASKS_COMPLETED_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASKS_IN_PROGRESS_OR_COMPLETED_SUB_COLLECTION_TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASKS_IN_PROGRESS_SUB_COLLECTION
 import com.example.csks_creatives.domain.model.employee.Employee
+import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.firestore.DocumentReference
@@ -248,6 +252,58 @@ class AdminRepositoryImplementation @Inject constructor(
             )
         }
     }
+
+    override suspend fun getAllActiveLeaveRequests() = callbackFlow {
+        val listenerRegistration =
+            getActiveLeaveRequestsReference().addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e(logTag, "Error fetching active leaves: ", error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val leaveList = snapshot.documents.mapNotNull { leave ->
+                        leave.toObject(LeaveRequest::class.java)
+                    }
+
+                    trySend(leaveList).isSuccess
+                }
+            }
+        awaitClose {
+            listenerRegistration.remove()
+            Log.d(logTag, "Firestore listener removed for active leave requests listener")
+        }
+    }
+
+    override suspend fun markLeaveRequestAsApproved(leaveRequestId: String, employeeId: String) {
+        try {
+            getLeaveCollectionReference(employeeId).document(leaveRequestId).set(
+                hashMapOf(
+                    LEAVE_REQUEST_APPROVAL_STATUS to true
+                ), SetOptions.merge()
+            )
+            Log.d(
+                logTag + "markLeaveRequest",
+                "Leave $leaveRequestId employeeId: $employeeId request marked as approved"
+            )
+            getActiveLeaveRequestsReference().document(leaveRequestId).delete().await()
+            Log.d(
+                logTag + "Delete",
+                "Leave $leaveRequestId Deleted Successfully"
+            )
+        } catch (exception: Exception) {
+            Log.e(
+                logTag + "markLeaveRequest",
+                "Error $exception in marking approved leaveId: $leaveRequestId employeeId: $employeeId"
+            )
+        }
+    }
+
+    private fun getActiveLeaveRequestsReference() = firestore.collection(LEAVE_REQUESTS_COLLECTION)
+
+    private fun getLeaveCollectionReference(employeeId: String) =
+        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
+            .collection(LEAVES_SUB_COLLECTION)
 
     private fun getEmployeePathForId(employeeId: String) =
         firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)

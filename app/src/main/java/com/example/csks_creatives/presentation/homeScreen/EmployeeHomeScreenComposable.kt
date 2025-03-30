@@ -37,10 +37,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
+import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.helper.FutureSelectableDates
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
@@ -204,22 +206,42 @@ fun EmployeeHomeScreenComposable(
                 }
             }
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                TextButton(onClick = { viewModel.onAddLeaveDialogEvent(LeaveRequestDialogEvent.OpenDialog) }) {
-                    Text("Request Leave")
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { viewModel.onEvent(EmployeeHomeScreenEvent.ToggleLeavesSection) }
+                ) {
+                    Text(if (state.isLeavesSectionVisible) "Hide Leaves" else "Show Leaves")
                 }
             }
-            item {
-                Text("Approved Leaves", style = MaterialTheme.typography.titleMedium)
-                state.approvedLeaves.forEach { leave ->
-                    LeaveRequestCard(leave)
+            if (state.isLeavesSectionVisible) {
+                if (state.rejectedLeaves.isNotEmpty()) {
+                    item {
+                        Text(
+                            "Leaves Pending Approval",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        state.rejectedLeaves.forEach { leave ->
+                            LeaveRequestCard(leave)
+                        }
+                    }
                 }
-            }
 
-            item {
-                Text("Rejected Leaves", style = MaterialTheme.typography.titleMedium)
-                state.rejectedLeaves.forEach { leave ->
-                    LeaveRequestCard(leave)
+                if (state.approvedLeaves.isNotEmpty()) {
+                    item {
+                        Text("Approved Leaves", style = MaterialTheme.typography.titleMedium)
+                        state.approvedLeaves.forEach { leave ->
+                            LeaveRequestCard(leave)
+                        }
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { viewModel.onAddLeaveDialogEvent(LeaveRequestDialogEvent.OpenDialog) }) {
+                        Text("Request Leave")
+                    }
                 }
             }
         }
@@ -353,7 +375,11 @@ fun LeaveRequestDialog(
                 Button(onClick = { onEvent(LeaveRequestDialogEvent.CloseDialog) }) {
                     Text("Cancel")
                 }
-            }
+            },
+            properties = DialogProperties(
+                dismissOnClickOutside = false,
+                dismissOnBackPress = false
+            )
         )
     }
 }
@@ -364,14 +390,14 @@ fun LeaveRequestCard(leave: LeaveRequest) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = if (leave.approvedStatus) Color.Green else Color.Red)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Date: ${leave.leaveDate.toDate()}")
+            Text("Date: ${formatTimeStampToGetJustDate(leave.leaveDate.toDate().time.toString())}")
             Text("Reason: ${leave.leaveReason}")
             Text(
-                "Status: ${if (leave.approvedStatus) "Approved" else "Rejected"}",
-                color = if (leave.approvedStatus) Color.Green else Color.Red
+                "Status: ${if (leave.approvedStatus) "Approved" else "Not Approved"}",
             )
         }
     }

@@ -12,6 +12,7 @@ data class EmployeeHomeScreenState(
     val tasksOrder: DateOrder = DateOrder.Descending,
     val isOrderByToggleVisible: Boolean = true,
     val isAddLeaveDialogVisible: Boolean = false,
+    val isLeavesSectionVisible: Boolean = false,
     val isLoading: Boolean = false,
     val approvedLeaves: List<LeaveRequest> = emptyList(),
     val rejectedLeaves: List<LeaveRequest> = emptyList(),

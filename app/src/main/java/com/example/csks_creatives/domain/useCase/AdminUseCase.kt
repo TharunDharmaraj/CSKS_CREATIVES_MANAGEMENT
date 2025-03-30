@@ -3,6 +3,7 @@ package com.example.csks_creatives.domain.useCase
 import com.example.csks_creatives.data.utils.Utils.toEmployeeItem
 import com.example.csks_creatives.data.utils.Utils.toEmployeeList
 import com.example.csks_creatives.domain.model.employee.Employee
+import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.database.EmployeesLocalRepository
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
@@ -15,7 +16,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class   AdminUseCase @Inject constructor(
+class AdminUseCase @Inject constructor(
     private val adminRepository: AdminRepository,
     private val employeesLocalRepository: EmployeesLocalRepository
 ) :
@@ -108,6 +109,29 @@ class   AdminUseCase @Inject constructor(
             }
         } catch (e: Exception) {
             return ResultState.Error("Failed to fetch employees: ${e.message}")
+        }
+    }
+
+    override suspend fun getAllActiveLeaveRequests(): Flow<ResultState<List<LeaveRequest>>> =
+        flow {
+            try {
+                adminRepository.getAllActiveLeaveRequests().collect { leaveRequestList ->
+                    emit(ResultState.Success(leaveRequestList))
+                }
+            } catch (exception: Exception) {
+                emit(ResultState.Error("Error $exception fetching Active Leave Requests"))
+            }
+        }.flowOn(Dispatchers.IO)
+
+    override suspend fun markLeaveRequestAsApproved(leaveRequest: LeaveRequest): ResultState<String> {
+        try {
+            adminRepository.markLeaveRequestAsApproved(
+                employeeId = leaveRequest.postedBy,
+                leaveRequestId = leaveRequest.leaveRequestId
+            )
+            return ResultState.Success("Leave Approved")
+        } catch (exception: Exception) {
+            return ResultState.Error("Error $exception in Approval")
         }
     }
 }

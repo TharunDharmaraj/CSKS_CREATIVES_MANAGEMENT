@@ -104,6 +104,11 @@ object Utils {
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
+    fun formatTimeStampToGetJustDate(timeStampInMilliSeconds: String): String {
+        val timeFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
+    }
+
     fun getFormattedDateTimeFormat(timeStampInMilliSeconds: String): String {
         val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
         return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
@@ -141,9 +146,5 @@ object Utils {
 
     fun Date.toTimestamp(): Timestamp {
         return Timestamp(this)
-    }
-
-    fun Timestamp.toDate(): Date {
-        return this.toDate()
     }
 }

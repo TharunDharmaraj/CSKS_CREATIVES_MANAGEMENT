@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.employee.Employee
+import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.AdminUseCaseFactory
 import com.example.csks_creatives.domain.useCase.factories.ClientsUseCaseFactory
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +41,7 @@ class AdminHomeScreenViewModel @Inject constructor(
         clientsUseCaseFactory.create()
         tasksUseCaseFactory.create()
         fetchActiveTasks()
+        fetchActiveLeaveRequests()
     }
 
     private val _adminHomeScreenState = MutableStateFlow(AdminHomeScreenState())
@@ -78,10 +81,6 @@ class AdminHomeScreenViewModel @Inject constructor(
             AdminHomeScreenEvent.CreateClientButtonClick -> {
                 _adminHomeScreenVisibilityState.value =
                     _adminHomeScreenVisibilityState.value.copy(isAddClientDialogVisible = true)
-            }
-
-            AdminHomeScreenEvent.CreateTaskButtonClick -> {
-                // Redirect to Tasks Detail Screen
             }
 
             AdminHomeScreenEvent.ToggleClientSection -> {
@@ -144,9 +143,13 @@ class AdminHomeScreenViewModel @Inject constructor(
                 }
             }
 
-            AdminHomeScreenEvent.ClientItemClick -> TODO()
-            AdminHomeScreenEvent.EmployeeItemClick -> TODO()
-            AdminHomeScreenEvent.TaskItemClick -> TODO()
+            AdminHomeScreenEvent.ToggleActiveLeavesSection -> {
+                _adminHomeScreenVisibilityState.update {
+                    it.copy(
+                        isLeaveRequestsSectionVisible = !_adminHomeScreenVisibilityState.value.isLeaveRequestsSectionVisible
+                    )
+                }
+            }
         }
     }
 
@@ -264,6 +267,21 @@ class AdminHomeScreenViewModel @Inject constructor(
         }
     }
 
+    private fun fetchActiveLeaveRequests() {
+        viewModelScope.launch {
+            adminUseCaseFactory.getAllActiveLeaveRequests().collect { result ->
+                if (result is ResultState.Success) {
+                    _adminHomeScreenState.update {
+                        it.copy(
+                            activeLeaveRequests = result.data
+                        )
+                    }
+                }
+
+            }
+        }
+    }
+
     private fun fetchCompletedTasks() {
         viewModelScope.launch {
             tasksUseCaseFactory.getAllCompletedTasks().collect { result ->
@@ -297,6 +315,17 @@ class AdminHomeScreenViewModel @Inject constructor(
     fun emitLogoutEvent(isUserLoggedOut: Boolean) {
         viewModelScope.launch {
             LogoutEvent.emitLogoutEvent(isUserLoggedOut)
+        }
+    }
+
+    fun onLeaveRequestApproved(leaveRequest: LeaveRequest) {
+        viewModelScope.launch {
+            val result = adminUseCaseFactory.markLeaveRequestAsApproved(leaveRequest)
+            if (result is ResultState.Success) {
+                _uiEvent.emit(ToastUiEvent.ShowToast("Leave Approved Successfully"))
+            } else if (result is ResultState.Error) {
+                _uiEvent.emit(ToastUiEvent.ShowToast("Error Approving Leave: ${result.message}"))
+            }
         }
     }
 }

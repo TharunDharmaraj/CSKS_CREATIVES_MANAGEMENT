@@ -74,7 +74,6 @@ class EmployeeRepositoryImplementation @Inject constructor(
 
                 if (snapshot != null) {
                     val leaveList = snapshot.documents.mapNotNull { leave ->
-                        Log.d(logTag, "Raw Leave Data: ${leave.data}")
                         leave.toObject(LeaveRequest::class.java)
                     }
 
