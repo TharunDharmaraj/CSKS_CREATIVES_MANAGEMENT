@@ -10,9 +10,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 // TODO When app grows bigger, to use cloud functions to trigger FCM to employee device when a task is assigned to them. It is on hold now, since it requires billing
 @AndroidEntryPoint

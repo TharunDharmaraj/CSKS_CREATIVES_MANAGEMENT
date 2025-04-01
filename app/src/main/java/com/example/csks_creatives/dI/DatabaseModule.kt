@@ -2,12 +2,7 @@ package com.example.csks_creatives.dI
 
 import android.content.Context
 import androidx.room.Room
-import com.example.csks_creatives.data.database.ClientsDao
-import com.example.csks_creatives.data.database.ClientsDataBase
-import com.example.csks_creatives.data.database.CurrentUserDao
-import com.example.csks_creatives.data.database.CurrentUserDatabase
-import com.example.csks_creatives.data.database.EmployeesDao
-import com.example.csks_creatives.data.database.EmployeesDatabase
+import com.example.csks_creatives.data.database.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,8 +1,6 @@
 package com.example.csks_creatives.domain.model.task
 
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.*
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 
 data class ClientTaskOverview(

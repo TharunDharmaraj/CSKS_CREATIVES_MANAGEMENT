@@ -1,8 +1,6 @@
 package com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event
 
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.*
 
 sealed class TaskDetailEvent {
     object CreateTask : TaskDetailEvent() // Only Admin should be able to Create a Task

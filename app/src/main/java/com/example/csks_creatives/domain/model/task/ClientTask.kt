@@ -13,9 +13,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_TASK_NAME
 import com.example.csks_creatives.data.utils.Constants.TASK_TYPE
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.*
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.PropertyName

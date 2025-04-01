@@ -1,32 +1,15 @@
 package com.example.csks_creatives.presentation.homeScreen
 
 import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,9 +22,7 @@ import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDat
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.AdminHomeScreenViewModel
-import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddClientDialogEvent
-import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddEmployeeDialogEvent
-import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AdminHomeScreenEvent
+import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.*
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
 import kotlinx.coroutines.launch
@@ -117,14 +98,12 @@ fun AdminHomeScreen(
                     if (loadingState.value.isEmployeesLoading) {
                         LoadingProgress()
                     }
-                    Text(
-                        text = state.value.employeeList[index].employeeName,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clickable {
-                                val employeeId = state.value.employeeList[index].employeeId
-                                navController.navigate("employee_detail/$employeeId")
-                            }
+                    CardItem(
+                        title = state.value.employeeList[index].employeeName,
+                        onClick = {
+                            val employeeId = state.value.employeeList[index].employeeId
+                            navController.navigate("employee_detail/$employeeId")
+                        }
                     )
                 }
             }
@@ -139,14 +118,12 @@ fun AdminHomeScreen(
                     if (loadingState.value.isClientsLoading) {
                         LoadingProgress()
                     }
-                    Text(
-                        text = state.value.clientList[index].clientName,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clickable {
-                                val clientId = state.value.clientList[index].clientId
-                                navController.navigate("client_detail/$clientId")
-                            }
+                    CardItem(
+                        title = state.value.clientList[index].clientName,
+                        onClick = {
+                            val clientId = state.value.clientList[index].clientId
+                            navController.navigate("client_detail/$clientId")
+                        }
                     )
                 }
             }
@@ -164,14 +141,13 @@ fun AdminHomeScreen(
                     if (loadingState.value.isActiveTasksLoading) {
                         LoadingProgress()
                     }
-                    Text(
-                        text = state.value.activeTaskList[index].taskName,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clickable {
-                                val taskId = state.value.activeTaskList[index].taskId
-                                navController.navigate("task_detail/$taskId/$ADMIN_NAME")
-                            }
+                    CardItem(
+                        title = state.value.activeTaskList[index].taskName,
+                        subtitle = state.value.activeTaskList[index].taskType.name,
+                        onClick = {
+                            val taskId = state.value.activeTaskList[index].taskId
+                            navController.navigate("task_detail/$taskId/$ADMIN_NAME")
+                        }
                     )
                 }
             }
@@ -189,14 +165,13 @@ fun AdminHomeScreen(
                     if (loadingState.value.isBacklogTasksLoading) {
                         LoadingProgress()
                     }
-                    Text(
-                        text = state.value.backlogTaskList[index].taskName,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clickable {
-                                val taskId = state.value.backlogTaskList[index].taskId
-                                navController.navigate("task_detail/$taskId/$ADMIN_NAME")
-                            }
+                    CardItem(
+                        title = state.value.backlogTaskList[index].taskName,
+                        subtitle = state.value.backlogTaskList[index].taskType.name,
+                        onClick = {
+                            val taskId = state.value.backlogTaskList[index].taskId
+                            navController.navigate("task_detail/$taskId/$ADMIN_NAME")
+                        }
                     )
                 }
             }
@@ -214,14 +189,13 @@ fun AdminHomeScreen(
                     if (loadingState.value.isCompletedTasksLoading) {
                         LoadingProgress()
                     }
-                    Text(
-                        text = state.value.completedTasksList[index].taskName,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clickable {
-                                val taskId = state.value.completedTasksList[index].taskId
-                                navController.navigate("task_detail/$taskId/$ADMIN_NAME")
-                            }
+                    CardItem(
+                        title = state.value.completedTasksList[index].taskName,
+                        subtitle = state.value.completedTasksList[index].taskType.name,
+                        onClick = {
+                            val taskId = state.value.completedTasksList[index].taskId
+                            navController.navigate("task_detail/$taskId/$ADMIN_NAME")
+                        }
                     )
                 }
             }
@@ -408,12 +382,45 @@ fun LeaveRequestTaskItem(
 
             Button(
                 onClick = onApproval,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
                 modifier = Modifier
                     .padding(start = 16.dp)
                     .height(40.dp)
             ) {
                 Text("Approve")
+            }
+        }
+    }
+}
+
+@Composable
+fun CardItem(
+    title: String,
+    subtitle: String? = null,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick() }
+            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            subtitle?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
