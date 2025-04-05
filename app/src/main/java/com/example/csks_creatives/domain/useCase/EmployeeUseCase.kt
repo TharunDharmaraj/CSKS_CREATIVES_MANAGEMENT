@@ -1,5 +1,6 @@
 package com.example.csks_creatives.domain.useCase
 
+import android.util.Log
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.employee.LeaveRequestsGrouped
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class EmployeeUseCase @Inject constructor(
     private val employeeRepository: EmployeeRepository
 ) : EmployeeUseCaseFactory {
+    private val logTag = "EmployeeUseCase"
     override fun create(): EmployeeUseCase {
         return EmployeeUseCase(employeeRepository)
     }
@@ -87,4 +89,19 @@ class EmployeeUseCase @Inject constructor(
                 )
             }
         }
+
+    override suspend fun widthDrawLeaveRequest(leaveRequest: LeaveRequest) {
+        try {
+            if (leaveRequest.postedBy.isEmpty()) return
+            employeeRepository.widthDrawLeaveRequest(
+                employeeId = leaveRequest.postedBy,
+                leaveRequest = leaveRequest
+            )
+        } catch (exception: Exception) {
+            Log.e(
+                logTag,
+                "Error in widthDrawLeaveRequest for employeeId:$leaveRequest.postedBy, leaveRequest:$leaveRequest $exception"
+            )
+        }
+    }
 }

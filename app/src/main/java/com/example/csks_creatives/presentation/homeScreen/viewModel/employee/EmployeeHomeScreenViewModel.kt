@@ -2,6 +2,7 @@ package com.example.csks_creatives.presentation.homeScreen.viewModel.employee
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactory
@@ -41,7 +42,7 @@ class EmployeeHomeScreenViewModel @Inject constructor(
 
     private var employeeId = EMPTY_STRING
     private var hasInitialized = false
-    private var hasCompletedTasksFethed = false
+    private var hasCompletedTasksFetched = false
 
     fun onEvent(employeeHomeScreenEvent: EmployeeHomeScreenEvent) {
         when (employeeHomeScreenEvent) {
@@ -157,8 +158,8 @@ class EmployeeHomeScreenViewModel @Inject constructor(
     }
 
     fun getEmployeeCompletedTasks(employeeId: String) {
-        if (hasCompletedTasksFethed) return
-        hasCompletedTasksFethed = true
+        if (hasCompletedTasksFetched) return
+        hasCompletedTasksFetched = true
         tasksUseCaseFactory.getCompletedTasksForEmployee(
             employeeId,
             _employeeHomeScreenState.value.tasksOrder
@@ -244,6 +245,12 @@ class EmployeeHomeScreenViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun withDrawLeaveRequest(leaveRequest: LeaveRequest){
+        viewModelScope.launch {
+            employeeUseCaseFactory.widthDrawLeaveRequest(leaveRequest)
         }
     }
 

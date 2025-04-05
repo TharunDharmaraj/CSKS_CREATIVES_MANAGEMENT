@@ -15,4 +15,6 @@ interface EmployeeUseCaseFactory {
     suspend fun getAllLeavesTaken(employeeId: String): Flow<ResultState<List<LeaveRequest>>>
 
     suspend fun getAllLeaveRequestsGrouped(employeeId: String): Flow<ResultState<LeaveRequestsGrouped>>
+
+    suspend fun widthDrawLeaveRequest(leaveRequest: LeaveRequest)
 }

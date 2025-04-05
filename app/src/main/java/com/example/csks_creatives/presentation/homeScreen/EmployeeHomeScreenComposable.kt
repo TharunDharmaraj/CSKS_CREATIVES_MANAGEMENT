@@ -271,7 +271,11 @@ fun EmployeeHomeScreenComposable(
                             )
                         }
                         items(state.rejectedLeaves.size) { index ->
-                            LeaveRequestCard(state.rejectedLeaves[index])
+                            LeaveRequestCard(
+                                state.rejectedLeaves[index],
+                                onWidthDrawRequest = {
+                                    viewModel.withDrawLeaveRequest(state.rejectedLeaves[index])
+                                })
                         }
                     }
 
@@ -429,7 +433,7 @@ fun LeaveRequestDialog(
 }
 
 @Composable
-fun LeaveRequestCard(leave: LeaveRequest) {
+fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -440,13 +444,34 @@ fun LeaveRequestCard(leave: LeaveRequest) {
             color = if (leave.approvedStatus) Color.Green else Color.Red
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Date: ${formatTimeStampToGetJustDate(leave.leaveDate.toDate().time.toString())}")
-            Text("Reason: ${leave.leaveReason}")
-            Text(
-                "Status: ${if (leave.approvedStatus) "Approved" else "Not Approved"}",
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Date: ${formatTimeStampToGetJustDate(leave.leaveDate.toDate().time.toString())}")
+                Text("Reason: ${leave.leaveReason}")
+                Text(
+                    "Status: ${if (leave.approvedStatus) "Approved" else "Not Approved"}",
+                )
+            }
+            if (leave.approvedStatus == false) {
+                Button(
+                    onClick = onWidthDrawRequest,
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .height(40.dp)
+                ) {
+                    Text("Withdraw")
+                }
+            }
         }
+
     }
 }
 

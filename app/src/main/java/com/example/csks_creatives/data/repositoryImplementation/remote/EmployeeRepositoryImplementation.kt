@@ -115,6 +115,27 @@ class EmployeeRepositoryImplementation @Inject constructor(
             }
         }
 
+    override suspend fun widthDrawLeaveRequest(employeeId: String, leaveRequest: LeaveRequest) {
+        try {
+            getLeaveCollectionReference(employeeId).document(leaveRequest.leaveRequestId).delete()
+                .await()
+            Log.d(
+                logTag + "Withdraw",
+                "Successfully deleted employeeId:$employeeId leaveRequest $leaveRequest"
+            )
+            getLeaveRequestsCollection().document(leaveRequest.leaveRequestId).delete().await()
+            Log.d(
+                logTag + "Withdraw",
+                "Successfully deleted leaveRequest $leaveRequest from active eave requests collection"
+            )
+        } catch (exception: Exception) {
+            Log.d(
+                logTag + "Withdraw",
+                "Error $exception in withdrawing employeeId:$employeeId leaveRequest $leaveRequest"
+            )
+        }
+    }
+
     private fun getLeaveCollectionReference(employeeId: String) =
         firebaseFirestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
             .collection(LEAVES_SUB_COLLECTION)
