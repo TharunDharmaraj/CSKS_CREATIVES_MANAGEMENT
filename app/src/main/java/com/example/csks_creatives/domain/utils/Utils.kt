@@ -27,18 +27,6 @@ object Utils {
     fun List<ClientTask>.getCompletedTasks(): List<ClientTask> =
         this.filter { it.currentStatus == TaskStatusType.COMPLETED }
 
-    fun getAllStatusOptionsForAdmin(): List<String> {
-        return listOf(
-            BACKLOG,
-            IN_PROGRESS,
-            IN_REVIEW,
-            REVISION_ONE,
-            REVISION_TWO,
-            REVISION_THREE,
-            COMPLETED
-        )
-    }
-
     fun getAvailableStatusOptions(currentStatus: TaskStatusType): List<String> {
         return when (currentStatus) {
             TaskStatusType.BACKLOG -> listOf(
@@ -100,16 +88,19 @@ object Utils {
     fun getCurrentTimeAsString(): String = System.currentTimeMillis().toString()
 
     fun formatTimeStamp(timeStampInMilliSeconds: String): String {
+        if(timeStampInMilliSeconds.toString().isEmpty()) return "TimeStamp Empty"
         val timeFormat = SimpleDateFormat("HH:mm:ss MMM dd yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun formatTimeStampToGetJustDate(timeStampInMilliSeconds: String): String {
+        if(timeStampInMilliSeconds.toString().isEmpty()) return "Date Empty"
         val timeFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun getFormattedDateTimeFormat(timeStampInMilliSeconds: String): String {
+        if(timeStampInMilliSeconds.toString().isEmpty()) return "Task Creation Time Empty"
         val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
         return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }

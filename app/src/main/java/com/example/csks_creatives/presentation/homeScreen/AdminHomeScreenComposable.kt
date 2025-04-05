@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,24 +19,39 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
+import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
+import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.AdminHomeScreenViewModel
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.*
+import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.navigation.AdminBottomNavigation
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
+import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun AdminHomeScreen(
     viewModel: AdminHomeScreenViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
+    val adminToolbarTitle = viewModel.homeScreenTitle.collectAsState()
+    val pagerState = rememberPagerState()
+    val coroutineScope = rememberCoroutineScope()
+    val items = listOf(
+        AdminBottomNavigation.Employees,
+        AdminBottomNavigation.Clients,
+        AdminBottomNavigation.Tasks,
+        AdminBottomNavigation.LeaveRequests
+    )
+
     Scaffold(
         topBar = {
             AppToolbar(
-                title = "Welcome, Admin",
+                title = adminToolbarTitle.value,
                 canShowMenu = true,
                 menuItems = listOf(
                     ToolbarOverFlowMenuItem("add_employee", "Add Employee"),
@@ -65,12 +81,52 @@ fun AdminHomeScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            NavigationBar(containerColor = darkSlateBlue) {
+                val currentPage = pagerState.currentPage
+
+                items.forEach { item ->
+                    val showBadge =
+                        item is AdminBottomNavigation.LeaveRequests && viewModel.hasUnapprovedLeaves.value
+
+                    NavigationBarItem(
+                        selected = items[currentPage] == item,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(items.indexOf(item))
+                            }
+                        },
+                        icon = {
+                            if (showBadge) {
+                                BadgedBox(
+                                    badge = {
+                                        Badge(containerColor = Color.Red, content = {})
+                                    }
+                                ) {
+                                    Icon(item.icon, contentDescription = item.title)
+                                }
+                            } else {
+                                Icon(item.icon, contentDescription = item.title)
+                            }
+                        }
+                    )
+                }
+
+            }
         }
     ) { padding ->
         val context = LocalContext.current
-        val state = viewModel.adminHomeScreenState.collectAsState()
         val visibilityState = viewModel.adminHomeScreenVisibilityState.collectAsState()
-        val loadingState = viewModel.adminHomeScreenLoadingState.collectAsState()
+
+        LaunchedEffect(pagerState.currentPage) {
+            when (items[pagerState.currentPage]) {
+                AdminBottomNavigation.Employees -> viewModel.setHomeScreenTitle("Employees")
+                AdminBottomNavigation.Clients -> viewModel.setHomeScreenTitle("Clients")
+                AdminBottomNavigation.Tasks -> viewModel.setHomeScreenTitle("My Tasks")
+                AdminBottomNavigation.LeaveRequests -> viewModel.setHomeScreenTitle("Leave Requests")
+            }
+        }
 
         LaunchedEffect(Unit) {
             viewModel.uiEvent.collect { event ->
@@ -81,145 +137,32 @@ fun AdminHomeScreen(
                 }
             }
         }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
-                .padding(padding),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                SectionToggleButton("Employees", visibilityState.value.isEmployeeSectionVisible) {
+
+        HorizontalPager(
+            count = items.size,
+            state = pagerState,
+            modifier = Modifier.padding(padding)
+        ) { page ->
+            when (items[page]) {
+                AdminBottomNavigation.Employees -> {
                     viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleEmployeeSection)
+                    EmployeeListScreen(navController, viewModel)
                 }
-            }
-            if (visibilityState.value.isEmployeeSectionVisible) {
-                items(state.value.employeeList.size) { index ->
-                    if (loadingState.value.isEmployeesLoading) {
-                        LoadingProgress()
-                    }
-                    CardItem(
-                        title = state.value.employeeList[index].employeeName,
-                        onClick = {
-                            val employeeId = state.value.employeeList[index].employeeId
-                            navController.navigate("employee_detail/$employeeId")
-                        }
-                    )
-                }
-            }
 
-            item {
-                SectionToggleButton("Clients", visibilityState.value.isClientSectionVisible) {
+                AdminBottomNavigation.Clients -> {
                     viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleClientSection)
+                    ClientListScreen(navController, viewModel)
                 }
-            }
-            if (visibilityState.value.isClientSectionVisible) {
-                items(state.value.clientList.size) { index ->
-                    if (loadingState.value.isClientsLoading) {
-                        LoadingProgress()
-                    }
-                    CardItem(
-                        title = state.value.clientList[index].clientName,
-                        onClick = {
-                            val clientId = state.value.clientList[index].clientId
-                            navController.navigate("client_detail/$clientId")
-                        }
-                    )
-                }
-            }
 
-            item {
-                SectionToggleButton(
-                    "Active Tasks",
-                    visibilityState.value.isActiveTaskSectionVisible
-                ) {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleActiveTaskSection)
+                AdminBottomNavigation.Tasks -> {
+                    TaskListScreen(navController, viewModel)
                 }
-            }
-            if (visibilityState.value.isActiveTaskSectionVisible) {
-                items(state.value.activeTaskList.size) { index ->
-                    if (loadingState.value.isActiveTasksLoading) {
-                        LoadingProgress()
-                    }
-                    CardItem(
-                        title = state.value.activeTaskList[index].taskName,
-                        subtitle = state.value.activeTaskList[index].taskType.name,
-                        onClick = {
-                            val taskId = state.value.activeTaskList[index].taskId
-                            navController.navigate("task_detail/$taskId/$ADMIN_NAME")
-                        }
-                    )
-                }
-            }
 
-            item {
-                SectionToggleButton(
-                    "Backlog Tasks",
-                    visibilityState.value.isBacklogTaskSectionVisible
-                ) {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleBacklogTaskSection)
-                }
-            }
-            if (visibilityState.value.isBacklogTaskSectionVisible) {
-                items(state.value.backlogTaskList.size) { index ->
-                    if (loadingState.value.isBacklogTasksLoading) {
-                        LoadingProgress()
-                    }
-                    CardItem(
-                        title = state.value.backlogTaskList[index].taskName,
-                        subtitle = state.value.backlogTaskList[index].taskType.name,
-                        onClick = {
-                            val taskId = state.value.backlogTaskList[index].taskId
-                            navController.navigate("task_detail/$taskId/$ADMIN_NAME")
-                        }
-                    )
-                }
-            }
-
-            item {
-                SectionToggleButton(
-                    "Completed Tasks",
-                    visibilityState.value.isCompletedTaskSectionVisible
-                ) {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleCompletedTaskSection)
-                }
-            }
-            if (visibilityState.value.isCompletedTaskSectionVisible) {
-                items(state.value.completedTasksList.size) { index ->
-                    if (loadingState.value.isCompletedTasksLoading) {
-                        LoadingProgress()
-                    }
-                    CardItem(
-                        title = state.value.completedTasksList[index].taskName,
-                        subtitle = state.value.completedTasksList[index].taskType.name,
-                        onClick = {
-                            val taskId = state.value.completedTasksList[index].taskId
-                            navController.navigate("task_detail/$taskId/$ADMIN_NAME")
-                        }
-                    )
-                }
-            }
-
-            item {
-                SectionToggleButton(
-                    "Leave Requests",
-                    visibilityState.value.isLeaveRequestsSectionVisible,
-                    onToggle = {
-                        viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleActiveLeavesSection)
-                    }
-                )
-            }
-            if (visibilityState.value.isLeaveRequestsSectionVisible) {
-                items(state.value.activeLeaveRequests.size) { index ->
-                    // Show card for leave requests
-                    LeaveRequestTaskItem(
-                        leaveRequest = state.value.activeLeaveRequests[index],
-                        onApproval = { viewModel.onLeaveRequestApproved(state.value.activeLeaveRequests[index]) }
-                    )
+                AdminBottomNavigation.LeaveRequests -> {
+                    LeaveRequestListScreen(viewModel)
                 }
             }
         }
-
 
         if (visibilityState.value.isAddClientDialogVisible) {
             AddClientDialog(viewModel)
@@ -334,14 +277,6 @@ fun AddClientDialog(viewModel: AdminHomeScreenViewModel) {
 }
 
 @Composable
-fun SectionToggleButton(text: String, isVisible: Boolean, onToggle: () -> Unit) {
-    Button(onClick = onToggle, modifier = Modifier.fillMaxWidth()) {
-        Text(if (isVisible) "Hide $text" else "Show $text")
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-}
-
-@Composable
 fun LeaveRequestTaskItem(
     leaveRequest: LeaveRequest,
     onApproval: () -> Unit
@@ -421,6 +356,228 @@ fun CardItem(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
+    val state by viewModel.adminHomeScreenState.collectAsState()
+
+    if (state.activeLeaveRequests.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No leave requests from Employees!",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(state.activeLeaveRequests.size) { index ->
+                LeaveRequestTaskItem(
+                    leaveRequest = state.activeLeaveRequests[index],
+                    onApproval = {
+                        viewModel.onLeaveRequestApproved(state.activeLeaveRequests[index])
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScreenViewModel) {
+    val state = viewModel.adminHomeScreenState.collectAsState()
+    val isLoading = viewModel.adminHomeScreenLoadingState.collectAsState().value.isClientsLoading
+
+    if (state.value.clientList.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No Clients found, tap on Add clients",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(state.value.clientList.size) { index ->
+                if (isLoading) LoadingProgress()
+                CardItem(
+                    title = state.value.clientList[index].clientName,
+                    onClick = { navController.navigate("client_detail/${state.value.clientList[index].clientId}") }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EmployeeListScreen(navController: NavHostController, viewModel: AdminHomeScreenViewModel) {
+    val state = viewModel.adminHomeScreenState.collectAsState()
+    val isLoading = viewModel.adminHomeScreenLoadingState.collectAsState().value.isEmployeesLoading
+
+    if (state.value.employeeList.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No Employees found, tap on Add Employees",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(state.value.employeeList.size) { index ->
+                if (isLoading) LoadingProgress()
+                CardItem(
+                    title = state.value.employeeList[index].employeeName,
+                    onClick = { navController.navigate("employee_detail/${state.value.employeeList[index].employeeId}") }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun TaskListScreen(navController: NavHostController, viewModel: AdminHomeScreenViewModel) {
+    val state by viewModel.adminHomeScreenState.collectAsState()
+    val loadingState by viewModel.adminHomeScreenLoadingState.collectAsState()
+
+    val pagerState = rememberPagerState()
+    val scope = rememberCoroutineScope()
+    val tabTitles = listOf("Active", "Backlog", "Completed")
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = darkSlateBlue,
+            contentColor = MaterialTheme.colorScheme.primary
+        ) {
+            tabTitles.forEachIndexed { index, title ->
+                Tab(
+                    text = { Text(title) },
+                    selected = pagerState.currentPage == index,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } }
+                )
+            }
+        }
+
+        HorizontalPager(
+            count = tabTitles.size,
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ) { page ->
+            when (page) {
+                0 -> {
+                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleActiveTaskSection)
+                    TaskListContent(
+                        tasks = state.activeTaskList,
+                        tasksListName = "Active Tasks",
+                        isLoading = loadingState.isActiveTasksLoading,
+                        navController = navController
+                    )
+                }
+
+                1 -> {
+                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleBacklogTaskSection)
+                    TaskListContent(
+                        tasks = state.backlogTaskList,
+                        tasksListName = "Backlog Tasks",
+                        isLoading = loadingState.isBacklogTasksLoading,
+                        navController = navController
+                    )
+                }
+
+                2 -> {
+                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleCompletedTaskSection)
+                    TaskListContent(
+                        tasks = state.completedTasksList,
+                        tasksListName = "Completed Tasks",
+                        isLoading = loadingState.isCompletedTasksLoading,
+                        navController = navController
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskListContent(
+    tasks: List<ClientTask>,
+    tasksListName: String = "tasks",
+    isLoading: Boolean,
+    navController: NavHostController
+) {
+    when {
+        isLoading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        tasks.isEmpty() -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Text("No $tasksListName found", style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+
+        else -> {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.Top
+            ) {
+                items(tasks.size) { index ->
+                    CardItem(
+                        title = tasks[index].taskName,
+                        subtitle = tasks[index].taskType.name,
+                        onClick = {
+                            navController.navigate("task_detail/${tasks[index].taskId}/$ADMIN_NAME")
+                        }
+                    )
+                }
             }
         }
     }

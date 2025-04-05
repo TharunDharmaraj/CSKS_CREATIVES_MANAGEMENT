@@ -1,5 +1,6 @@
 package com.example.csks_creatives.domain.useCase
 
+import android.util.Log
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
@@ -143,7 +144,7 @@ class TasksUseCase @Inject constructor(
                 emit(ResultState.Success(tasks))
             }
         } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All Backlog Tasks"))
+            emit(ResultState.Error("Failed to get All Backlog Tasks exception: $exception"))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -154,7 +155,7 @@ class TasksUseCase @Inject constructor(
                 emit(ResultState.Success(tasks))
             }
         } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All Completed Tasks"))
+            emit(ResultState.Error("Failed to get All Completed Tasks exception: $exception"))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -174,11 +175,16 @@ class TasksUseCase @Inject constructor(
         taskId: String,
         tasksInProgress: List<ClientTaskOverview>
     ): String {
-        tasksInProgress.forEach { task ->
-            return calculateFormattedTaskTakenTime(
-                task.taskCreationTime,
-                getCurrentTimeAsString()
-            )
+        if (tasksInProgress.isNotEmpty()) {
+            Log.d("tharun", "tasks in progress = $tasksInProgress")
+            tasksInProgress.forEach { task ->
+                if (task.taskId == taskId && task.taskCreationTime.isNotEmpty()) {
+                    return calculateFormattedTaskTakenTime(
+                        task.taskCreationTime,
+                        getCurrentTimeAsString()
+                    )
+                }
+            }
         }
         return "123456"
     }
@@ -195,7 +201,7 @@ class TasksUseCase @Inject constructor(
                 )
             }
         }
-        return "123456"
+        return "123456789"
     }
 
     override fun getTimeTakenForCompletedTask(clientTask: ClientTask): String {

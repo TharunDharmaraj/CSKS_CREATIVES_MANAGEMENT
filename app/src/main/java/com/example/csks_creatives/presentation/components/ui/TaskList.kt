@@ -34,7 +34,7 @@ fun TaskItem(task: ClientTask, onTaskClick: () -> Unit) {
                 fontSize = 14.sp,
                 color = when (task.currentStatus) {
                     TaskStatusType.BACKLOG -> Color.Red
-                    TaskStatusType.IN_PROGRESS -> Color.Blue
+                    TaskStatusType.IN_PROGRESS -> Color.Yellow
                     TaskStatusType.COMPLETED -> Color.Green
                     TaskStatusType.BLOCKED -> Color.Black
                     else -> Color.Gray

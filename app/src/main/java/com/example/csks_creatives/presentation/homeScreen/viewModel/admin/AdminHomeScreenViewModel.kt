@@ -1,5 +1,6 @@
 package com.example.csks_creatives.presentation.homeScreen.viewModel.admin
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.client.Client
@@ -29,6 +30,8 @@ class AdminHomeScreenViewModel @Inject constructor(
         fetchActiveTasks()
         fetchActiveLeaveRequests()
     }
+    private val _homeScreenTitleState = MutableStateFlow("Welcome, Admin")
+    val homeScreenTitle = _homeScreenTitleState.asStateFlow()
 
     private val _adminHomeScreenState = MutableStateFlow(AdminHomeScreenState())
     val adminHomeScreenState: StateFlow<AdminHomeScreenState> = _adminHomeScreenState.asStateFlow()
@@ -50,6 +53,8 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     private val _uiEvent = MutableSharedFlow<ToastUiEvent>()
     val uiEvent: SharedFlow<ToastUiEvent> = _uiEvent.asSharedFlow()
+
+    val hasUnapprovedLeaves = mutableStateOf(false)
 
     private var isEmployeesFetched = false
     private var isClientsFetched = false
@@ -257,6 +262,7 @@ class AdminHomeScreenViewModel @Inject constructor(
         viewModelScope.launch {
             adminUseCaseFactory.getAllActiveLeaveRequests().collect { result ->
                 if (result is ResultState.Success) {
+                    hasUnapprovedLeaves.value = result.data.any { it.approvedStatus == false }
                     _adminHomeScreenState.update {
                         it.copy(
                             activeLeaveRequests = result.data
@@ -313,5 +319,9 @@ class AdminHomeScreenViewModel @Inject constructor(
                 _uiEvent.emit(ToastUiEvent.ShowToast("Error Approving Leave: ${result.message}"))
             }
         }
+    }
+
+    fun setHomeScreenTitle(title: String) {
+        _homeScreenTitleState.value = title
     }
 }

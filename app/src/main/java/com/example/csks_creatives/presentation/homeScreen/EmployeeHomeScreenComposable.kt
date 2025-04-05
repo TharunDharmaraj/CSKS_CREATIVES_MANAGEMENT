@@ -1,6 +1,7 @@
 package com.example.csks_creatives.presentation.homeScreen
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -238,7 +239,6 @@ fun TaskItemCard(
             .padding(8.dp)
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.LightGray),
         onClick = onItemClick
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -363,7 +363,10 @@ fun LeaveRequestCard(leave: LeaveRequest) {
             .fillMaxWidth()
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = if (leave.approvedStatus) Color.Green else Color.Red)
+        border = BorderStroke(
+            width = 4.dp,
+            color = if (leave.approvedStatus) Color.Green else Color.Red
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Date: ${formatTimeStampToGetJustDate(leave.leaveDate.toDate().time.toString())}")
