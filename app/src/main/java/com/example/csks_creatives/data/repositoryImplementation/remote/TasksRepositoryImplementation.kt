@@ -2,6 +2,7 @@ package com.example.csks_creatives.data.repositoryImplementation.remote
 
 import android.util.Log
 import com.example.csks_creatives.data.utils.Constants.BACKLOG
+import com.example.csks_creatives.data.utils.Constants.COMPLETED
 import com.example.csks_creatives.data.utils.Constants.TASKS_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_ATTACHMENT
 import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
@@ -159,6 +160,20 @@ class TasksRepositoryImplementation @Inject constructor(
     override suspend fun getTasksForEmployee(employeeId: String): Flow<List<ClientTask>> =
         getTasksBasedOnCondition(TASK_EMPLOYEE_ID, employeeId)
 
+    override suspend fun getActiveTasksForEmployee(employeeId: String): Flow<List<ClientTask>> {
+        val query = firestore.collection(TASKS_COLLECTION)
+            .whereEqualTo(TASK_EMPLOYEE_ID, employeeId)
+            .whereNotEqualTo(TASK_CURRENT_STATUS, COMPLETED)
+        return getTasks(query)
+    }
+
+    override suspend fun getCompletedTasksForEmployee(employeeId: String): Flow<List<ClientTask>> {
+        val query = firestore.collection(TASKS_COLLECTION)
+            .whereEqualTo(TASK_EMPLOYEE_ID, employeeId)
+            .whereEqualTo(TASK_CURRENT_STATUS, COMPLETED)
+        return getTasks(query)
+    }
+
     override suspend fun getActiveTasks(): Flow<List<ClientTask>> {
         val query = firestore.collection(TASKS_COLLECTION)
             .whereNotIn(
@@ -232,7 +247,10 @@ class TasksRepositoryImplementation @Inject constructor(
                 )
             Log.d(logTag + "Create", "Successfully created dummy status on Task Creation")
         } catch (exception: Exception) {
-            Log.d(logTag + "Create", "Failed to create dummy status on Task Creation")
+            Log.d(
+                logTag + "Create",
+                "Failed to create dummy status on Task Creation Exception: $exception"
+            )
         }
     }
 

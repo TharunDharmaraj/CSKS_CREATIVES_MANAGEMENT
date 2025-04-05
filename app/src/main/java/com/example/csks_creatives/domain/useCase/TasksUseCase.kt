@@ -22,6 +22,7 @@ class TasksUseCase @Inject constructor(
     private val tasksRepository: TasksRepository,
     private val adminRepository: AdminRepository
 ) : TasksUseCaseFactory {
+    private val logTag = "tasksUseCase"
     override fun create(): TasksUseCase {
         return TasksUseCase(tasksRepository, adminRepository)
     }
@@ -74,6 +75,45 @@ class TasksUseCase @Inject constructor(
             emit(ResultState.Error("Failed to fetch tasks for employee ${exception.message}"))
         }
     }.flowOn(Dispatchers.IO)
+
+    override fun getActiveTasksForEmployee(
+        employeeId: String,
+        order: DateOrder
+    ): Flow<ResultState<List<ClientTask>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            tasksRepository.getActiveTasksForEmployee(employeeId)
+                .collect { tasks ->
+                    val sorted = when (order) {
+                        DateOrder.Ascending -> tasks.sortedBy { it.taskCreationTime }
+                        DateOrder.Descending -> tasks.sortedByDescending { it.taskCreationTime }
+                    }
+                    emit(ResultState.Success(sorted))
+                }
+        } catch (exception: Exception) {
+            emit(ResultState.Error("Failed to fetch active tasks: ${exception.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    override fun getCompletedTasksForEmployee(
+        employeeId: String,
+        order: DateOrder
+    ): Flow<ResultState<List<ClientTask>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            tasksRepository.getCompletedTasksForEmployee(employeeId)
+                .collect { tasks ->
+                    val sorted = when (order) {
+                        DateOrder.Ascending -> tasks.sortedBy { it.taskCreationTime }
+                        DateOrder.Descending -> tasks.sortedByDescending { it.taskCreationTime }
+                    }
+                    emit(ResultState.Success(sorted))
+                }
+        } catch (e: Exception) {
+            emit(ResultState.Error("Failed to fetch completed tasks: ${e.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+
 
     override suspend fun createTask(task: ClientTask): ResultState<String> {
         return try {
@@ -176,7 +216,6 @@ class TasksUseCase @Inject constructor(
         tasksInProgress: List<ClientTaskOverview>
     ): String {
         if (tasksInProgress.isNotEmpty()) {
-            Log.d("tharun", "tasks in progress = $tasksInProgress")
             tasksInProgress.forEach { task ->
                 if (task.taskId == taskId && task.taskCreationTime.isNotEmpty()) {
                     return calculateFormattedTaskTakenTime(
@@ -220,6 +259,7 @@ class TasksUseCase @Inject constructor(
             val diffMillis = completedEntry.startTime.toLong() - inProgressEntry.startTime.toLong()
             getFormattedTaskTakenTime(diffMillis)
         } catch (e: Exception) {
+            Log.e(logTag, "Exception in getTimeTakenForCompletedTask for clientTask $clientTask $e")
             "0"
         }
     }

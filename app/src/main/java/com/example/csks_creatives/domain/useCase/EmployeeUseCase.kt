@@ -52,6 +52,7 @@ class EmployeeUseCase @Inject constructor(
 
     override suspend fun getAllLeavesTaken(employeeId: String): Flow<ResultState<List<LeaveRequest>>> =
         flow {
+            emit(ResultState.Loading)
             try {
                 employeeRepository.getAllLeaveRequestsForEmployee(employeeId)
                     .collect { leaveRequests ->
@@ -68,6 +69,7 @@ class EmployeeUseCase @Inject constructor(
 
     override suspend fun getAllLeaveRequestsGrouped(employeeId: String): Flow<ResultState<LeaveRequestsGrouped>> =
         flow {
+            emit(ResultState.Loading)
             try {
                 employeeRepository.getAllApprovedAndUnApprovedRequestsForEmployee(employeeId)
                     .collect { groupedLeaveRequests ->

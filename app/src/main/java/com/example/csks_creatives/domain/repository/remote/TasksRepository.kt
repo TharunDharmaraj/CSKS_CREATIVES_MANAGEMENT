@@ -15,6 +15,10 @@ interface TasksRepository {
 
     suspend fun getTasksForEmployee(employeeId: String): Flow<List<ClientTask>>
 
+    suspend fun getActiveTasksForEmployee(employeeId: String): Flow<List<ClientTask>>
+
+    suspend fun getCompletedTasksForEmployee(employeeId: String): Flow<List<ClientTask>>
+
     suspend fun getActiveTasks(): Flow<List<ClientTask>>
 
     suspend fun getCompletedTasks(): Flow<List<ClientTask>>

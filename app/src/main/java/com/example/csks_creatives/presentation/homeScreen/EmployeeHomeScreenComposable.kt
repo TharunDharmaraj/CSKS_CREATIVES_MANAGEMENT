@@ -2,15 +2,22 @@ package com.example.csks_creatives.presentation.homeScreen
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -18,10 +25,10 @@ import androidx.navigation.NavHostController
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
+import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.helper.FutureSelectableDates
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
-import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.EmployeeHomeScreenViewModel
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event.EmployeeHomeScreenEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.employee.event.LeaveRequestDialogEvent
@@ -37,6 +44,7 @@ fun EmployeeHomeScreenComposable(
     navController: NavHostController,
     employeeId: String
 ) {
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     Scaffold(
         topBar = {
             AppToolbar(
@@ -58,6 +66,33 @@ fun EmployeeHomeScreenComposable(
                     }
                 }
             )
+        },
+        bottomBar = {
+            NavigationBar(containerColor = darkSlateBlue) {
+                NavigationBarItem(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    icon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Active Tasks"
+                        )
+                    },
+                    label = { Text("Active") }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    icon = { Icon(Icons.Default.Done, contentDescription = "Completed Tasks") },
+                    label = { Text("Done") }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    icon = { Icon(Icons.Default.DateRange, contentDescription = "Leaves") },
+                    label = { Text("Leaves") }
+                )
+            }
         }
     ) { padding ->
         val context = LocalContext.current
@@ -81,143 +116,180 @@ fun EmployeeHomeScreenComposable(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Order By:", fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { viewModel.onEvent(EmployeeHomeScreenEvent.ToggleOrderSection) }) {
-                        Text(if (state.isOrderByToggleVisible) "Hide" else "Show")
-                    }
-                }
-            }
+            when (selectedTab) {
+                0 -> { // Active Tasks
+                    if (state.isActiveTasksLoading.not()) {
+                        item {
+                            SectionHeaderWithSort(
+                                title = "Active Tasks",
+                                isAscending = state.tasksOrder == DateOrder.Ascending,
+                                onSortClick = {
+                                    viewModel.onEvent(
+                                        EmployeeHomeScreenEvent.Order(
+                                            if (state.tasksOrder == DateOrder.Ascending) DateOrder.Descending else DateOrder.Ascending
+                                        )
+                                    )
+                                }
+                            )
+                        }
 
-            if (state.isOrderByToggleVisible) {
-                item {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        RadioButton(
-                            onClick = { viewModel.onEvent(EmployeeHomeScreenEvent.Order(DateOrder.Ascending)) },
-                            selected = state.tasksOrder == DateOrder.Ascending
-                        )
-                        Text("Ascending", modifier = Modifier.padding(start = 4.dp))
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        RadioButton(
-                            onClick = { viewModel.onEvent(EmployeeHomeScreenEvent.Order(DateOrder.Descending)) },
-                            selected = state.tasksOrder == DateOrder.Descending
-                        )
-                        Text("Descending", modifier = Modifier.padding(start = 4.dp))
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Active Tasks:", fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { viewModel.onEvent(EmployeeHomeScreenEvent.ToggleActiveTasksSection) }) {
-                        Text(if (state.isActiveTasksSectionVisible) "Hide" else "Show")
-                    }
-                }
-            }
-
-            if (state.isActiveTasksSectionVisible) {
-                items(state.activeTasks.size) { index ->
-                    val clientTask = state.activeTasks[index]
-                    if (state.isLoading) {
-                        LoadingProgress()
-                    }
-                    TaskItemCard(
-                        state.activeTasks[index],
-                        onItemClick = {
-                            navController.navigate("task_detail/${clientTask.taskId}/$employeeId")
-                        },
-                        viewModel = viewModel
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Completed Tasks:", fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { viewModel.onEvent(EmployeeHomeScreenEvent.ToggleCompletedTasksSection) }) {
-                        Text(if (state.isCompletedTasksSectionVisible) "Hide" else "Show")
-                    }
-                }
-            }
-
-            if (state.isCompletedTasksSectionVisible) {
-                items(state.completedTasks.size) { index ->
-                    val clientTask = state.completedTasks[index]
-                    if (state.isLoading) {
-                        LoadingProgress()
-                    }
-                    TaskItemCard(
-                        clientTask,
-                        onItemClick = {
-                            navController.navigate("task_detail/${clientTask.taskId}/$employeeId")
-                        },
-                        isCompletedTask = true,
-                        viewModel = viewModel
-                    )
-                }
-            }
-            item {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { viewModel.onEvent(EmployeeHomeScreenEvent.ToggleLeavesSection) }
-                ) {
-                    Text(if (state.isLeavesSectionVisible) "Hide Leaves" else "Show Leaves")
-                }
-            }
-            if (state.isLeavesSectionVisible) {
-                if (state.rejectedLeaves.isNotEmpty()) {
-                    item {
-                        Text(
-                            "Leaves Pending Approval",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        state.rejectedLeaves.forEach { leave ->
-                            LeaveRequestCard(leave)
+                        if (state.activeTasks.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "No active tasks found",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge.copy(color = Color.Gray)
+                                )
+                            }
+                        } else {
+                            items(state.activeTasks.size) { index ->
+                                TaskItemCard(
+                                    task = state.activeTasks[index],
+                                    onItemClick = {
+                                        navController.navigate("task_detail/${state.activeTasks[index].taskId}/$employeeId")
+                                    },
+                                    viewModel = viewModel
+                                )
+                            }
+                        }
+                    } else {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
 
-                if (state.approvedLeaves.isNotEmpty()) {
-                    item {
-                        Text("Approved Leaves", style = MaterialTheme.typography.titleMedium)
-                        state.approvedLeaves.forEach { leave ->
-                            LeaveRequestCard(leave)
+                1 -> { // Completed Tasks
+                    if (state.isCompletedTasksLoading.not()) {
+                        viewModel.getEmployeeCompletedTasks(employeeId)
+                        item {
+                            SectionHeaderWithSort(
+                                title = "Completed Tasks",
+                                isAscending = state.tasksOrder == DateOrder.Ascending,
+                                onSortClick = {
+                                    viewModel.onEvent(
+                                        EmployeeHomeScreenEvent.Order(
+                                            if (state.tasksOrder == DateOrder.Ascending) DateOrder.Descending else DateOrder.Ascending
+                                        )
+                                    )
+                                }
+                            )
+                        }
+
+                        if (state.completedTasks.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "No completed tasks found",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge.copy(color = Color.Gray)
+                                )
+                            }
+                        } else {
+                            items(state.completedTasks.size) { index ->
+                                TaskItemCard(
+                                    task = state.completedTasks[index],
+                                    isCompletedTask = true,
+                                    onItemClick = {
+                                        navController.navigate("task_detail/${state.completedTasks[index].taskId}/$employeeId")
+                                    },
+                                    viewModel = viewModel
+                                )
+                            }
+                        }
+                    } else {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { viewModel.onAddLeaveDialogEvent(LeaveRequestDialogEvent.OpenDialog) }) {
-                        Text("Request Leave")
+                2 -> { // Leave Requests
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable {
+                                    viewModel.onAddLeaveDialogEvent(LeaveRequestDialogEvent.OpenDialog)
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AddCircle,
+                                    contentDescription = "Add Leave",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = "Request Leave",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    if (state.rejectedLeaves.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Leaves Pending Approval",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        items(state.rejectedLeaves.size) { index ->
+                            LeaveRequestCard(state.rejectedLeaves[index])
+                        }
+                    }
+
+                    if (state.approvedLeaves.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Approved Leaves",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        items(state.approvedLeaves.size) { index ->
+                            LeaveRequestCard(state.approvedLeaves[index])
+                        }
                     }
                 }
             }
         }
+
 
         LeaveRequestDialog(
             isVisible = state.isAddLeaveDialogVisible,
@@ -364,7 +436,7 @@ fun LeaveRequestCard(leave: LeaveRequest) {
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         border = BorderStroke(
-            width = 4.dp,
+            width = 2.dp,
             color = if (leave.approvedStatus) Color.Green else Color.Red
         )
     ) {
@@ -373,6 +445,29 @@ fun LeaveRequestCard(leave: LeaveRequest) {
             Text("Reason: ${leave.leaveReason}")
             Text(
                 "Status: ${if (leave.approvedStatus) "Approved" else "Not Approved"}",
+            )
+        }
+    }
+}
+
+@Composable
+fun SectionHeaderWithSort(
+    title: String,
+    isAscending: Boolean,
+    onSortClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(title, fontWeight = FontWeight.Bold)
+        IconButton(onClick = onSortClick) {
+            Icon(
+                imageVector = if (isAscending) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                contentDescription = "Sort"
             )
         }
     }

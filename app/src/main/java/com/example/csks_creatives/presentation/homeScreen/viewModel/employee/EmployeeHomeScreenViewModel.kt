@@ -41,6 +41,7 @@ class EmployeeHomeScreenViewModel @Inject constructor(
 
     private var employeeId = EMPTY_STRING
     private var hasInitialized = false
+    private var hasCompletedTasksFethed = false
 
     fun onEvent(employeeHomeScreenEvent: EmployeeHomeScreenEvent) {
         when (employeeHomeScreenEvent) {
@@ -51,30 +52,10 @@ class EmployeeHomeScreenViewModel @Inject constructor(
                 sortTasks(employeeHomeScreenEvent.order)
             }
 
-            EmployeeHomeScreenEvent.ToggleActiveTasksSection -> {
-                _employeeHomeScreenState.value = _employeeHomeScreenState.value.copy(
-                    isActiveTasksSectionVisible = _employeeHomeScreenState.value.isActiveTasksSectionVisible.not()
-                )
-            }
-
-            EmployeeHomeScreenEvent.ToggleCompletedTasksSection -> {
-                _employeeHomeScreenState.value = _employeeHomeScreenState.value.copy(
-                    isCompletedTasksSectionVisible = _employeeHomeScreenState.value.isCompletedTasksSectionVisible.not()
-                )
-            }
-
             EmployeeHomeScreenEvent.ToggleOrderSection -> {
                 _employeeHomeScreenState.value = _employeeHomeScreenState.value.copy(
                     isOrderByToggleVisible = _employeeHomeScreenState.value.isOrderByToggleVisible.not()
                 )
-            }
-
-            EmployeeHomeScreenEvent.ToggleLeavesSection -> {
-                _employeeHomeScreenState.update {
-                    it.copy(
-                        isLeavesSectionVisible = _employeeHomeScreenState.value.isLeavesSectionVisible.not()
-                    )
-                }
             }
         }
     }
@@ -150,27 +131,56 @@ class EmployeeHomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getEmployeeTasks(employeeId: String, order: DateOrder) {
-        tasksUseCaseFactory.getTasksForEmployee(employeeId, order)
+    private fun getEmployeeActiveTasks(employeeId: String, order: DateOrder) {
+        tasksUseCaseFactory.getActiveTasksForEmployee(employeeId, order)
             .onEach { result ->
                 when (result) {
                     is ResultState.Error -> {
-                        _uiEvent.emit(ToastUiEvent.ShowToast("Error Retriving Data"))
+                        _uiEvent.emit(ToastUiEvent.ShowToast("Error: ${result.message}"))
                     }
 
                     ResultState.Loading -> {
                         _employeeHomeScreenState.value =
-                            _employeeHomeScreenState.value.copy(isLoading = true)
+                            _employeeHomeScreenState.value.copy(isActiveTasksLoading = true)
                     }
 
                     is ResultState.Success -> {
-                        val (activeTasks, completedTasks) = result.data
+                        val activeTasks = result.data
                         _employeeHomeScreenState.value =
                             _employeeHomeScreenState.value.copy(
                                 activeTasks = activeTasks,
-                                completedTasks = completedTasks,
-                                tasksOrder = order,
-                                isLoading = false
+                                isActiveTasksLoading = false
+                            )
+                    }
+                }
+            }.launchIn(viewModelScope)
+    }
+
+    fun getEmployeeCompletedTasks(employeeId: String) {
+        if (hasCompletedTasksFethed) return
+        hasCompletedTasksFethed = true
+        tasksUseCaseFactory.getCompletedTasksForEmployee(
+            employeeId,
+            _employeeHomeScreenState.value.tasksOrder
+        )
+            .onEach { result ->
+                when (result) {
+                    ResultState.Loading -> {
+                        _employeeHomeScreenState.value =
+                            _employeeHomeScreenState.value.copy(isCompletedTasksLoading = true)
+                    }
+
+                    is ResultState.Error -> {
+                        _uiEvent.emit(ToastUiEvent.ShowToast("Error: ${result.message}"))
+                    }
+
+
+                    is ResultState.Success -> {
+                        val activeTasks = result.data
+                        _employeeHomeScreenState.value =
+                            _employeeHomeScreenState.value.copy(
+                                completedTasks = activeTasks,
+                                isCompletedTasksLoading = false
                             )
                     }
                 }
@@ -202,7 +212,7 @@ class EmployeeHomeScreenViewModel @Inject constructor(
         if (hasInitialized) return
         hasInitialized = true
         this.employeeId = employeeId
-        getEmployeeTasks(employeeId, DateOrder.Descending)
+        getEmployeeActiveTasks(employeeId, DateOrder.Descending)
         fetchLeaveRequests(employeeId)
     }
 
@@ -213,7 +223,9 @@ class EmployeeHomeScreenViewModel @Inject constructor(
                     is ResultState.Success -> {
                         val leaveRequests = result.data
                         val approved = leaveRequests.filter { it.approvedStatus }
-                        val rejected = leaveRequests.filter { !it.approvedStatus }
+                            .sortedByDescending { it.leaveDate }
+                        val rejected =
+                            leaveRequests.filter { !it.approvedStatus }.sortedBy { it.leaveDate }
 
                         _employeeHomeScreenState.update {
                             it.copy(
