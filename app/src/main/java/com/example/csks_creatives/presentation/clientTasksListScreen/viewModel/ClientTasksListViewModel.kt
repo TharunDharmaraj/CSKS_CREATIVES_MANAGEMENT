@@ -29,9 +29,6 @@ class ClientTasksListViewModel @Inject constructor(
     private val _clientTasksListState = MutableStateFlow(ClientTasksListState())
     val clientsTasksListState = _clientTasksListState.asStateFlow()
 
-    private val _isFilterTasksVisible = MutableStateFlow(false)
-    val isFilterTasksVisible = _isFilterTasksVisible.asStateFlow()
-
     private var hasInitialized = false
 
     fun onEvent(clientTaskListScreenEvent: ClientTasksListScreenEvent) {
@@ -103,12 +100,6 @@ class ClientTasksListViewModel @Inject constructor(
                     )
                 }
             }
-
-            ClientTasksListScreenEvent.ToggleAmountVisibility -> {
-                _clientTasksListState.update {
-                    it.copy(isAmountVisible = !it.isAmountVisible)
-                }
-            }
         }
     }
 
@@ -126,10 +117,14 @@ class ClientTasksListViewModel @Inject constructor(
                         isLoading = false
                     )
                     if (clientTasksList.isNotEmpty()) {
-                        _isFilterTasksVisible.value = true
+                        _clientTasksListState.value = _clientTasksListState.value.copy(
+                            isFilterTasksIconVisible = true
+                        )
                         filterTasks()
                     } else {
-                        _isFilterTasksVisible.value = false
+                        _clientTasksListState.value = _clientTasksListState.value.copy(
+                            isFilterTasksIconVisible = false
+                        )
                     }
                 }
             }
@@ -193,7 +188,7 @@ class ClientTasksListViewModel @Inject constructor(
     fun getTotalUnPaidCostForClient(): Pair<Int, Int> {
         var totalCostPaid = 0
         var totalCostUnPaid = 0
-        _clientTasksListState.value.tasksList.forEach { task ->
+        _allTasksForClientFromFireStore.value.forEach { task ->
             if (task.taskPaidStatus == TaskPaidStatus.NOT_PAID) {
                 totalCostUnPaid += task.taskCost
             } else {
@@ -206,13 +201,11 @@ class ClientTasksListViewModel @Inject constructor(
     fun getYearlyAndMonthlyCostBreakdown(): Map<Int, Map<Int, Pair<Int, Int>>> {
         val costBreakdown = mutableMapOf<Int, MutableMap<Int, Pair<Int, Int>>>()
 
-        _clientTasksListState.value.tasksList.forEach { task ->
+        _allTasksForClientFromFireStore.value.forEach { task ->
             val taskCreationTime = task.taskCreationTime.toLongOrNull()
             val taskCost = task.taskCost.toString().toIntOrNull()
 
-            if (taskCreationTime == null || taskCost == null) {
-                return@forEach
-            }
+            if (taskCreationTime == null || taskCost == null) return@forEach
 
             val calendar = Calendar.getInstance().apply { timeInMillis = taskCreationTime }
             val year = calendar.get(Calendar.YEAR)
@@ -231,5 +224,15 @@ class ClientTasksListViewModel @Inject constructor(
         }
 
         return costBreakdown
+    }
+
+
+    fun setFilterAndSearchIconVisibility(isVisible: Boolean) {
+        _clientTasksListState.update {
+            it.copy(
+                isFilterTasksIconVisible = isVisible,
+                isSearchBarVisible = isVisible
+            )
+        }
     }
 }

@@ -26,7 +26,10 @@ import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.components.ui.TaskItem
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
+import com.google.accompanist.pager.*
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPagerApi::class, ExperimentalPagerApi::class)
 @Composable
 fun ClientTasksListComposable(
     clientId: String,
@@ -34,10 +37,17 @@ fun ClientTasksListComposable(
     viewModel: ClientTasksListViewModel = hiltViewModel()
 ) {
     val state = viewModel.clientsTasksListState.collectAsState()
-    val filterIconState = viewModel.isFilterTasksVisible.collectAsState()
+    val pagerState = rememberPagerState(initialPage = 0)
+    val coroutineScope = rememberCoroutineScope()
+
+    val tabTitles = listOf("Tasks", "Amounts")
 
     LaunchedEffect(Unit) {
         viewModel.initialize(clientId)
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        viewModel.setFilterAndSearchIconVisibility(pagerState.currentPage == 0)
     }
 
     Scaffold(
@@ -46,7 +56,7 @@ fun ClientTasksListComposable(
                 title = "Client $clientId",
                 canShowMenu = true,
                 canShowSearch = state.value.canShowSearchIcon,
-                canShowFilterTasks = filterIconState.value,
+                canShowFilterTasks = state.value.isFilterTasksIconVisible,
                 canShowBackIcon = true,
                 menuItems = listOf(
                     ToolbarOverFlowMenuItem("logout", "Logout")
@@ -59,12 +69,10 @@ fun ClientTasksListComposable(
                 },
                 onBackClicked = { navController.popBackStack() },
                 onMenuItemClicked = { itemId ->
-                    when (itemId) {
-                        "logout" -> {
-                            viewModel.emitLogoutEvent(true)
-                            navController.navigate("login") {
-                                popUpTo(0) { inclusive = true }
-                            }
+                    if (itemId == "logout") {
+                        viewModel.emitLogoutEvent(true)
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
                         }
                     }
                 }
@@ -77,150 +85,192 @@ fun ClientTasksListComposable(
                 .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
                 .padding(paddingValue)
         ) {
-            if (state.value.isFilterSectionVisible) {
-                Column {
-                    if (state.value.isSearchBarVisible) {
-                        OutlinedTextField(
-                            value = state.value.searchText,
-                            onValueChange = {
-                                viewModel.onEvent(
-                                    ClientTasksListScreenEvent.OnSearchTextChanged(
-                                        it
-                                    )
-                                )
-                            },
-                            label = { Text("Search Task") },
-                            modifier = Modifier.fillMaxWidth(),
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Search,
-                                    contentDescription = "Search"
-                                )
-                            },
-                            singleLine = true
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Absolute.Left,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Sort by Date Created",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(
-                            onClick = {
-                                val newOrder = if (state.value.tasksOrder is DateOrder.Ascending)
-                                    DateOrder.Descending else DateOrder.Ascending
-                                viewModel.onEvent(ClientTasksListScreenEvent.Order(newOrder))
+            TabRow(selectedTabIndex = pagerState.currentPage) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
                             }
-                        ) {
-                            Icon(
-                                imageVector = if (state.value.tasksOrder is DateOrder.Ascending) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                                contentDescription = "Sort Order"
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Button(
-                            onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (state.value.isPaidTasksVisible) Color.Green else Color.Gray
-                            )
-                        ) {
-                            Text(text = "Show Paid")
-                        }
-
-                        Button(
-                            onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (state.value.isUnpaidTasksVisible) Color.Red else Color.Gray
-                            )
-                        ) {
-                            Text(text = "Show Unpaid")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(text = "Filter by Status", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    LazyRow {
-                        items(TaskStatusType.entries.size) { index ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                                    .clickable {
-                                        viewModel.onEvent(
-                                            ClientTasksListScreenEvent.ToggleStatusFilter(
-                                                TaskStatusType.entries[index]
-                                            )
-                                        )
-                                    }
-                            ) {
-                                Checkbox(
-                                    checked = state.value.selectedStatuses.contains(TaskStatusType.entries[index]),
-                                    onCheckedChange = {
-                                        viewModel.onEvent(
-                                            ClientTasksListScreenEvent.ToggleStatusFilter(
-                                                TaskStatusType.entries[index]
-                                            )
-                                        )
-                                    }
-                                )
-                                Text(text = TaskStatusType.entries[index].name)
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
+                        },
+                        text = { Text(title) }
+                    )
                 }
             }
-            if (state.value.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadingProgress()
-                }
-            } else {
-                if (state.value.tasksList.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No tasks found for client",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Gray
-                        )
-                    }
-                } else {
-                    val yearlyBreakdown = viewModel.getYearlyAndMonthlyCostBreakdown()
-                    LazyColumn {
-                        item {
-                            Button(
-                                onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ToggleAmountVisibility) }
+
+            HorizontalPager(count = tabTitles.size, state = pagerState) { page ->
+                when (page) {
+                    0 -> {
+                        if (state.value.isLoading) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = if (state.value.isAmountVisible) "Hide Amounts" else "Show Amounts"
-                                )
+                                LoadingProgress()
+                            }
+                        } else {
+                            Column {
+                                if (state.value.isFilterSectionVisible) {
+                                    Column {
+                                        if (state.value.isSearchBarVisible) {
+                                            OutlinedTextField(
+                                                value = state.value.searchText,
+                                                onValueChange = {
+                                                    viewModel.onEvent(
+                                                        ClientTasksListScreenEvent.OnSearchTextChanged(
+                                                            it
+                                                        )
+                                                    )
+                                                },
+                                                label = { Text("Search Task") },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                leadingIcon = {
+                                                    Icon(
+                                                        Icons.Default.Search,
+                                                        contentDescription = "Search"
+                                                    )
+                                                },
+                                                singleLine = true
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                        }
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "Sort by Date Created",
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            IconButton(
+                                                onClick = {
+                                                    val newOrder =
+                                                        if (state.value.tasksOrder is DateOrder.Ascending)
+                                                            DateOrder.Descending else DateOrder.Ascending
+                                                    viewModel.onEvent(
+                                                        ClientTasksListScreenEvent.Order(
+                                                            newOrder
+                                                        )
+                                                    )
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = if (state.value.tasksOrder is DateOrder.Ascending) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                                                    contentDescription = "Sort Order"
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceEvenly
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    viewModel.onEvent(
+                                                        ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter
+                                                    )
+                                                },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = if (state.value.isPaidTasksVisible) Color.Green else Color.Gray
+                                                )
+                                            ) {
+                                                Text(text = "Show Paid")
+                                            }
+
+                                            Button(
+                                                onClick = {
+                                                    viewModel.onEvent(
+                                                        ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter
+                                                    )
+                                                },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = if (state.value.isUnpaidTasksVisible) Color.Red else Color.Gray
+                                                )
+                                            ) {
+                                                Text(text = "Show Unpaid")
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        Text(
+                                            text = "Filter by Status",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        LazyRow {
+                                            items(TaskStatusType.entries.size) { index ->
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .clickable {
+                                                            viewModel.onEvent(
+                                                                ClientTasksListScreenEvent.ToggleStatusFilter(
+                                                                    TaskStatusType.entries[index]
+                                                                )
+                                                            )
+                                                        }
+                                                ) {
+                                                    Checkbox(
+                                                        checked = state.value.selectedStatuses.contains(
+                                                            TaskStatusType.entries[index]
+                                                        ),
+                                                        onCheckedChange = {
+                                                            viewModel.onEvent(
+                                                                ClientTasksListScreenEvent.ToggleStatusFilter(
+                                                                    TaskStatusType.entries[index]
+                                                                )
+                                                            )
+                                                        }
+                                                    )
+                                                    Text(text = TaskStatusType.entries[index].name)
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
+
+                                if (state.value.tasksList.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No tasks found for client",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                } else {
+                                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                        items(state.value.tasksList.size) { index ->
+                                            TaskItem(
+                                                task = state.value.tasksList[index],
+                                                onTaskClick = {
+                                                    navController.navigate("task_detail/${state.value.tasksList[index].taskId}/$ADMIN_NAME")
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
+                    }
 
-                        if (state.value.isAmountVisible) {
+                    1 -> {
+                        val yearlyBreakdown = viewModel.getYearlyAndMonthlyCostBreakdown()
 
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
                             val totalCost = viewModel.getTotalUnPaidCostForClient()
                             item {
                                 Text(
@@ -232,6 +282,7 @@ fun ClientTasksListComposable(
                                     fontWeight = FontWeight.Bold
                                 )
                             }
+
                             yearlyBreakdown.forEach { (year, monthlyData) ->
                                 item {
                                     Text(
@@ -263,16 +314,6 @@ fun ClientTasksListComposable(
                                     }
                                 }
                             }
-                        }
-
-                        items(state.value.tasksList.size) { index ->
-                            val clientTask = state.value.tasksList[index]
-                            TaskItem(
-                                task = clientTask,
-                                onTaskClick = {
-                                    navController.navigate("task_detail/${clientTask.taskId}/$ADMIN_NAME")
-                                }
-                            )
                         }
                     }
                 }

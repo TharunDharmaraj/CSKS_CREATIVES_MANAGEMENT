@@ -8,7 +8,6 @@ sealed class ClientTasksListScreenEvent {
     object ToggleFilterTasksClicked : ClientTasksListScreenEvent()
     object ShowOnlyUnPaidTasksFilter : ClientTasksListScreenEvent()
     object ShowOnlyPaidTasksFilter : ClientTasksListScreenEvent()
-    object ToggleAmountVisibility : ClientTasksListScreenEvent()
     data class OnSearchTextChanged(val searchText: String) : ClientTasksListScreenEvent()
     data class Order(val order: DateOrder) : ClientTasksListScreenEvent()
     data class ToggleStatusFilter(val status: TaskStatusType) : ClientTasksListScreenEvent()

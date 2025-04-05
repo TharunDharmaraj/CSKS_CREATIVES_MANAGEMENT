@@ -11,11 +11,11 @@ data class ClientTasksListState(
     val tasksOrder: DateOrder = DateOrder.Ascending,
     val canShowSearchIcon: Boolean = false,
     val isSearchBarVisible: Boolean = false,
+    val isFilterTasksIconVisible: Boolean = false,
     val isFilterSectionVisible: Boolean = false,
     val isAllTasksVisible: Boolean = true,
     val isPaidTasksVisible: Boolean = false,
     val isUnpaidTasksVisible: Boolean = false,
-    val isAmountVisible: Boolean = false,
     val searchText: String = EMPTY_STRING,
     val selectedStatuses: Set<TaskStatusType> = emptySet()
 )
