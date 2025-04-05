@@ -245,7 +245,6 @@ class TasksRepositoryImplementation @Inject constructor(
                         TASK_STATUS_HISTORY_END_TIME to TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
                     ), SetOptions.merge()
                 )
-            Log.d(logTag + "Create", "Successfully created dummy status on Task Creation")
         } catch (exception: Exception) {
             Log.d(
                 logTag + "Create",
@@ -268,7 +267,6 @@ class TasksRepositoryImplementation @Inject constructor(
                         ?: TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
                 statusHistoryMap[documentSnapshot.id] = listOf(startTime, endTime)
             }
-            Log.d(logTag + "StatusList", "HistoryMap is $statusHistoryMap")
         } catch (exception: Exception) {
             Log.d(logTag + "StatusList", "Error building statusMap $exception")
         }
