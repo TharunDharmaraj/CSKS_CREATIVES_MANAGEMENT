@@ -8,6 +8,8 @@ interface LoginRepository {
 
     suspend fun saveFCMToken(employeeId: String)
 
+    suspend fun saveAdminFMToken()
+
     suspend fun saveNewFcmToken(employeeId: String, newToken: String)
 
     fun getCurrentUser(): CurrentLoginUser?

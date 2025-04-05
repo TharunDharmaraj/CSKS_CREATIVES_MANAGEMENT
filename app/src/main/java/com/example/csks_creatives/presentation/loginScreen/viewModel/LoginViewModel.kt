@@ -47,7 +47,11 @@ class LoginViewModel @Inject constructor(
             )
             loginResult.onSuccess { user ->
                 loginUseCase.insertCurrentUserDetails(user)
-                if (user.userRole is UserRole.Employee) loginUseCase.saveFcmToken(user.id)
+                if (user.userRole is UserRole.Employee) {
+                    loginUseCase.saveFcmToken(user.id)
+                } else {
+                    loginUseCase.saveAdminFcmToken()
+                }
                 emitLogoutEvent(false)
                 _loginScreenState.update {
                     it.copy(

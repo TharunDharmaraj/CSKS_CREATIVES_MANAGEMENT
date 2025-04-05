@@ -30,6 +30,7 @@ object Constants {
     // Admin Collection
     const val ADMIN_USERNAME = "UserName"
     const val ADMIN_PASSWORD = "Password"
+    const val ADMIN_DOCUMENT_NAME = "csks"
 
     // Clients Collection Fields
     const val CLIENT_ID = "ClientId"
@@ -79,5 +80,5 @@ object Constants {
 
     //FCM
     const val FCM_TOKEN_FIELD = "fcmToken"
-    const val FCM_TOKEN_LAST_UPDATED_FIELD = "fcmTokenLastUpdated"
+    const val FCM_TOKEN_LAST_UPDATED_FIELD = "fcmTokenLastUpdated" // Just Used for debugging purposes
 }

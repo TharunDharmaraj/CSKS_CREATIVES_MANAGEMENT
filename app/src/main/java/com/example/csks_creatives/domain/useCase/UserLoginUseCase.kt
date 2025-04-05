@@ -52,6 +52,8 @@ class UserLoginUseCase @Inject constructor(
 
     suspend fun saveFcmToken(employeeId: String) = loginRepository.saveFCMToken(employeeId)
 
+    suspend fun saveAdminFcmToken() = loginRepository.saveAdminFMToken()
+
     suspend fun saveNewFcmToken(employeeId: String, newToken: String) =
         loginRepository.saveNewFcmToken(employeeId, newToken)
 

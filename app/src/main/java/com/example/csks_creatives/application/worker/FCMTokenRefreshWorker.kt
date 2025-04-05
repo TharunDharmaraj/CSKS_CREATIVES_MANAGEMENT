@@ -24,8 +24,14 @@ class FCMTokenRefreshWorker @AssistedInject constructor(
         return try {
             fcmTokenRefreshWorkerCoroutineScope.launch {
                 val currentUser = userPersistenceUseCase.getCurrentUser()
-                if (currentUser != null && currentUser.userRole == UserRole.Employee) {
-                    loginUseCase.saveFcmToken(currentUser.employeeId)
+                if (currentUser != null) {
+                    if (currentUser.userRole == UserRole.Employee) {
+                        Log.d("FCMWorker", "Writing new FCM for Employee ${currentUser.employeeId}")
+                        loginUseCase.saveFcmToken(currentUser.employeeId)
+                    } else {
+                        Log.d("FCMWorker", "Writing new FCM for Admin")
+                        loginUseCase.saveAdminFcmToken()
+                    }
                 }
             }
             Result.success()

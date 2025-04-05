@@ -2,6 +2,7 @@ package com.example.csks_creatives.data.repositoryImplementation.remote
 
 import android.util.Log
 import com.example.csks_creatives.data.utils.Constants.ADMIN_COLLECTION
+import com.example.csks_creatives.data.utils.Constants.ADMIN_DOCUMENT_NAME
 import com.example.csks_creatives.data.utils.Constants.ADMIN_PASSWORD
 import com.example.csks_creatives.data.utils.Constants.ADMIN_USERNAME
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_COLLECTION
@@ -98,6 +99,31 @@ class LoginRepositoryImplementation @Inject constructor(
         }
     }
 
+    override suspend fun saveAdminFMToken() {
+        messaging.token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                firestore.collection(ADMIN_COLLECTION).document(ADMIN_DOCUMENT_NAME)
+                    .set(
+                        hashMapOf(
+                            FCM_TOKEN_FIELD to token,
+                            FCM_TOKEN_LAST_UPDATED_FIELD to formatTimeStamp(
+                                getCurrentTimeAsString()
+                            )
+                        ), SetOptions.merge()
+                    )
+                    .addOnSuccessListener { Log.d(logTag + "FCM", "New Token set to Admin $token") }
+                    .addOnFailureListener {
+                        Log.e(
+                            logTag + "FCM",
+                            "Error saving new token to Admin",
+                            it
+                        )
+                    }
+            }
+        }
+    }
+
     override suspend fun saveNewFcmToken(employeeId: String, newToken: String) {
         firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
             .set(
@@ -115,6 +141,8 @@ class LoginRepositoryImplementation @Inject constructor(
     override fun getCurrentUser() = currentLoggedInUser
 
     override fun deleteCurrentUser() {
+        // To delete the FCM Tokens for a device on Logout
+        messaging.deleteToken()
         currentLoggedInUser = null
     }
 

@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.example.csks_creatives.R
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -32,8 +33,12 @@ class MessagingService : FirebaseMessagingService() {
         val userPersistenceUseCase = entryPoint.userPersistenceUseCase()
         messagingCoroutineScope.launch {
             val currentUser = userPersistenceUseCase.getCurrentUser()
-            if (currentUser != null && currentUser.userRole == UserRole.Admin) {
-                loginUseCase.saveNewFcmToken(currentUser.employeeId, newToken)
+            if (currentUser != null) {
+                if (currentUser.userRole != UserRole.Admin) {
+                    loginUseCase.saveNewFcmToken(currentUser.employeeId, newToken)
+                } else {
+                    loginUseCase.saveAdminFcmToken()
+                }
             }
         }
     }
@@ -53,6 +58,7 @@ class MessagingService : FirebaseMessagingService() {
         val notification = NotificationCompat.Builder(this, "TASK_CHANNEL")
             .setContentTitle(title)
             .setContentText(message)
+            .setSmallIcon(R.drawable.logo)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
