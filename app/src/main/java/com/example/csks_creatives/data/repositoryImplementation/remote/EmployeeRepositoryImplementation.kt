@@ -10,6 +10,7 @@ import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_ID
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_POSTED_BY
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_REASON
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
+import com.example.csks_creatives.domain.model.employee.LeaveRequestsGrouped
 import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -86,6 +87,34 @@ class EmployeeRepositoryImplementation @Inject constructor(
             Log.d(logTag, "Firestore listener removed for employeeId: $employeeId")
         }
     }
+
+    override suspend fun getAllApprovedAndUnApprovedRequestsForEmployee(employeeId: String) =
+        callbackFlow {
+            val listenerRegistration = getLeaveCollectionReference(employeeId)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.e(logTag, "Error fetching leaves: ", error)
+                        close(error)
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot != null) {
+                        val leaveList = snapshot.documents.mapNotNull { leave ->
+                            leave.toObject(LeaveRequest::class.java)
+                        }
+
+                        val approved = leaveList.filter { it.approvedStatus == true }
+                        val unapproved = leaveList.filter { it.approvedStatus != true }
+
+                        trySend(LeaveRequestsGrouped(approved, unapproved)).isSuccess
+                    }
+                }
+
+            awaitClose {
+                listenerRegistration.remove()
+                Log.d(logTag, "Firestore listener removed for employeeId: $employeeId")
+            }
+        }
 
     private fun getLeaveCollectionReference(employeeId: String) =
         firebaseFirestore.collection(EMPLOYEE_COLLECTION).document(employeeId)

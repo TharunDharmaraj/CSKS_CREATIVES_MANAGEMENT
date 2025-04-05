@@ -7,9 +7,9 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class AdminBottomNavigation(val title: String, val icon: ImageVector, val route: String) {
-    object Employees : AdminBottomNavigation("Employees", Icons.Default.Person, "employees")
-    object Clients : AdminBottomNavigation("Clients", Icons.Default.Star, "clients")
-    object Tasks : AdminBottomNavigation("Tasks", Icons.Default.Email, "tasks")
-    object LeaveRequests : AdminBottomNavigation("Leaves", icon = Icons.Default.Info, "leaves")
+sealed class AdminBottomNavigation(val title: String, val icon: ImageVector) {
+    object Employees : AdminBottomNavigation("Employees", Icons.Default.Person)
+    object Clients : AdminBottomNavigation("Clients", Icons.Default.Star)
+    object Tasks : AdminBottomNavigation("Tasks", Icons.Default.Email)
+    object LeaveRequests : AdminBottomNavigation("Leaves", icon = Icons.Default.Info)
 }

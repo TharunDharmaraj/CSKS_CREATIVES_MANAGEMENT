@@ -2,11 +2,11 @@ package com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
-import com.example.csks_creatives.domain.useCase.factories.AdminUseCaseFactory
-import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
+import com.example.csks_creatives.domain.useCase.factories.*
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
@@ -20,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class EmployeeDetailsScreenViewModel @Inject constructor(
     private val adminUseCase: AdminUseCaseFactory,
-    private val tasksUseCase: TasksUseCaseFactory
+    private val tasksUseCase: TasksUseCaseFactory,
+    private val employeeUseCaseFactory: EmployeeUseCaseFactory
 ) : ViewModel() {
     init {
         adminUseCase.create()
@@ -38,6 +39,9 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
     private val activeTasksFetchFromFirestore =
         MutableStateFlow<List<ClientTaskOverview>>(emptyList())
 
+    private val _employeeDetailScreenTitle = MutableStateFlow("")
+    val employeeDetailsScreenTitle = _employeeDetailScreenTitle.asStateFlow()
+
     private var hasInitialized = false
 
     fun onEvent(employeeDetailsScreenEvent: EmployeeDetailsScreenEvent) {
@@ -46,11 +50,18 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
                 // TODO Go to Task Details Page
             }
 
-            is EmployeeDetailsScreenEvent.OnSearchTextChanged -> {
-                _employeeDetailsScreenState.value = _employeeDetailsScreenState.value.copy(
-                    searchText = employeeDetailsScreenEvent.searchText
-                )
-                filterTasks()
+            is EmployeeDetailsScreenEvent.OnSearchTextChangedForCompleted -> {
+                _employeeDetailsScreenState.update {
+                    it.copy(searchTextForCompleted = employeeDetailsScreenEvent.text)
+                }
+                filterCompletedTasks()
+            }
+
+            is EmployeeDetailsScreenEvent.OnSearchTextChangedForActive -> {
+                _employeeDetailsScreenState.update {
+                    it.copy(searchTextForActive = employeeDetailsScreenEvent.text)
+                }
+                filterActiveTasks()
             }
 
             is EmployeeDetailsScreenEvent.Order -> {
@@ -93,27 +104,40 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
         }
     }
 
-    private fun filterTasks() {
-        val searchText = _employeeDetailsScreenState.value.searchText
-        var tasksCompletedList = tasksCompletedFetchFromFirestore.value
-        var activeTasksList = activeTasksFetchFromFirestore.value
-        if (searchText.isNotBlank()) {
-            tasksCompletedList = tasksCompletedList.filter { task ->
-                task.taskName.lowercase().contains(searchText) ||
-                        task.currentStatus.name.lowercase().contains(searchText) ||
-                        task.clientId.lowercase().contains(searchText)
-            }
-            activeTasksList = activeTasksList.filter { task ->
-                task.taskName.lowercase().contains(searchText) ||
-                        task.currentStatus.name.lowercase().contains(searchText) ||
-                        task.clientId.lowercase().contains(searchText)
+    private fun filterCompletedTasks() {
+        val searchText = _employeeDetailsScreenState.value.searchTextForCompleted
+        val filtered = if (searchText.isBlank()) {
+            tasksCompletedFetchFromFirestore.value
+        } else {
+            tasksCompletedFetchFromFirestore.value.filter { task ->
+                task.taskName.contains(searchText, ignoreCase = true) ||
+                        task.clientId.contains(searchText, ignoreCase = true) ||
+                        task.currentStatus.name.contains(searchText, ignoreCase = true)
             }
         }
-        _employeeDetailsScreenState.value = _employeeDetailsScreenState.value.copy(
-            tasksInProgress = activeTasksList,
-            tasksCompleted = tasksCompletedList
-        )
+
+        _employeeDetailsScreenState.update {
+            it.copy(tasksCompleted = filtered)
+        }
     }
+
+    private fun filterActiveTasks() {
+        val searchText = _employeeDetailsScreenState.value.searchTextForActive
+        val filtered = if (searchText.isBlank()) {
+            activeTasksFetchFromFirestore.value
+        } else {
+            activeTasksFetchFromFirestore.value.filter { task ->
+                task.taskName.contains(searchText, ignoreCase = true) ||
+                        task.clientId.contains(searchText, ignoreCase = true) ||
+                        task.currentStatus.name.contains(searchText, ignoreCase = true)
+            }
+        }
+
+        _employeeDetailsScreenState.update {
+            it.copy(tasksInProgress = filtered)
+        }
+    }
+
 
     private fun getEmployeeDetails(employeeId: String) {
         viewModelScope.launch {
@@ -216,7 +240,25 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
     fun initialize(employeeId: String) {
         if (hasInitialized) return
         hasInitialized = true
+        _employeeDetailScreenTitle.value = employeeId
         getEmployeeDetails(employeeId)
+        getAllLeavesTaken(employeeId)
+    }
+
+    private fun getAllLeavesTaken(employeeId: String) {
+        viewModelScope.launch {
+            employeeUseCaseFactory.getAllLeaveRequestsGrouped(employeeId).collect { result ->
+                if (result is ResultState.Success) {
+                    val groupedLeavesList = result.data
+                    _employeeDetailsScreenState.update {
+                        it.copy(
+                            approvedLeavesList = groupedLeavesList.approved,
+                            unApprovedLeavesList = groupedLeavesList.unapproved
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun emitLogoutEvent(isUserLoggedOut: Boolean) {
@@ -236,4 +278,14 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
             taskId,
             _employeeDetailsScreenState.value.tasksInProgress
         )
+
+    fun setEmployeeDetailsScreenToolbarTitle(title: String) {
+        _employeeDetailScreenTitle.value = title
+    }
+
+    fun approveEmployeeLeave(leaveRequest: LeaveRequest) {
+        viewModelScope.launch {
+            adminUseCase.markLeaveRequestAsApproved(leaveRequest)
+        }
+    }
 }

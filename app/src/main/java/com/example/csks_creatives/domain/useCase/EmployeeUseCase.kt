@@ -1,6 +1,7 @@
 package com.example.csks_creatives.domain.useCase
 
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
+import com.example.csks_creatives.domain.model.employee.LeaveRequestsGrouped
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
 import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactory
@@ -64,4 +65,24 @@ class EmployeeUseCase @Inject constructor(
                 )
             }
         }.flowOn(Dispatchers.IO)
+
+    override suspend fun getAllLeaveRequestsGrouped(employeeId: String): Flow<ResultState<LeaveRequestsGrouped>> =
+        flow {
+            try {
+                employeeRepository.getAllApprovedAndUnApprovedRequestsForEmployee(employeeId)
+                    .collect { groupedLeaveRequests ->
+                        val sortedGrouped = LeaveRequestsGrouped(
+                            approved = groupedLeaveRequests.approved.sortedByDescending { it.leaveDate },
+                            unapproved = groupedLeaveRequests.unapproved.sortedByDescending { it.leaveDate }
+                        )
+                        emit(ResultState.Success(sortedGrouped))
+                    }
+            } catch (exception: Exception) {
+                emit(
+                    ResultState.Error(
+                        exception.localizedMessage ?: "Error fetching leave requests"
+                    )
+                )
+            }
+        }
 }

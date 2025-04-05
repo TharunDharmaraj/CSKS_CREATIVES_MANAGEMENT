@@ -41,7 +41,7 @@ fun AdminHomeScreen(
     val adminToolbarTitle = viewModel.homeScreenTitle.collectAsState()
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
-    val items = listOf(
+    val navigationItems = listOf(
         AdminBottomNavigation.Employees,
         AdminBottomNavigation.Clients,
         AdminBottomNavigation.Tasks,
@@ -86,15 +86,15 @@ fun AdminHomeScreen(
             NavigationBar(containerColor = darkSlateBlue) {
                 val currentPage = pagerState.currentPage
 
-                items.forEach { item ->
+                navigationItems.forEach { item ->
                     val showBadge =
                         item is AdminBottomNavigation.LeaveRequests && viewModel.hasUnapprovedLeaves.value
 
                     NavigationBarItem(
-                        selected = items[currentPage] == item,
+                        selected = navigationItems[currentPage] == item,
                         onClick = {
                             coroutineScope.launch {
-                                pagerState.animateScrollToPage(items.indexOf(item))
+                                pagerState.animateScrollToPage(navigationItems.indexOf(item))
                             }
                         },
                         icon = {
@@ -120,7 +120,7 @@ fun AdminHomeScreen(
         val visibilityState = viewModel.adminHomeScreenVisibilityState.collectAsState()
 
         LaunchedEffect(pagerState.currentPage) {
-            when (items[pagerState.currentPage]) {
+            when (navigationItems[pagerState.currentPage]) {
                 AdminBottomNavigation.Employees -> viewModel.setHomeScreenTitle("Employees")
                 AdminBottomNavigation.Clients -> viewModel.setHomeScreenTitle("Clients")
                 AdminBottomNavigation.Tasks -> viewModel.setHomeScreenTitle("My Tasks")
@@ -139,11 +139,11 @@ fun AdminHomeScreen(
         }
 
         HorizontalPager(
-            count = items.size,
+            count = navigationItems.size,
             state = pagerState,
             modifier = Modifier.padding(padding)
         ) { page ->
-            when (items[page]) {
+            when (navigationItems[page]) {
                 AdminBottomNavigation.Employees -> {
                     viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleEmployeeSection)
                     EmployeeListScreen(navController, viewModel)
