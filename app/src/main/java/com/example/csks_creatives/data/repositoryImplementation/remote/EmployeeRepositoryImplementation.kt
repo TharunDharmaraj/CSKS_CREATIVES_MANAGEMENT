@@ -112,7 +112,6 @@ class EmployeeRepositoryImplementation @Inject constructor(
 
             awaitClose {
                 listenerRegistration.remove()
-                Log.d(logTag, "Firestore listener removed for employeeId: $employeeId")
             }
         }
 
