@@ -188,6 +188,7 @@ fun AddEmployeeDialog(viewModel: AdminHomeScreenViewModel) {
             Column {
                 TextField(
                     value = state.value.employeeName,
+                    singleLine = true,
                     onValueChange = {
                         viewModel.onEmployeeDialogEvent(
                             AddEmployeeDialogEvent.EmployeeNameTextFieldChanged(
@@ -200,6 +201,7 @@ fun AddEmployeeDialog(viewModel: AdminHomeScreenViewModel) {
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = state.value.employeePassword,
+                    singleLine = true,
                     onValueChange = {
                         viewModel.onEmployeeDialogEvent(
                             AddEmployeeDialogEvent.EmployeeNamePasswordFieldChanged(
@@ -245,6 +247,7 @@ fun AddClientDialog(viewModel: AdminHomeScreenViewModel) {
         text = {
             TextField(
                 value = state.value.clientName,
+                singleLine = true,
                 onValueChange = {
                     viewModel.onClientDialogEvent(
                         AddClientDialogEvent.ClientNameTextFieldChanged(

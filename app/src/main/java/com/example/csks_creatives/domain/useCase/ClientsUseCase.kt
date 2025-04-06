@@ -26,7 +26,6 @@ class ClientsUseCase @Inject constructor(
     override suspend fun addClient(client: Client): ResultState<String> {
         val buildClient = client.copy(
             clientId = client.clientName,
-            clientTasks = listOf()
         )
 
         if (buildClient.clientId.isBlank()) return ResultState.Error("Client ID Cannot be EMPTY")

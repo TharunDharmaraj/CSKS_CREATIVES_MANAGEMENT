@@ -7,8 +7,6 @@ import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_JOINED_
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_NAME
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_NUMBER_OF_TASKS_COMPLETED
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_PASSWORD
-import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_TASKS_COMPLETED
-import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_TASKS_IN_PROGRESS
 import com.example.csks_creatives.data.utils.Constants.LEAVES_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUESTS_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_APPROVAL_STATUS
@@ -44,8 +42,6 @@ class AdminRepositoryImplementation @Inject constructor(
                     EMPLOYEE_EMPLOYEE_NAME to employee.employeeName.lowercase(),
                     EMPLOYEE_EMPLOYEE_JOINED_TIME to employee.joinedTime,
                     EMPLOYEE_EMPLOYEE_PASSWORD to employee.employeePassword.lowercase(),
-                    EMPLOYEE_EMPLOYEE_TASKS_COMPLETED to employee.tasksCompleted,
-                    EMPLOYEE_EMPLOYEE_TASKS_IN_PROGRESS to employee.tasksInProgress,
                     EMPLOYEE_EMPLOYEE_NUMBER_OF_TASKS_COMPLETED to employee.numberOfTasksCompleted
                 ),
                 SetOptions.merge()
@@ -157,7 +153,10 @@ class AdminRepositoryImplementation @Inject constructor(
             Log.d(logTag + "check", "EmployeeId not found: $employeeId")
             return false
         } catch (exception: Exception) {
-            Log.d(logTag + "check", "Error fetching Employee exists: $employeeId")
+            Log.d(
+                logTag + "check",
+                "Error ${exception.message} fetching Employee exists: $employeeId"
+            )
             return true
         }
     }

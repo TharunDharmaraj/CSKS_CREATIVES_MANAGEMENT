@@ -1,10 +1,10 @@
 package com.example.csks_creatives.data.repositoryImplementation.remote
 
 import android.util.Log
-import com.example.csks_creatives.data.utils.Constants.COMMENT_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.COMMENT_COMMENTED_BY
 import com.example.csks_creatives.data.utils.Constants.COMMENT_ID
 import com.example.csks_creatives.data.utils.Constants.COMMENT_STRING
+import com.example.csks_creatives.data.utils.Constants.COMMENT_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.COMMENT_TIME_STAMP
 import com.example.csks_creatives.data.utils.Constants.TASKS_COLLECTION
 import com.example.csks_creatives.domain.model.task.Comment
@@ -65,5 +65,5 @@ class CommentsRepositoryImplementation @Inject constructor(
     }
 
     private fun getCommentPath(taskId: String) =
-        firestore.collection(TASKS_COLLECTION).document(taskId).collection(COMMENT_COLLECTION)
+        firestore.collection(TASKS_COLLECTION).document(taskId).collection(COMMENT_SUB_COLLECTION)
 }

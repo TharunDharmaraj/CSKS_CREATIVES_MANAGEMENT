@@ -4,7 +4,6 @@ import android.util.Log
 import com.example.csks_creatives.data.utils.Constants.CLIENT_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.CLIENT_ID
 import com.example.csks_creatives.data.utils.Constants.CLIENT_NAME
-import com.example.csks_creatives.data.utils.Constants.CLIENT_TASKS
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.repository.remote.ClientsRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -39,8 +38,7 @@ class ClientsRepositoryImplementation @Inject constructor(
             firestore.collection(CLIENT_COLLECTION).document(clientName).set(
                 hashMapOf(
                     CLIENT_ID to client.clientId,
-                    CLIENT_NAME to clientName,
-                    CLIENT_TASKS to client.clientTasks
+                    CLIENT_NAME to clientName
                 ),
                 SetOptions.merge()
             ).await()

@@ -6,8 +6,7 @@ import com.example.csks_creatives.data.utils.Converter
 @Entity(tableName = "ClientsList")
 data class ClientItem(
     @PrimaryKey val clientId: String,
-    val clientName: String,
-    var clientTasks: List<String>
+    val clientName: String
 )
 
 @Dao

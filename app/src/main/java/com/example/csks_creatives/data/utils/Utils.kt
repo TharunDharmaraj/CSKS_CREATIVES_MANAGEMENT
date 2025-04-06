@@ -44,8 +44,7 @@ object Utils {
 
     fun Client.toClientItem() = ClientItem(
         clientName = this.clientName,
-        clientId = this.clientId,
-        clientTasks = this.clientTasks
+        clientId = this.clientId
     )
 
     fun List<ClientItem>.toClientList(): List<Client> {
@@ -58,8 +57,7 @@ object Utils {
 
     private fun ClientItem.toClient() = Client(
         clientName = this.clientName,
-        clientId = this.clientId,
-        clientTasks = this.clientTasks
+        clientId = this.clientId
     )
 
     fun List<EmployeeItem>.toEmployeeList(): List<Employee> {

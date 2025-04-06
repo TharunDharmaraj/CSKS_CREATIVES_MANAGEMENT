@@ -5,7 +5,6 @@ object Constants {
     const val EMPLOYEE_COLLECTION = "Employee"
     const val ADMIN_COLLECTION = "Admin"
     const val CLIENT_COLLECTION = "Client"
-    const val COMMENT_COLLECTION = "Comment"
     const val TASKS_COLLECTION = "Tasks"
     const val LEAVE_REQUESTS_COLLECTION = "LeaveRequests"
 
@@ -21,6 +20,8 @@ object Constants {
     const val TASKS_IN_PROGRESS_OR_COMPLETED_SUB_COLLECTION_TASK_ID = "taskId"
     const val EMPLOYEE_EMPLOYEE_NUMBER_OF_TASKS_COMPLETED = "numberOfTasksCompleted"
     const val LEAVES_SUB_COLLECTION = "Leaves"
+
+    // LeaveRequests
     const val LEAVE_REQUEST_ID = "leaveRequestId"
     const val LEAVE_REQUEST_DATE = "leaveDate"
     const val LEAVE_REQUEST_REASON = "leaveReason"
@@ -35,14 +36,6 @@ object Constants {
     // Clients Collection Fields
     const val CLIENT_ID = "ClientId"
     const val CLIENT_NAME = "ClientName"
-    const val CLIENT_TASKS = "ClientTasks"
-
-    // Comments Collection Fields
-    const val COMMENT_ID = "CommentId"
-    const val COMMENT_STRING = "CommentString"
-    const val COMMENT_COMMENTED_BY = "CommentedBy"
-    const val COMMENT_TIME_STAMP = "CommentTimeStamp"
-    const val ADMIN_COMMENT_OWNER = "csks"
 
     // Task Collection Fields
     const val TASK_ID = "taskId"
@@ -56,10 +49,18 @@ object Constants {
     const val TASK_COST = "taskCost"
     const val TASK_PAID_STATUS = "taskPaidStatus"
     const val TASK_CURRENT_STATUS = "currentStatus"
+    const val COMMENT_SUB_COLLECTION = "Comment"
     const val TASK_STATUS_HISTORY_SUB_COLLECTION = "StatusHistory"
     const val TASK_STATUS_HISTORY_START_TIME = "startTime"
     const val TASK_STATUS_HISTORY_END_TIME = "endTime"
-    const val TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE = 0.toLong()
+    const val TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE = 0L
+
+    // Comments Collection Fields
+    const val COMMENT_ID = "CommentId"
+    const val COMMENT_STRING = "CommentString"
+    const val COMMENT_COMMENTED_BY = "CommentedBy"
+    const val COMMENT_TIME_STAMP = "CommentTimeStamp"
+    const val ADMIN_COMMENT_OWNER = "csks"
 
     // Status Types
     const val BACKLOG = "BACKLOG"
