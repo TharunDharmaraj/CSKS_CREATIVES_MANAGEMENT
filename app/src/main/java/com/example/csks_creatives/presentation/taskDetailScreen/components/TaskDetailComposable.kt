@@ -6,10 +6,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -19,6 +22,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.csks_creatives.data.utils.Constants.ADMIN_DOCUMENT_NAME
 import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.utills.enums.tasks.*
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
@@ -217,6 +221,60 @@ fun TaskDetailComposable(
             enabled = userRole == UserRole.Admin,
         )
 
+        // Task Priority (Dropdown)
+        DropdownMenuWithSelection(
+            label = "Task Priority",
+            selectedItem = dropDownListState.value.taskPriority.find { it == taskState.value.taskPriority }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskPriority.map { it.name },
+            onItemSelected = { selectedStatus ->
+                viewModel.onEvent(
+                    TaskDetailEvent.TaskPriorityChanged(
+                        TaskPriority.valueOf(
+                            selectedStatus
+                        )
+                    )
+                )
+            },
+            enabled = userRole == UserRole.Admin
+        )
+
+        // Task Direction App (Dropdown)
+        DropdownMenuWithSelection(
+            label = "Task Direction App",
+            selectedItem = dropDownListState.value.taskDirectionApp.find { it == taskState.value.taskDirectionApp }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskDirectionApp.map { it.name },
+            onItemSelected = { selectedStatus ->
+                viewModel.onEvent(
+                    TaskDetailEvent.TaskDirectionAppChanged(
+                        TaskDirectionApp.valueOf(
+                            selectedStatus
+                        )
+                    )
+                )
+            },
+            enabled = userRole == UserRole.Admin
+        )
+
+        // Task Upload Output (Dropdown)
+        DropdownMenuWithSelection(
+            label = "Task Upload Output",
+            selectedItem = dropDownListState.value.taskUploadOutput.find { it == taskState.value.taskUploadOutput }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskUploadOutput.map { it.name },
+            onItemSelected = { selectedStatus ->
+                viewModel.onEvent(
+                    TaskDetailEvent.TaskUploadOutputChanged(
+                        TaskUploadOutput.valueOf(
+                            selectedStatus
+                        )
+                    )
+                )
+            },
+            enabled = userRole == UserRole.Admin
+        )
+
         // Task Status (Dropdown)
         if (isTaskCreation.not()) {
             DropdownMenuWithSelection(
@@ -236,63 +294,6 @@ fun TaskDetailComposable(
         }
         Spacer(Modifier.height(10.dp))
 
-        // Task Priority (Dropdown)
-        DropdownMenuWithSelection(
-            label = "Task Priority",
-            selectedItem = dropDownListState.value.taskPriority.find { it == taskState.value.taskPriority }?.name
-                ?: "Select",
-            items = dropDownListState.value.taskPriority.map { it.name },
-            onItemSelected = { selectedStatus ->
-                viewModel.onEvent(
-                    TaskDetailEvent.TaskPriorityChanged(
-                        TaskPriority.valueOf(
-                            selectedStatus
-                        )
-                    )
-                )
-            },
-            enabled = userRole == UserRole.Admin
-        )
-        Spacer(Modifier.height(10.dp))
-
-        // Task Direction App (Dropdown)
-        DropdownMenuWithSelection(
-            label = "Task Direction App",
-            selectedItem = dropDownListState.value.taskDirectionApp.find { it == taskState.value.taskDirectionApp }?.name
-                ?: "Select",
-            items = dropDownListState.value.taskDirectionApp.map { it.name },
-            onItemSelected = { selectedStatus ->
-                viewModel.onEvent(
-                    TaskDetailEvent.TaskDirectionAppChanged(
-                        TaskDirectionApp.valueOf(
-                            selectedStatus
-                        )
-                    )
-                )
-            },
-            enabled = userRole == UserRole.Admin
-        )
-        Spacer(Modifier.height(10.dp))
-
-        // Task Upload Output (Dropdown)
-        DropdownMenuWithSelection(
-            label = "Task Upload Output",
-            selectedItem = dropDownListState.value.taskUploadOutput.find { it == taskState.value.taskUploadOutput }?.name
-                ?: "Select",
-            items = dropDownListState.value.taskUploadOutput.map { it.name },
-            onItemSelected = { selectedStatus ->
-                viewModel.onEvent(
-                    TaskDetailEvent.TaskUploadOutputChanged(
-                        TaskUploadOutput.valueOf(
-                            selectedStatus
-                        )
-                    )
-                )
-            },
-            enabled = userRole == UserRole.Admin
-        )
-        Spacer(Modifier.height(10.dp))
-
         if (visibilityState.value.isStatusHistoryVisible) {
             Text("Task Status History", style = MaterialTheme.typography.titleMedium)
             taskState.value.taskStatusHistory.forEach { statusEntry ->
@@ -300,29 +301,65 @@ fun TaskDetailComposable(
             }
         }
 
-
         // TODO ALLOW COMMENTS DURING TASKS CREATION - Use a Queuing Mechanism to post tasks once Task Created
         if (isTaskCreation.not()) {
+            Text(
+                "Comments",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
             if (taskState.value.taskComments.isNotEmpty()) {
-                Card(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        .padding(bottom = 8.dp)
                 ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(
-                            "Comments",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
+                    taskState.value.taskComments.forEach { comment ->
+                        var isMyComment = false
+                        val isAdminComment = comment.commentedBy == ADMIN_DOCUMENT_NAME
+                        val isCurrentUserIsAdmin = userRole == UserRole.Admin
+                        if (isCurrentUserIsAdmin && isAdminComment) {
+                            isMyComment = true
+                        } else {
+                            if (isCurrentUserIsAdmin.not() && isAdminComment.not()) {
+                                isMyComment = true
+                            }
+                        }
 
-                        taskState.value.taskComments.forEach { comment ->
-                            Text(
-                                "${comment.commentedBy}: ${comment.commentString} (${comment.commentTimeStamp})",
-                                modifier = Modifier.padding(4.dp)
-                            )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = if (isMyComment) Arrangement.End else Arrangement.Start
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                tonalElevation = 2.dp,
+                                color = if (isMyComment) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .widthIn(max = 280.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    if (!isMyComment) {
+                                        Text(
+                                            text = comment.commentedBy,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    Text(
+                                        text = comment.commentString,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                    Text(
+                                        text = comment.commentTimeStamp,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        modifier = Modifier.align(Alignment.End)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -334,16 +371,21 @@ fun TaskDetailComposable(
                 )
             }
 
-
-// Comment Input Section
+            // Input field and post button
             OutlinedTextField(
                 value = commentState.value.commentString,
                 onValueChange = {
-                    viewModel.onCommentEvent(TaskCommentsEvent.commentStringChanged(it))
+                    viewModel.onCommentEvent(TaskCommentsEvent.CommentStringChanged(it))
                 },
                 label = { Text("Add a comment") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Go),
+                keyboardActions = KeyboardActions(
+                    onGo = { viewModel.onCommentEvent(TaskCommentsEvent.CreateComment) }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             )
 
             Button(
@@ -354,6 +396,7 @@ fun TaskDetailComposable(
                 Text("Post Comment")
             }
         }
+
     }
 }
 

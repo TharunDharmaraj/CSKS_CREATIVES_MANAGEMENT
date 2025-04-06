@@ -259,7 +259,7 @@ class TaskDetailViewModel @Inject constructor(
 
     fun onCommentEvent(event: TaskCommentsEvent) {
         when (event) {
-            is TaskCommentsEvent.commentStringChanged -> {
+            is TaskCommentsEvent.CommentStringChanged -> {
                 _taskCommentState.value =
                     _taskCommentState.value.copy(commentString = event.commentDescription)
             }

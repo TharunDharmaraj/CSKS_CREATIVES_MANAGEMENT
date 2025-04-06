@@ -24,7 +24,7 @@ class CommentsUseCase @Inject constructor(
             try {
                 commentsRepository.getComments(taskId).collect { comments ->
                     emit(
-                        ResultState.Success(comments.sortedByDescending { it.commentTimeStamp }
+                        ResultState.Success(comments.sortedBy { it.commentTimeStamp }
                             .map { comment ->
                                 comment.copy(
                                     commentTimeStamp = formatTimeStamp(comment.commentTimeStamp)
