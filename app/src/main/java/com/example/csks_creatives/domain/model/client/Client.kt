@@ -14,5 +14,5 @@ data class Client(
     @PropertyName(CLIENT_ID) val clientId: String = EMPTY_STRING,
     @PropertyName(CLIENT_NAME) val clientName: String = EMPTY_STRING,
 ) {
-    constructor() : this("", "", emptyList())
+    constructor() : this("", "")
 }
