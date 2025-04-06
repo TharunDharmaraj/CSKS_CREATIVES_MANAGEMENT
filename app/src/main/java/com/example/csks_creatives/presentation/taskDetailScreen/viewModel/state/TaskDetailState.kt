@@ -14,6 +14,9 @@ data class TaskDetailState(
     val taskCost: Int = 0, // Editable and viewable only for admin
     val taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID,
     val taskType: TaskType = TaskType.SHORTS_VIDEO, // Editable for admin, Viewable for employee
+    val taskPriority: TaskPriority = TaskPriority.MEDIUM, //  Editable for Admin, Viewable for Employee
+    val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS, // Where the employee should find task related files. Editable for Admin, Viewable for Employee
+    val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES, // Where the tasks should be uploaded once complete.  Editable for Admin, Viewable for Employee
     val taskCurrentStatus: TaskStatusType = TaskStatusType.BACKLOG, // Read Only for Both Admin and Employee
     val taskStatusHistory: List<TaskStatusHistory> = emptyList(), // Status History - Read Only by both Admin and Employee
     val taskComments: List<Comment> = emptyList(), // List of Comments
@@ -29,6 +32,9 @@ fun TaskDetailState.toClientTask(): ClientTask {
         taskEstimate = this.taskEstimate,
         taskCost = this.taskCost,
         taskPaidStatus = this.taskPaidStatus,
+        taskPriority = this.taskPriority,
+        taskUploadOutput = this.taskUploadOutput,
+        taskDirectionApp = this.taskDirectionApp,
         taskType = this.taskType,
         currentStatus = this.taskCurrentStatus,
         statusHistory = this.taskStatusHistory

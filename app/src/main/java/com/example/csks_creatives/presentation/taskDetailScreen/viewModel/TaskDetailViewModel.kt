@@ -14,6 +14,8 @@ import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.getAvailableStatusOptions
 import com.example.csks_creatives.domain.utils.Utils.getTasksPaidStatusList
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.*
+import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCreationUiEvent.NavigateBack
+import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCreationUiEvent.ShowToast
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.state.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -35,6 +37,37 @@ class TaskDetailViewModel @Inject constructor(
         adminUseCaseFactory.create()
         commentsUseCaseFactory.create()
     }
+
+    private val _uiEvent = MutableSharedFlow<TaskCreationUiEvent>()
+    val uiEvent: SharedFlow<TaskCreationUiEvent> = _uiEvent.asSharedFlow()
+
+    private val _taskDetailState = MutableStateFlow(TaskDetailState())
+    val taskDetailState = _taskDetailState.asStateFlow()
+
+    private val initialTaskDetailState = MutableStateFlow(TaskDetailState())
+
+    private val _dropDownListState = MutableStateFlow(DropDownListState())
+    val dropDownListState = _dropDownListState.asStateFlow()
+
+    private val _taskCommentState = MutableStateFlow(TaskCommentState())
+    val taskCommentState = _taskCommentState.asStateFlow()
+
+    private val _visibilityState = MutableStateFlow(TaskDetailsSectionVisibilityState())
+    val visibilityState = _visibilityState.asStateFlow()
+
+    private val _actionButtonEnabled = MutableStateFlow(false)
+    val actionButtonEnabled = _actionButtonEnabled.asStateFlow()
+
+    private val _taskName = MutableStateFlow("Task Name")
+    var taskName = _taskName.asStateFlow()
+
+    private val _paidStatus = MutableStateFlow(false)
+    var paidStatus = _paidStatus.asStateFlow()
+
+    private var initialTaskStatus: TaskStatusType? = null
+    private var hasInitialized = false
+    private var isTaskSaved = false
+    private var commentOwner = EMPTY_STRING
 
     fun initialize(
         userRole: UserRole,
@@ -71,38 +104,6 @@ class TaskDetailViewModel @Inject constructor(
         }
     }
 
-
-    private val _uiEvent = MutableSharedFlow<TaskCreationUiEvent>()
-    val uiEvent: SharedFlow<TaskCreationUiEvent> = _uiEvent.asSharedFlow()
-
-    private val _taskDetailState = MutableStateFlow(TaskDetailState())
-    val taskDetailState = _taskDetailState.asStateFlow()
-
-    private val initialTaskDetailState = MutableStateFlow(TaskDetailState())
-
-    private val _dropDownListState = MutableStateFlow(DropDownListState())
-    val dropDownListState = _dropDownListState.asStateFlow()
-
-    private val _taskCommentState = MutableStateFlow(TaskCommentState())
-    val taskCommentState = _taskCommentState.asStateFlow()
-
-    private val _visibilityState = MutableStateFlow(TaskDetailsSectionVisibilityState())
-    val visibilityState = _visibilityState.asStateFlow()
-
-    private val _actionButtonEnabled = MutableStateFlow(false)
-    val actionButtonEnabled = _actionButtonEnabled.asStateFlow()
-
-    private val _taskName = MutableStateFlow("Task Name")
-    var taskName = _taskName.asStateFlow()
-
-    private val _paidStatus = MutableStateFlow(false)
-    var paidStatus = _paidStatus.asStateFlow()
-
-    private var initialTaskStatus: TaskStatusType? = null
-    private var hasInitialized = false
-    private var isTaskSaved = false
-    private var commentOwner = EMPTY_STRING
-
     fun onEvent(event: TaskDetailEvent) {
         when (event) {
             TaskDetailEvent.CreateTask -> {
@@ -110,12 +111,12 @@ class TaskDetailViewModel @Inject constructor(
                     val task = _taskDetailState.value.toClientTask()
                     when (val result = tasksUseCaseFactory.createTask(task)) {
                         is ResultState.Success -> {
-                            _uiEvent.emit(TaskCreationUiEvent.ShowToast(result.data))
-                            _uiEvent.emit(TaskCreationUiEvent.NavigateBack)
+                            _uiEvent.emit(ShowToast(result.data))
+                            _uiEvent.emit(NavigateBack)
                         }
 
                         is ResultState.Error -> {
-                            _uiEvent.emit(TaskCreationUiEvent.ShowToast("Failed Create task ${result.message}"))
+                            _uiEvent.emit(ShowToast("Failed Create task ${result.message}"))
                         }
 
                         is ResultState.Loading -> {
@@ -134,13 +135,13 @@ class TaskDetailViewModel @Inject constructor(
                         initialTask = initialTask
                     )) {
                         is ResultState.Success -> {
-                            _uiEvent.emit(TaskCreationUiEvent.ShowToast(result.data))
-                            _uiEvent.emit(TaskCreationUiEvent.NavigateBack)
+                            _uiEvent.emit(ShowToast(result.data))
+                            _uiEvent.emit(NavigateBack)
                         }
 
                         is ResultState.Error -> {
-                            _uiEvent.emit(TaskCreationUiEvent.ShowToast(result.message))
-                            _uiEvent.emit(TaskCreationUiEvent.NavigateBack)
+                            _uiEvent.emit(ShowToast(result.message))
+                            _uiEvent.emit(NavigateBack)
                         }
 
                         else -> {}
@@ -229,6 +230,30 @@ class TaskDetailViewModel @Inject constructor(
                     )
                 }
             }
+
+            is TaskDetailEvent.TaskDirectionAppChanged -> {
+                _taskDetailState.update {
+                    it.copy(
+                        taskDirectionApp = event.taskDirectionApp
+                    )
+                }
+            }
+
+            is TaskDetailEvent.TaskPriorityChanged -> {
+                _taskDetailState.update {
+                    it.copy(
+                        taskPriority = event.taskPriority
+                    )
+                }
+            }
+
+            is TaskDetailEvent.TaskUploadOutputChanged -> {
+                _taskDetailState.update {
+                    it.copy(
+                        taskUploadOutput = event.taskUploadOutput
+                    )
+                }
+            }
         }
     }
 
@@ -292,6 +317,9 @@ class TaskDetailViewModel @Inject constructor(
                         taskAssignedTo = task.employeeId,
                         taskEstimate = task.taskEstimate,
                         taskPaidStatus = task.taskPaidStatus,
+                        taskPriority = task.taskPriority,
+                        taskUploadOutput = task.taskUploadOutput,
+                        taskDirectionApp = task.taskDirectionApp,
                         taskType = task.taskType,
                         taskCost = task.taskCost,
                         taskCurrentStatus = task.currentStatus
@@ -303,6 +331,9 @@ class TaskDetailViewModel @Inject constructor(
                         taskAssignedTo = task.employeeId,
                         taskEstimate = task.taskEstimate,
                         taskPaidStatus = task.taskPaidStatus,
+                        taskPriority = task.taskPriority,
+                        taskUploadOutput = task.taskUploadOutput,
+                        taskDirectionApp = task.taskDirectionApp,
                         taskType = task.taskType,
                         taskCost = task.taskCost,
                         taskCurrentStatus = task.currentStatus

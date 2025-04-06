@@ -12,6 +12,9 @@ data class ClientTaskOverview(
     val taskCost: Int = 0,
     val taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID,
     val taskType: TaskType = TaskType.SHORTS_VIDEO,
+    val taskPriority: TaskPriority = TaskPriority.MEDIUM,
+    val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS,
+    val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES,
     val currentStatus: TaskStatusType = TaskStatusType.BACKLOG,
     val taskInProgressTime: String = EMPTY_STRING,
     val taskCompletedTime: String = EMPTY_STRING

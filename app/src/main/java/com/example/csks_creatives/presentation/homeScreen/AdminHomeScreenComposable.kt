@@ -1,7 +1,7 @@
 package com.example.csks_creatives.presentation.homeScreen
 
 import android.widget.Toast
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +22,7 @@ import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.darkSlateBlue
+import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.AdminHomeScreenViewModel
@@ -333,6 +334,7 @@ fun LeaveRequestTaskItem(
 @Composable
 fun CardItem(
     title: String,
+    cardBorder: BorderStroke? = null,
     subtitle: String? = null,
     onClick: () -> Unit
 ) {
@@ -340,9 +342,9 @@ fun CardItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onClick() }
-            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)),
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
+        border = cardBorder ?: BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Column(
@@ -428,7 +430,7 @@ fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScree
                 if (isLoading) LoadingProgress()
                 CardItem(
                     title = state.value.clientList[index].clientName,
-                    onClick = { navController.navigate("client_detail/${state.value.clientList[index].clientId}") }
+                    onClick = { navController.navigate("client_detail/${state.value.clientList[index].clientId}") },
                 )
             }
         }
@@ -548,7 +550,7 @@ fun TaskListContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 32.dp),
-                contentAlignment = Alignment.TopCenter
+                contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
@@ -559,7 +561,7 @@ fun TaskListContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 32.dp),
-                contentAlignment = Alignment.TopCenter
+                contentAlignment = Alignment.Center
             ) {
                 Text("No $tasksListName found", style = MaterialTheme.typography.bodyLarge)
             }
@@ -576,6 +578,10 @@ fun TaskListContent(
                     CardItem(
                         title = tasks[index].taskName,
                         subtitle = tasks[index].taskType.name,
+                        cardBorder = BorderStroke(
+                            width = 2.dp,
+                            color = getBorderColorBasedOnTaskPriority(tasks[index].taskPriority)
+                        ),
                         onClick = {
                             navController.navigate("task_detail/${tasks[index].taskId}/$ADMIN_NAME")
                         }

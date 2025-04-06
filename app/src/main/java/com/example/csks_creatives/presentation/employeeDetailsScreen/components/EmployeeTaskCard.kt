@@ -1,5 +1,6 @@
 package com.example.csks_creatives.presentation.employeeDetailsScreen.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -8,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
+import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
 
 @Composable
 fun EmployeeTaskCard(task: ClientTaskOverview, onClick: () -> Unit, timeTaken: String) {
@@ -16,6 +18,10 @@ fun EmployeeTaskCard(task: ClientTaskOverview, onClick: () -> Unit, timeTaken: S
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        border = BorderStroke(
+            width = 2.dp,
+            color = getBorderColorBasedOnTaskPriority(task.taskPriority)
+        ),
         onClick = onClick
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

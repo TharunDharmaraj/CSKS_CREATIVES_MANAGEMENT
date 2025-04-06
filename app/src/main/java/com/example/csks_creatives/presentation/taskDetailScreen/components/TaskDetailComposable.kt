@@ -1,7 +1,6 @@
 package com.example.csks_creatives.presentation.taskDetailScreen.components
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -18,9 +17,10 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.csks_creatives.domain.model.employee.Employee
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.enums.tasks.*
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.TaskDetailViewModel
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCommentsEvent
@@ -95,8 +95,7 @@ fun TaskDetailComposable(
                 }) {
                     Text("Stay")
                 }
-            }
-        )
+            })
     }
 
     Column(
@@ -127,7 +126,6 @@ fun TaskDetailComposable(
                 viewModel.onEvent(TaskDetailEvent.TaskDescriptionTextFieldChanged(it))
             }, readOnly = userRole != UserRole.Admin
         )
-
 
         // Estimate
         OutlinedTextField(
@@ -238,6 +236,63 @@ fun TaskDetailComposable(
         }
         Spacer(Modifier.height(10.dp))
 
+        // Task Priority (Dropdown)
+        DropdownMenuWithSelection(
+            label = "Task Priority",
+            selectedItem = dropDownListState.value.taskPriority.find { it == taskState.value.taskPriority }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskPriority.map { it.name },
+            onItemSelected = { selectedStatus ->
+                viewModel.onEvent(
+                    TaskDetailEvent.TaskPriorityChanged(
+                        TaskPriority.valueOf(
+                            selectedStatus
+                        )
+                    )
+                )
+            },
+            enabled = userRole == UserRole.Admin
+        )
+        Spacer(Modifier.height(10.dp))
+
+        // Task Direction App (Dropdown)
+        DropdownMenuWithSelection(
+            label = "Task Direction App",
+            selectedItem = dropDownListState.value.taskDirectionApp.find { it == taskState.value.taskDirectionApp }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskDirectionApp.map { it.name },
+            onItemSelected = { selectedStatus ->
+                viewModel.onEvent(
+                    TaskDetailEvent.TaskDirectionAppChanged(
+                        TaskDirectionApp.valueOf(
+                            selectedStatus
+                        )
+                    )
+                )
+            },
+            enabled = userRole == UserRole.Admin
+        )
+        Spacer(Modifier.height(10.dp))
+
+        // Task Upload Output (Dropdown)
+        DropdownMenuWithSelection(
+            label = "Task Upload Output",
+            selectedItem = dropDownListState.value.taskUploadOutput.find { it == taskState.value.taskUploadOutput }?.name
+                ?: "Select",
+            items = dropDownListState.value.taskUploadOutput.map { it.name },
+            onItemSelected = { selectedStatus ->
+                viewModel.onEvent(
+                    TaskDetailEvent.TaskUploadOutputChanged(
+                        TaskUploadOutput.valueOf(
+                            selectedStatus
+                        )
+                    )
+                )
+            },
+            enabled = userRole == UserRole.Admin
+        )
+        Spacer(Modifier.height(10.dp))
+
         if (visibilityState.value.isStatusHistoryVisible) {
             Text("Task Status History", style = MaterialTheme.typography.titleMedium)
             taskState.value.taskStatusHistory.forEach { statusEntry ->
@@ -330,7 +385,8 @@ fun ClickableLinkTextField(
         }
     }
 
-    OutlinedTextField(value = text,
+    OutlinedTextField(
+        value = text,
         onValueChange = { if (!readOnly) onTextChange(it) },
         readOnly = readOnly,
         label = { Text("Task Description") },
@@ -354,12 +410,11 @@ fun ClickableLinkTextField(
                         annotatedText.getStringAnnotations(
                             tag = "URL", start = offset, end = offset
                         ).firstOrNull()?.let { annotation ->
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                            val intent = Intent(Intent.ACTION_VIEW, annotation.item.toUri())
                             context.startActivity(intent)
                         }
                     }
                 }
             }
-        }
-    )
+        })
 }

@@ -168,32 +168,45 @@ fun ActiveTasksScreen(viewModel: EmployeeDetailsScreenViewModel, navController: 
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        LazyColumn {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Sort by Date:", fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Ascending))
-                    }) {
-                        Text("Ascending")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Descending))
-                    }) {
-                        Text("Descending")
+        if (state.tasksInProgress.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No active tasks found.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 32.dp)
+                )
+            }
+        } else {
+            LazyColumn {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Sort by Date:", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Ascending))
+                        }) {
+                            Text("Ascending")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Descending))
+                        }) {
+                            Text("Descending")
+                        }
                     }
                 }
-            }
-            items(state.tasksInProgress.size) { index ->
-                EmployeeTaskCard(
-                    task = state.tasksInProgress[index],
-                    onClick = {
-                        navController.navigate("task_detail/${state.tasksInProgress[index].taskId}/$ADMIN_NAME")
-                    },
-                    timeTaken = viewModel.getTimeTakenForActiveTask(state.tasksInProgress[index].taskId)
-                )
+                items(state.tasksInProgress.size) { index ->
+                    EmployeeTaskCard(
+                        task = state.tasksInProgress[index],
+                        onClick = {
+                            navController.navigate("task_detail/${state.tasksInProgress[index].taskId}/$ADMIN_NAME")
+                        },
+                        timeTaken = viewModel.getTimeTakenForActiveTask(state.tasksInProgress[index].taskId)
+                    )
+                }
             }
         }
     }
@@ -224,36 +237,50 @@ fun CompletedTasksScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        LazyColumn {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Sort by Date:", fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Ascending))
-                    }) {
-                        Text("Ascending")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Descending))
-                    }) {
-                        Text("Descending")
+        if (state.tasksCompleted.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No completed tasks found.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 32.dp)
+                )
+            }
+        } else {
+            LazyColumn {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Sort by Date:", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Ascending))
+                        }) {
+                            Text("Ascending")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            viewModel.onEvent(EmployeeDetailsScreenEvent.Order(DateOrder.Descending))
+                        }) {
+                            Text("Descending")
+                        }
                     }
                 }
-            }
-            items(state.tasksCompleted.size) { index ->
-                EmployeeTaskCard(
-                    task = state.tasksCompleted[index],
-                    onClick = {
-                        navController.navigate("task_detail/${state.tasksCompleted[index].taskId}/$ADMIN_NAME")
-                    },
-                    timeTaken = viewModel.getTimeTakenForCompletion(state.tasksCompleted[index].taskId)
-                )
+                items(state.tasksCompleted.size) { index ->
+                    EmployeeTaskCard(
+                        task = state.tasksCompleted[index],
+                        onClick = {
+                            navController.navigate("task_detail/${state.tasksCompleted[index].taskId}/$ADMIN_NAME")
+                        },
+                        timeTaken = viewModel.getTimeTakenForCompletion(state.tasksCompleted[index].taskId)
+                    )
+                }
             }
         }
     }
 }
+
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalPagerApi::class)
 @Composable

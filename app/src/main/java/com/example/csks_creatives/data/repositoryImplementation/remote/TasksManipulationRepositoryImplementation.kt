@@ -6,16 +6,19 @@ import com.example.csks_creatives.data.utils.Constants.TASK_ATTACHMENT
 import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_COST
 import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
+import com.example.csks_creatives.data.utils.Constants.TASK_DIRECTION_APP
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
+import com.example.csks_creatives.data.utils.Constants.TASK_PRIORITY
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_TASK_NAME
 import com.example.csks_creatives.data.utils.Constants.TASK_TYPE
+import com.example.csks_creatives.data.utils.Constants.TASK_UPLOAD_OUTPUT
 import com.example.csks_creatives.data.utils.Utils.convertStatusTypeToString
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
@@ -81,7 +84,7 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             )
             Log.d(logTag + "Status", "Successfully changed TaskId $taskId to $status")
         } catch (exception: Exception) {
-            Log.d(logTag + "Status", "Failed to changed TaskId $taskId to $status")
+            Log.d(logTag + "Status", "Failed with $exception to changed TaskId $taskId to $status")
         }
     }
 
@@ -126,13 +129,16 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                     TASK_ESTIMATE to task.taskEstimate,
                     TASK_COST to task.taskCost,
                     TASK_PAID_STATUS to task.taskPaidStatus,
+                    TASK_PRIORITY to task.taskPriority,
+                    TASK_DIRECTION_APP to task.taskDirectionApp,
+                    TASK_UPLOAD_OUTPUT to task.taskUploadOutput,
                     TASK_TYPE to task.taskType,
                     TASK_CURRENT_STATUS to task.currentStatus
                 ), SetOptions.merge()
             )
             Log.d(logTag + "Edit", "Successfully Edited TaskId $task")
         } catch (exception: Exception) {
-            Log.d(logTag + "Edit", "Failed to Edit TaskId ${task.taskId}")
+            Log.d(logTag + "Edit", "Failed with $exception to Edit TaskId ${task.taskId}")
         }
     }
 

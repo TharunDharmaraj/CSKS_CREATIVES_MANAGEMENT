@@ -9,16 +9,19 @@ import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_COST
 import com.example.csks_creatives.data.utils.Constants.TASK_CREATION_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
+import com.example.csks_creatives.data.utils.Constants.TASK_DIRECTION_APP
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
+import com.example.csks_creatives.data.utils.Constants.TASK_PRIORITY
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_TASK_NAME
 import com.example.csks_creatives.data.utils.Constants.TASK_TYPE
+import com.example.csks_creatives.data.utils.Constants.TASK_UPLOAD_OUTPUT
 import com.example.csks_creatives.data.utils.Utils.convertStringStatusToStatusType
 import com.example.csks_creatives.domain.model.task.*
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
@@ -54,6 +57,9 @@ class TasksRepositoryImplementation @Inject constructor(
                     TASK_ATTACHMENT to task.taskAttachment,
                     TASK_ESTIMATE to task.taskEstimate,
                     TASK_COST to task.taskCost,
+                    TASK_PRIORITY to task.taskPriority,
+                    TASK_DIRECTION_APP to task.taskDirectionApp,
+                    TASK_UPLOAD_OUTPUT to task.taskUploadOutput,
                     TASK_PAID_STATUS to task.taskPaidStatus,
                     TASK_TYPE to task.taskType,
                     TASK_CURRENT_STATUS to task.currentStatus
@@ -141,6 +147,9 @@ class TasksRepositoryImplementation @Inject constructor(
                         taskPaidStatus = task.taskPaidStatus,
                         taskCost = task.taskCost,
                         taskType = task.taskType,
+                        taskPriority = task.taskPriority,
+                        taskDirectionApp = task.taskDirectionApp,
+                        taskUploadOutput = task.taskUploadOutput,
                         currentStatus = task.currentStatus,
                         taskInProgressTime = inProgressStartTime ?: "133",
                         taskCompletedTime = completedStartTime ?: "153"

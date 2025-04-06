@@ -15,4 +15,7 @@ sealed class TaskDetailEvent {
     data class TaskAssignedToEmployeeChanged(val employeeId: String) : TaskDetailEvent()
     data class TaskTypeChanged(val taskType: TaskType) : TaskDetailEvent()
     data class TaskStatusTypeChanged(val taskStatusType: TaskStatusType) : TaskDetailEvent()
+    data class TaskPriorityChanged(val taskPriority: TaskPriority) : TaskDetailEvent()
+    data class TaskDirectionAppChanged(val taskDirectionApp: TaskDirectionApp) : TaskDetailEvent()
+    data class TaskUploadOutputChanged(val taskUploadOutput: TaskUploadOutput) : TaskDetailEvent()
 }
