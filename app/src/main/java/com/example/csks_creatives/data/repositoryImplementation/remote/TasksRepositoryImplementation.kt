@@ -14,6 +14,9 @@ import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
+import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_AMOUNT
+import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_PAYMENT_DATE
+import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_PRIORITY
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
@@ -26,6 +29,7 @@ import com.example.csks_creatives.data.utils.Utils.convertStringStatusToStatusTy
 import com.example.csks_creatives.domain.model.task.*
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.repository.remote.TasksRepository
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import com.google.firebase.firestore.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
@@ -68,7 +72,7 @@ class TasksRepositoryImplementation @Inject constructor(
             setInitialTaskStatusOnTaskCreation(taskId, taskCreationTime)
             Log.d(logTag + "Create", "Successfully createdTask $task")
         } catch (exception: Exception) {
-            Log.d(logTag + "Create", "Failed $exception to create Task $task")
+            Log.d(logTag + "Create", "Failed ${exception.message}  to create Task $task")
         }
     }
 
@@ -80,13 +84,20 @@ class TasksRepositoryImplementation @Inject constructor(
                 return@addSnapshotListener
             }
             var updatedTaskWithStatusHistory = ClientTask()
-            documentSnapshot.let { documentSnapshot1 ->
+            documentSnapshot.let { documentSnapshot ->
                 val getTaskStatusJob = tasksRepositoryCoroutineScope.launch {
-                    val task = documentSnapshot1?.toObject(ClientTask::class.java)
-                        ?.copy(taskId = documentSnapshot1.id)
+                    val task = documentSnapshot?.toObject(ClientTask::class.java)
+                        ?.copy(taskId = documentSnapshot.id)
                     task?.let {
-                        val statusHistory = getTaskStatusList(documentSnapshot1.id)
+                        val paymentHistory = getTaskPaymentsList(documentSnapshot.id)
+                        val statusHistory = getTaskStatusList(documentSnapshot.id)
                         updatedTaskWithStatusHistory = it.copy(
+                            paymentHistory = paymentHistory.map { pair ->
+                                PaymentInfo(
+                                    pair.first.toInt(),
+                                    pair.second
+                                )
+                            },
                             statusHistory = statusHistory.map { (id, times) ->
                                 TaskStatusHistory(
                                     convertStringStatusToStatusType(id),
@@ -257,7 +268,7 @@ class TasksRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(
                 logTag + "Create",
-                "Failed to create dummy status on Task Creation Exception: $exception"
+                "Failed to create dummy status on Task Creation exception: ${exception.message}"
             )
         }
     }
@@ -277,9 +288,29 @@ class TasksRepositoryImplementation @Inject constructor(
                 statusHistoryMap[documentSnapshot.id] = listOf(startTime, endTime)
             }
         } catch (exception: Exception) {
-            Log.d(logTag + "StatusList", "Error building statusMap $exception")
+            Log.d(logTag + "StatusList", "Error building statusMap ${exception.message} ")
         }
         return statusHistoryMap
+    }
+
+    // To get the list of payment statuses
+    private suspend fun getTaskPaymentsList(taskId: String): List<Pair<Long, String>> {
+        val paymentHistoryList = arrayListOf<Pair<Long, String>>()
+        try {
+            val paymentsSubCollectionRef =
+                getTaskPath(taskId).collection(TASK_PAYMENTS_INFO_SUB_COLLECTION).get().await()
+            paymentsSubCollectionRef.documents.forEach { documentSnapshot ->
+                val paymentAmount =
+                    documentSnapshot.getLong(TASK_PAYMENTS_INFO_AMOUNT) ?: 0
+                val paymentDate =
+                    documentSnapshot.getString(TASK_PAYMENTS_INFO_PAYMENT_DATE)
+                        ?: getCurrentTimeAsString()
+                paymentHistoryList.add(Pair(paymentAmount, paymentDate))
+            }
+        } catch (exception: Exception) {
+            Log.d(logTag + "StatusList", "Error building statusMap ${exception.message} ")
+        }
+        return paymentHistoryList.toList()
     }
 
     private fun getTaskPath(taskId: String) =

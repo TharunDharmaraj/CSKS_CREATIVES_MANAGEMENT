@@ -117,7 +117,7 @@ class AdminUseCase @Inject constructor(
                     emit(ResultState.Success(leaveRequestList))
                 }
             } catch (exception: Exception) {
-                emit(ResultState.Error("Error $exception fetching Active Leave Requests"))
+                emit(ResultState.Error("Error ${exception.message}  fetching Active Leave Requests"))
             }
         }.flowOn(Dispatchers.IO)
 
@@ -129,7 +129,7 @@ class AdminUseCase @Inject constructor(
             )
             return ResultState.Success("Leave Approved")
         } catch (exception: Exception) {
-            return ResultState.Error("Error $exception in Approval")
+            return ResultState.Error("Error ${exception.message}  in Approval")
         }
     }
 }

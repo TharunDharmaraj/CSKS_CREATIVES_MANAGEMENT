@@ -11,6 +11,9 @@ import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
+import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_AMOUNT
+import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_PAYMENT_DATE
+import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_PRIORITY
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
@@ -20,8 +23,8 @@ import com.example.csks_creatives.data.utils.Constants.TASK_TASK_NAME
 import com.example.csks_creatives.data.utils.Constants.TASK_TYPE
 import com.example.csks_creatives.data.utils.Constants.TASK_UPLOAD_OUTPUT
 import com.example.csks_creatives.data.utils.Utils.convertStatusTypeToString
-import com.example.csks_creatives.domain.model.task.ClientTask
-import com.example.csks_creatives.domain.model.task.TaskStatusHistory
+import com.example.csks_creatives.domain.model.task.*
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsLong
@@ -46,7 +49,7 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             )
             Log.d(logTag + "Assign", "Assigned taskId $taskId to employeeId $employeeId")
         } catch (exception: Exception) {
-            Log.d(logTag + "Assign", "Error $exception assigning task to employee")
+            Log.d(logTag + "Assign", "Error ${exception.message}  assigning task to employee")
         }
     }
 
@@ -84,7 +87,10 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             )
             Log.d(logTag + "Status", "Successfully changed TaskId $taskId to $status")
         } catch (exception: Exception) {
-            Log.d(logTag + "Status", "Failed with $exception to changed TaskId $taskId to $status")
+            Log.d(
+                logTag + "Status",
+                "Failed with ${exception.message}  to changed TaskId $taskId to $status"
+            )
         }
     }
 
@@ -138,7 +144,44 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             )
             Log.d(logTag + "Edit", "Successfully Edited TaskId $task")
         } catch (exception: Exception) {
-            Log.d(logTag + "Edit", "Failed with $exception to Edit TaskId ${task.taskId}")
+            Log.d(
+                logTag + "Edit",
+                "Failed with ${exception.message}  to Edit TaskId ${task.taskId}"
+            )
+        }
+    }
+
+    override suspend fun addPartialTaskAmount(taskId: String, paymentInfo: PaymentInfo) {
+        try {
+            getTaskPath(taskId).collection(TASK_PAYMENTS_INFO_SUB_COLLECTION)
+                .document(paymentInfo.paymentDate).set(
+                    hashMapOf(
+                        TASK_PAYMENTS_INFO_AMOUNT to paymentInfo.amount,
+                        TASK_PAYMENTS_INFO_PAYMENT_DATE to paymentInfo.paymentDate
+                    ), SetOptions.merge()
+                )
+            Log.d(logTag + "PartialTaskAmount", "Successfully Edited TaskId $taskId")
+        } catch (exception: Exception) {
+            Log.d(
+                logTag + "PartialTaskAmount",
+                "Successfully Added partial Amount ${paymentInfo.amount} TaskId $taskId exception: ${exception.message}"
+            )
+        }
+    }
+
+    override suspend fun markTaskAsFullyPaid(taskId: String) {
+        try {
+            getTaskPath(taskId).set(
+                hashMapOf(
+                    TASK_PAID_STATUS to TaskPaidStatus.FULLY_PAID
+                ), SetOptions.merge()
+            )
+            Log.d(logTag + "PartialTaskAmount", "Successfully marked TaskId $taskId as Fully Paid")
+        } catch (exception: Exception) {
+            Log.d(
+                logTag + "PartialTaskAmount",
+                "Error in marking TaskId $taskId as Fully Paid, Exception: ${exception.message}"
+            )
         }
     }
 

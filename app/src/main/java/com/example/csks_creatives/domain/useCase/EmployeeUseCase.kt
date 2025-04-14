@@ -100,7 +100,7 @@ class EmployeeUseCase @Inject constructor(
         } catch (exception: Exception) {
             Log.e(
                 logTag,
-                "Error in widthDrawLeaveRequest for employeeId:$leaveRequest.postedBy, leaveRequest:$leaveRequest $exception"
+                "Error in widthDrawLeaveRequest for employeeId:$leaveRequest.postedBy, leaveRequest:$leaveRequest ${exception.message} "
             )
         }
     }

@@ -46,7 +46,7 @@ class UserLoginUseCase @Inject constructor(
                 )
             }
         } catch (exception: Exception) {
-            Log.d(logTag, "Exception $exception in inserting user $user in localDB")
+            Log.d(logTag, "Exception ${exception.message}  in inserting user $user in localDB")
         }
     }
 

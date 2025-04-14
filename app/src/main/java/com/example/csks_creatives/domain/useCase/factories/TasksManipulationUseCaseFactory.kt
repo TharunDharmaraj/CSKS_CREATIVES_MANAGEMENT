@@ -17,4 +17,6 @@ interface TasksManipulationUseCaseFactory {
     suspend fun getTaskStatusHistory(taskId: String): Flow<ResultState<List<TaskStatusHistory>>>
 
     suspend fun editTask(currentTask: ClientTask, initialTask: ClientTask): ResultState<String>
+
+    suspend fun addPartialTaskAmount(taskId: String, partialAmount: Int, remainingAmount: Int): ResultState<String>
 }

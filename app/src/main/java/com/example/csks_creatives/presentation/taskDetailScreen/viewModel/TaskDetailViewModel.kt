@@ -254,6 +254,21 @@ class TaskDetailViewModel @Inject constructor(
                     )
                 }
             }
+
+            is TaskDetailEvent.TaskPartialPaymentAmountChanged -> {
+                _taskDetailState.update {
+                    it.copy(
+                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount
+                    )
+                }
+            }
+
+            TaskDetailEvent.AddTaskPartialPayment -> {
+                addPartialTaskAmount(
+                    _taskDetailState.value.taskId,
+                    _taskDetailState.value.taskPartialPaymentsAmount
+                )
+            }
         }
     }
 
@@ -322,7 +337,8 @@ class TaskDetailViewModel @Inject constructor(
                         taskDirectionApp = task.taskDirectionApp,
                         taskType = task.taskType,
                         taskCost = task.taskCost,
-                        taskCurrentStatus = task.currentStatus
+                        taskCurrentStatus = task.currentStatus,
+                        taskPaymentsHistory = task.paymentHistory
                     )
                     _taskDetailState.value = _taskDetailState.value.copy(
                         taskTitle = task.taskName,
@@ -336,7 +352,8 @@ class TaskDetailViewModel @Inject constructor(
                         taskDirectionApp = task.taskDirectionApp,
                         taskType = task.taskType,
                         taskCost = task.taskCost,
-                        taskCurrentStatus = task.currentStatus
+                        taskCurrentStatus = task.currentStatus,
+                        taskPaymentsHistory = task.paymentHistory
                     )
                     _taskName.value = task.taskName
                     _paidStatus.value = getTaskPaidStatus(_taskDetailState.value)
@@ -408,4 +425,29 @@ class TaskDetailViewModel @Inject constructor(
     private fun getIsTaskSavedStatus(): Boolean = isTaskSaved
 
     private fun getInitialTaskStatus(): TaskStatusType = initialTaskStatus ?: TaskStatusType.BACKLOG
+
+    private fun addPartialTaskAmount(taskId: String, amount: Int) = viewModelScope.launch {
+        val remainingAmount =
+            _taskDetailState.value.taskCost - _taskDetailState.value.taskPaymentsHistory.sumOf { it.amount }
+        tasksManipulationUseCaseFactory.addPartialTaskAmount(taskId, amount, remainingAmount).let {
+            when (it) {
+                is ResultState.Error -> {
+                    _uiEvent.emit(ShowToast(it.message))
+                }
+
+                ResultState.Loading -> {
+                    // Ignore
+                }
+
+                is ResultState.Success -> {
+                    _taskDetailState.update {
+                        it.copy(
+                            taskPartialPaymentsAmount = 0
+                        )
+                    }
+                    _uiEvent.emit(ShowToast(it.data))
+                }
+            }
+        }
+    }
 }

@@ -60,7 +60,7 @@ class CommentsRepositoryImplementation @Inject constructor(
             ).await()
             Log.d(logTag + "Post", "Successfully posted Comment : $commentToBePosted")
         } catch (exception: Exception) {
-            Log.d(logTag + "Post", "Error $exception in posting Comment : $commentToBePosted")
+            Log.d(logTag + "Post", "Error ${exception.message}  in posting Comment : $commentToBePosted")
         }
     }
 

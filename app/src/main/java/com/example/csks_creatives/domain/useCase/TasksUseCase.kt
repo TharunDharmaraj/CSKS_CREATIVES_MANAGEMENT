@@ -149,7 +149,7 @@ class TasksUseCase @Inject constructor(
                 emit(ResultState.Success(task))
             }
         } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get Task $taskId Tasks $exception"))
+            emit(ResultState.Error("Failed to get Task $taskId Tasks ${exception.message} "))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -163,7 +163,7 @@ class TasksUseCase @Inject constructor(
                     )
                 }
             } catch (exception: Exception) {
-                emit(ResultState.Error("Failed to get taskOverView $taskId Tasks $exception"))
+                emit(ResultState.Error("Failed to get taskOverView $taskId Tasks ${exception.message} "))
             }
         }.flowOn(Dispatchers.IO)
 
@@ -174,7 +174,7 @@ class TasksUseCase @Inject constructor(
                 emit(ResultState.Success(tasks))
             }
         } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All active Tasks $exception"))
+            emit(ResultState.Error("Failed to get All active Tasks ${exception.message} "))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -185,7 +185,7 @@ class TasksUseCase @Inject constructor(
                 emit(ResultState.Success(tasks))
             }
         } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All Backlog Tasks exception: $exception"))
+            emit(ResultState.Error("Failed to get All Backlog Tasks exception: ${exception.message}"))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -196,7 +196,7 @@ class TasksUseCase @Inject constructor(
                 emit(ResultState.Success(tasks))
             }
         } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All Completed Tasks exception: $exception"))
+            emit(ResultState.Error("Failed to get All Completed Tasks exception: ${exception.message}"))
         }
     }.flowOn(Dispatchers.IO)
 

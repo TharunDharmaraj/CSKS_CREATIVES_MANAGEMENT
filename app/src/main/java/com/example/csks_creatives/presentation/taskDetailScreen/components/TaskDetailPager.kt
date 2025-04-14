@@ -25,7 +25,7 @@ fun TaskDetailPager(
     isTaskCreation: Boolean,
     onEvent: (TaskDetailEvent) -> Unit,
     onCommentEvent: (TaskCommentsEvent) -> Unit,
-    getAvailableStatusOptions: () -> List<String>
+    getAvailableStatusOptions: () -> List<String>,
 ) {
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
@@ -34,13 +34,13 @@ fun TaskDetailPager(
     val tabTitles = when (userRole) {
         UserRole.Admin -> {
             if (isTaskCreation.not()) {
-                listOf("Task", "Amount", "History", "Comments")
+                listOf("Task", "Amount", "History", "Chat")
             } else {
                 listOf("New Task")
             }
         }
 
-        UserRole.Employee -> listOf("Task", "History", "Comments")
+        UserRole.Employee -> listOf("Task", "History", "Chat")
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -72,7 +72,7 @@ fun TaskDetailPager(
                             userRole = userRole,
                             isTaskCreation = isTaskCreation,
                             onEvent = onEvent,
-                            getAvailableStatusOptions = getAvailableStatusOptions
+                            getAvailableStatusOptions = getAvailableStatusOptions,
                         )
 
                         1 -> AmountSection(

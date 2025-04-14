@@ -75,7 +75,7 @@ class LoginRepositoryImplementation @Inject constructor(
             Log.d(logTag, "Invalid Credentials")
             Result.failure(Exception("Invalid Credentials"))
         } catch (exception: Exception) {
-            Log.d(logTag, "Exception $exception")
+            Log.d(logTag, "Exception ${exception.message} ")
             Result.failure(exception)
         }
     }

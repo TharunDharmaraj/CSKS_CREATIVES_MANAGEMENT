@@ -27,7 +27,7 @@ class ClientsRepositoryImplementation @Inject constructor(
             )
             return snapshot.documents.mapNotNull { it.toObject(Client::class.java) }
         } catch (exception: Exception) {
-            Log.d(logTag + "Get", "Error $exception in fetching clients")
+            Log.d(logTag + "Get", "Error ${exception.message}  in fetching clients")
             emptyList()
         }
     }
@@ -44,7 +44,7 @@ class ClientsRepositoryImplementation @Inject constructor(
             ).await()
             Log.d(logTag + "Add", "Client Added into firestore $client")
         } catch (exception: Exception) {
-            Log.d(logTag + "Add", "Failed $exception Adding client $client to firestore")
+            Log.d(logTag + "Add", "Failed ${exception.message}  Adding client $client to firestore")
         }
     }
 
@@ -59,7 +59,7 @@ class ClientsRepositoryImplementation @Inject constructor(
             Log.d(logTag + "Check", "Client $clientName Not Exists")
             return false
         } catch (exception: Exception) {
-            Log.d(logTag + "Check", "Error $exception checking employee Existence")
+            Log.d(logTag + "Check", "Error ${exception.message}  checking employee Existence")
             return true
         }
     }

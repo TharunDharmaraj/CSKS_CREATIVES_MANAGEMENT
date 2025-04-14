@@ -94,4 +94,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
+
+    // Notification Popup
+    implementation (libs.accompanist.permissions)
 }

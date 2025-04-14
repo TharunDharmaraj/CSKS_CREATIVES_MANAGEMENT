@@ -1,5 +1,6 @@
 [versions]
 accompanistPager = "0.28.0"
+accompanistPermissions = "0.35.0-alpha"
 accompanistSystemuicontroller = "0.30.1"
 agp = "8.7.3"
 firebaseBom = "33.12.0"
@@ -8,17 +9,17 @@ hiltAndroid = "2.51.1"
 hiltAndroidGradlePlugin = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 kotlin = "2.1.10"
-coreKtx = "1.15.0"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 kotlinGradlePlugin = "1.9.0"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.03.01"
+composeBom = "2025.04.00"
 lifecycleViewmodelCompose = "2.8.7"
 navigationCompose = "2.8.9"
-roomKtx = "2.6.1"
+roomKtx = "2.7.0"
 firebaseMessagingKtx = "24.1.1"
 workRuntimeKtx = "2.10.0"
 hiltWork = "1.2.0"
@@ -26,6 +27,7 @@ hiltWork = "1.2.0"
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPager" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltNavigationCompose" }

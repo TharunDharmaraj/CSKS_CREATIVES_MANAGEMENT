@@ -31,7 +31,7 @@ object Constants {
     // Admin Collection
     const val ADMIN_USERNAME = "UserName"
     const val ADMIN_PASSWORD = "Password"
-    const val ADMIN_DOCUMENT_NAME = "csks"
+    const val ADMIN_DOCUMENT_NAME = "kishor"
 
     // Clients Collection Fields
     const val CLIENT_ID = "ClientId"
@@ -57,13 +57,16 @@ object Constants {
     const val TASK_STATUS_HISTORY_START_TIME = "startTime"
     const val TASK_STATUS_HISTORY_END_TIME = "endTime"
     const val TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE = 0L
+    const val TASK_PAYMENTS_INFO_SUB_COLLECTION = "PaymentsInfo"
+    const val TASK_PAYMENTS_INFO_AMOUNT = "amount"
+    const val TASK_PAYMENTS_INFO_PAYMENT_DATE = "paymentDate"
 
     // Comments Collection Fields
     const val COMMENT_ID = "CommentId"
     const val COMMENT_STRING = "CommentString"
     const val COMMENT_COMMENTED_BY = "CommentedBy"
     const val COMMENT_TIME_STAMP = "CommentTimeStamp"
-    const val ADMIN_COMMENT_OWNER = "csks"
+    const val ADMIN_COMMENT_OWNER = "kishor"
 
     // Status Types
     const val BACKLOG = "BACKLOG"

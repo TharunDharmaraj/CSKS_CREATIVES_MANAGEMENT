@@ -59,7 +59,7 @@ class EmployeeRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(
                 logTag + "Post",
-                "Error $exception posting Leave for EmployeeId: ${leaveRequest.postedBy}"
+                "Error ${exception.message}  posting Leave for EmployeeId: ${leaveRequest.postedBy}"
             )
         }
     }
@@ -131,7 +131,7 @@ class EmployeeRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(
                 logTag + "Withdraw",
-                "Error $exception in withdrawing employeeId:$employeeId leaveRequest $leaveRequest"
+                "Error ${exception.message}  in withdrawing employeeId:$employeeId leaveRequest $leaveRequest"
             )
         }
     }

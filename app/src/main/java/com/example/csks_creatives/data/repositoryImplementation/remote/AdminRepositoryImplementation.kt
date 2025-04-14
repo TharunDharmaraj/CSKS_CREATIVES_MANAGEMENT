@@ -138,7 +138,7 @@ class AdminRepositoryImplementation @Inject constructor(
             )
             return snapshot.documents.mapNotNull { it.toObject(Employee::class.java) }
         } catch (exception: Exception) {
-            Log.d(logTag + "Get", "Error $exception in fetching Employees")
+            Log.d(logTag + "Get", "Error ${exception.message}  in fetching Employees")
             emptyList()
         }
     }
@@ -179,7 +179,7 @@ class AdminRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(
                 logTag + "addActiveTask",
-                "Error $exception in Adding Active TaskId $taskId into EmployeeId $employeeId"
+                "Error ${exception.message}  in Adding Active TaskId $taskId into EmployeeId $employeeId"
             )
         }
     }
@@ -197,7 +197,7 @@ class AdminRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(
                 logTag + "DeleteActiveTask",
-                "Error $exception in deleting active taskId $taskId for EmployeeId $employeeId"
+                "Error ${exception.message}  in deleting active taskId $taskId for EmployeeId $employeeId"
             )
         }
     }
@@ -220,7 +220,7 @@ class AdminRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(
                 logTag + "addCompletedTask",
-                "Error $exception in Adding completed TaskId $taskId into EmployeeId $employeeId"
+                "Error ${exception.message}  in Adding completed TaskId $taskId into EmployeeId $employeeId"
             )
         }
     }
@@ -241,7 +241,7 @@ class AdminRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.d(
                 logTag + "DeleteCompletedTask",
-                "Error $exception in deleting completed taskId $taskId for EmployeeId $employeeId"
+                "Error ${exception.message}  in deleting completed taskId $taskId for EmployeeId $employeeId"
             )
         }
     }
@@ -287,7 +287,7 @@ class AdminRepositoryImplementation @Inject constructor(
         } catch (exception: Exception) {
             Log.e(
                 logTag + "markLeaveRequest",
-                "Error $exception in marking approved leaveId: $leaveRequestId employeeId: $employeeId"
+                "Error ${exception.message}  in marking approved leaveId: $leaveRequestId employeeId: $employeeId"
             )
         }
     }

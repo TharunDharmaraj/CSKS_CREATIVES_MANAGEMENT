@@ -1,6 +1,7 @@
 package com.example.csks_creatives.domain.repository.remote
 
 import com.example.csks_creatives.domain.model.task.ClientTask
+import com.example.csks_creatives.domain.model.task.PaymentInfo
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import kotlinx.coroutines.flow.Flow
@@ -13,4 +14,8 @@ interface TasksManipulationRepository {
     suspend fun fetchTaskStatusHistory(taskId: String): Flow<List<TaskStatusHistory>>
 
     suspend fun editTask(task: ClientTask)
+
+    suspend fun addPartialTaskAmount(taskId: String, paymentInfo: PaymentInfo)
+
+    suspend fun markTaskAsFullyPaid(taskId: String)
 }

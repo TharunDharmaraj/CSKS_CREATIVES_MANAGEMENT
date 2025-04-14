@@ -1,12 +1,12 @@
 package com.example.csks_creatives.domain.useCase
 
-import com.example.csks_creatives.domain.model.task.ClientTask
-import com.example.csks_creatives.domain.model.task.TaskStatusHistory
+import com.example.csks_creatives.domain.model.task.*
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.example.csks_creatives.domain.useCase.factories.TasksManipulationUseCaseFactory
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -52,7 +52,7 @@ class TasksManipulationUseCase @Inject constructor(
                         emit(ResultState.Success(statusHistory))
                     }
             } catch (exception: Exception) {
-                emit(ResultState.Error("Failed to get statusHistory for $taskId Tasks $exception"))
+                emit(ResultState.Error("Failed to get statusHistory for $taskId Tasks ${exception.message} "))
             }
         }.flowOn(Dispatchers.IO)
 
@@ -106,6 +106,32 @@ class TasksManipulationUseCase @Inject constructor(
             ResultState.Success("Task '${currentTask.taskName}' updated successfully")
         } catch (exception: Exception) {
             ResultState.Error("Failed to edit task ${exception.message}")
+        }
+    }
+
+    override suspend fun addPartialTaskAmount(
+        taskId: String,
+        partialAmount: Int,
+        remainingAmount: Int
+    ): ResultState<String> {
+        return try {
+            if (partialAmount <= 0) {
+                return ResultState.Error("Partial Amount Cannot be lesser than 0!")
+            }
+            if (partialAmount > remainingAmount) {
+                return ResultState.Error("Payment Exceeding Remaining Cost!")
+            }
+            tasksManipulationRepository.addPartialTaskAmount(
+                taskId,
+                PaymentInfo(amount = partialAmount, paymentDate = getCurrentTimeAsString())
+            )
+            if (partialAmount == remainingAmount) {
+                tasksManipulationRepository.markTaskAsFullyPaid(taskId)
+                return ResultState.Success("Marking task as fully paid")
+            }
+            ResultState.Success("Partial Payment $partialAmount recorded")
+        } catch (exception: Exception) {
+            ResultState.Error("Failed to Add amount ${exception.message} ")
         }
     }
 }

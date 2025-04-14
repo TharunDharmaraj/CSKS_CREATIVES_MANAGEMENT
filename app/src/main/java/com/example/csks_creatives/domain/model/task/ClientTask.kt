@@ -11,6 +11,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
+import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_PRIORITY
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_TASK_NAME
@@ -40,6 +41,7 @@ data class ClientTask(
     @PropertyName(TASK_UPLOAD_OUTPUT) val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES,
     @PropertyName(TASK_CURRENT_STATUS) val currentStatus: TaskStatusType = TaskStatusType.BACKLOG, // Current Task Status
     @PropertyName(TASK_STATUS_HISTORY_SUB_COLLECTION) val statusHistory: List<TaskStatusHistory>, // Status History EG : Backlog - 3 days, In-Progress - 2 days etc..
+    @PropertyName(TASK_PAYMENTS_INFO_SUB_COLLECTION) val paymentHistory: List<PaymentInfo> // Payments Info History - Only available for Partially paid tasks
 ) {
     constructor() : this(
         EMPTY_STRING,
@@ -56,6 +58,7 @@ data class ClientTask(
         TaskDirectionApp.TEAMS,
         TaskUploadOutput.CSKS_CREATIVES,
         TaskStatusType.BACKLOG,
+        emptyList(),
         emptyList()
     )
 }
