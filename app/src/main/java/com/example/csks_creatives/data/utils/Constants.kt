@@ -77,6 +77,7 @@ object Constants {
 
     // Task Paid Status
     const val FULLY_PAID = "FULLY_PAID"
+    const val PARTIALLY_PAID = "PARTIALLY_PAID"
     const val NOT_PAID = "NOT_PAID"
 
     // Admin Name

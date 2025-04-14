@@ -73,6 +73,7 @@ class ClientTasksListViewModel @Inject constructor(
                 _clientTasksListState.update {
                     it.copy(
                         isUnpaidTasksVisible = !it.isUnpaidTasksVisible,
+                        isPartiallyPaidTasksVisible = false,
                         isPaidTasksVisible = false,
                         isAllTasksVisible = false
                     )
@@ -84,6 +85,19 @@ class ClientTasksListViewModel @Inject constructor(
                 _clientTasksListState.update {
                     it.copy(
                         isPaidTasksVisible = !it.isPaidTasksVisible,
+                        isPartiallyPaidTasksVisible = false,
+                        isUnpaidTasksVisible = false,
+                        isAllTasksVisible = false
+                    )
+                }
+                filterTasks()
+            }
+
+            ClientTasksListScreenEvent.ShowOnlyPartiallyPaidTasksFilter -> {
+                _clientTasksListState.update {
+                    it.copy(
+                        isPartiallyPaidTasksVisible = !it.isPartiallyPaidTasksVisible,
+                        isPaidTasksVisible = false,
                         isUnpaidTasksVisible = false,
                         isAllTasksVisible = false
                     )
@@ -100,6 +114,7 @@ class ClientTasksListViewModel @Inject constructor(
                     )
                 }
             }
+
         }
     }
 

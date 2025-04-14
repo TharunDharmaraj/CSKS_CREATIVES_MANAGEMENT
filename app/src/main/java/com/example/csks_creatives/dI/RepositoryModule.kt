@@ -1,7 +1,7 @@
 package com.example.csks_creatives.dI
 
 import com.example.csks_creatives.data.database.*
-import com.example.csks_creatives.data.repositoryImplementation.database.*
+import com.example.csks_creatives.data.repositoryImplementation.local.*
 import com.example.csks_creatives.data.repositoryImplementation.remote.*
 import com.example.csks_creatives.domain.repository.database.*
 import com.example.csks_creatives.domain.repository.remote.*

@@ -16,6 +16,7 @@ data class ClientTasksListState(
     val isAllTasksVisible: Boolean = true,
     val isPaidTasksVisible: Boolean = false,
     val isUnpaidTasksVisible: Boolean = false,
+    val isPartiallyPaidTasksVisible: Boolean = false,
     val searchText: String = EMPTY_STRING,
     val selectedStatuses: Set<TaskStatusType> = emptySet()
 )

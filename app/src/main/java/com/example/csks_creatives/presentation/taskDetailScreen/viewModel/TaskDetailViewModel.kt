@@ -61,7 +61,7 @@ class TaskDetailViewModel @Inject constructor(
     private val _taskName = MutableStateFlow("Task Name")
     var taskName = _taskName.asStateFlow()
 
-    private val _paidStatus = MutableStateFlow(false)
+    private val _paidStatus = MutableStateFlow(TaskPaidStatus.NOT_PAID)
     var paidStatus = _paidStatus.asStateFlow()
 
     private var initialTaskStatus: TaskStatusType? = null
@@ -366,7 +366,7 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun getTaskPaidStatus(taskDetailState: TaskDetailState) =
-        taskDetailState.taskPaidStatus == TaskPaidStatus.FULLY_PAID
+        taskDetailState.taskPaidStatus
 
     fun getAvailableStatusOptions(): List<String> {
         return if (getIsTaskSavedStatus().not()) {

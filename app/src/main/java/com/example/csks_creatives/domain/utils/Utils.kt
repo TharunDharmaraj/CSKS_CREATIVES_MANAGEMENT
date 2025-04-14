@@ -6,12 +6,12 @@ import com.example.csks_creatives.data.utils.Constants.FULLY_PAID
 import com.example.csks_creatives.data.utils.Constants.IN_PROGRESS
 import com.example.csks_creatives.data.utils.Constants.IN_REVIEW
 import com.example.csks_creatives.data.utils.Constants.NOT_PAID
+import com.example.csks_creatives.data.utils.Constants.PARTIALLY_PAID
 import com.example.csks_creatives.data.utils.Constants.REVISION_ONE
 import com.example.csks_creatives.data.utils.Constants.REVISION_THREE
 import com.example.csks_creatives.data.utils.Constants.REVISION_TWO
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPriority
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.google.firebase.Timestamp
 import java.text.DateFormatSymbols
@@ -77,8 +77,14 @@ object Utils {
                 FULLY_PAID
             )
 
+            TaskPaidStatus.PARTIALLY_PAID -> listOf(
+                PARTIALLY_PAID,
+                FULLY_PAID
+            )
+
             TaskPaidStatus.NOT_PAID -> listOf(
                 NOT_PAID,
+                PARTIALLY_PAID,
                 FULLY_PAID
             )
         }
@@ -89,19 +95,19 @@ object Utils {
     fun getCurrentTimeAsString(): String = System.currentTimeMillis().toString()
 
     fun formatTimeStamp(timeStampInMilliSeconds: String): String {
-        if(timeStampInMilliSeconds.toString().isEmpty()) return "TimeStamp Empty"
+        if (timeStampInMilliSeconds.toString().isEmpty()) return "TimeStamp Empty"
         val timeFormat = SimpleDateFormat("HH:mm:ss MMM dd yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun formatTimeStampToGetJustDate(timeStampInMilliSeconds: String): String {
-        if(timeStampInMilliSeconds.toString().isEmpty()) return "Date Empty"
+        if (timeStampInMilliSeconds.toString().isEmpty()) return "Date Empty"
         val timeFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun getFormattedDateTimeFormat(timeStampInMilliSeconds: String): String {
-        if(timeStampInMilliSeconds.toString().isEmpty()) return "Task Creation Time Empty"
+        if (timeStampInMilliSeconds.toString().isEmpty()) return "Task Creation Time Empty"
         val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
         return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }

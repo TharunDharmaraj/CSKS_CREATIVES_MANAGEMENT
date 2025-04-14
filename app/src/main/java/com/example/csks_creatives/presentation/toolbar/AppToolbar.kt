@@ -10,7 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import com.example.csks_creatives.presentation.components.*
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
+import com.example.csks_creatives.presentation.components.darkSlateBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +24,7 @@ fun AppToolbar(
     canShowActionButton: Boolean = false,
     canShowAddTaskButton: Boolean = false,
     canShowTaskPaidStatusButton: Boolean = false,
-    taskPaidStatus: Boolean = false, // Paid or Not
+    taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID,
     isActionButtonEnabled: Boolean = false,
     actionButtonText: String = "Save",
     menuItems: List<ToolbarOverFlowMenuItem> = emptyList(),
@@ -54,9 +55,13 @@ fun AppToolbar(
             if (canShowTaskPaidStatusButton) {
                 IconButton(onClick = { /* Ignore */ }) {
                     Icon(
-                        imageVector = if (taskPaidStatus) Icons.Default.CheckCircle else Icons.Default.Info,
+                        imageVector = when (taskPaidStatus) {
+                            TaskPaidStatus.FULLY_PAID -> Icons.Default.CheckCircle
+                            TaskPaidStatus.PARTIALLY_PAID -> Icons.Default.Lock
+                            TaskPaidStatus.NOT_PAID -> Icons.Default.Info
+                        },
                         contentDescription = "Paid Status",
-                        tint = if (taskPaidStatus) Color.Green else Color.Red
+                        tint = if (taskPaidStatus == TaskPaidStatus.FULLY_PAID) Color.Green else Color.Red
                     )
                 }
             }
