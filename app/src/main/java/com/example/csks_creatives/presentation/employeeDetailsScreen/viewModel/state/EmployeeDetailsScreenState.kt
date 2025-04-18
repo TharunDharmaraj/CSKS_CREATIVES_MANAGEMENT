@@ -19,5 +19,6 @@ data class EmployeeDetailsScreenState(
     val tasksCompleted: List<ClientTaskOverview> = emptyList(),
     val tasksInProgress: List<ClientTaskOverview> = emptyList(),
     val approvedLeavesList: List<LeaveRequest> = emptyList(),
-    val unApprovedLeavesList: List<LeaveRequest> = emptyList()
+    val unApprovedLeavesList: List<LeaveRequest> = emptyList(),
+    val rejectedLeavesList: List<LeaveRequest> = emptyList()
 )

@@ -77,7 +77,8 @@ class EmployeeUseCase @Inject constructor(
                     .collect { groupedLeaveRequests ->
                         val sortedGrouped = LeaveRequestsGrouped(
                             approved = groupedLeaveRequests.approved.sortedByDescending { it.leaveDate },
-                            unapproved = groupedLeaveRequests.unapproved.sortedByDescending { it.leaveDate }
+                            unapproved = groupedLeaveRequests.unapproved.sortedByDescending { it.leaveDate },
+                            rejected = groupedLeaveRequests.rejected.sortedByDescending { it.leaveDate },
                         )
                         emit(ResultState.Success(sortedGrouped))
                     }
@@ -101,6 +102,20 @@ class EmployeeUseCase @Inject constructor(
             Log.e(
                 logTag,
                 "Error in widthDrawLeaveRequest for employeeId:$leaveRequest.postedBy, leaveRequest:$leaveRequest ${exception.message} "
+            )
+        }
+    }
+
+    override suspend fun reRequestLeaveRequest(leaveRequest: LeaveRequest) {
+        try {
+            if (leaveRequest.postedBy.isEmpty()) return
+            employeeRepository.reRequestDrawLeaveRequest(
+                leaveRequest = leaveRequest
+            )
+        } catch (exception: Exception) {
+            Log.e(
+                logTag,
+                "Error in reRequestLeaveRequest for employeeId:$leaveRequest.postedBy, leaveRequest:$leaveRequest ${exception.message} "
             )
         }
     }

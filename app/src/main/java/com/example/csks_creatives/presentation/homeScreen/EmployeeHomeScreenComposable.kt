@@ -24,7 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPriority
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
@@ -264,20 +264,35 @@ fun EmployeeHomeScreenComposable(
                             }
                         }
                     }
-
                     if (state.rejectedLeaves.isNotEmpty()) {
                         item {
                             Text(
-                                "Leaves Pending Approval",
+                                "Rejected Leaves",
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
                         items(state.rejectedLeaves.size) { index ->
                             LeaveRequestCard(
                                 state.rejectedLeaves[index],
+                                onReRequest = { viewModel.reRequestLeaveRequest(state.rejectedLeaves[index]) }
+                            )
+                        }
+                    }
+
+                    if (state.unApprovedLeaves.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Leaves Pending Approval",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        items(state.unApprovedLeaves.size) { index ->
+                            LeaveRequestCard(
+                                state.unApprovedLeaves[index],
                                 onWidthDrawRequest = {
-                                    viewModel.withDrawLeaveRequest(state.rejectedLeaves[index])
-                                })
+                                    viewModel.withDrawLeaveRequest(state.unApprovedLeaves[index])
+                                }
+                            )
                         }
                     }
 
@@ -317,7 +332,10 @@ fun TaskItemCard(
             .padding(8.dp)
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        border = BorderStroke(width = 2.dp, color = getBorderColorBasedOnTaskPriority(task.taskPriority)),
+        border = BorderStroke(
+            width = 2.dp,
+            color = getBorderColorBasedOnTaskPriority(task.taskPriority)
+        ),
         onClick = onItemClick
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -436,7 +454,7 @@ fun LeaveRequestDialog(
 }
 
 @Composable
-fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}) {
+fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}, onReRequest: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -444,7 +462,7 @@ fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         border = BorderStroke(
             width = 2.dp,
-            color = if (leave.approvedStatus) Color.Green else Color.Red
+            color = if (leave.approvedStatus == LeaveApprovalStatus.APPROVED) Color.Green else if (leave.approvedStatus == LeaveApprovalStatus.UN_APPROVED) Color.Blue else Color.Red
         )
     ) {
         Row(
@@ -460,10 +478,10 @@ fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}) {
                 Text("Date: ${formatTimeStampToGetJustDate(leave.leaveDate.toDate().time.toString())}")
                 Text("Reason: ${leave.leaveReason}")
                 Text(
-                    "Status: ${if (leave.approvedStatus) "Approved" else "Not Approved"}",
+                    "Status: ${if (leave.approvedStatus == LeaveApprovalStatus.APPROVED) "Approved" else if (leave.approvedStatus == LeaveApprovalStatus.UN_APPROVED) "Not Approved" else "Rejected"}",
                 )
             }
-            if (leave.approvedStatus == false) {
+            if (leave.approvedStatus == LeaveApprovalStatus.UN_APPROVED) {
                 Button(
                     onClick = onWidthDrawRequest,
                     modifier = Modifier
@@ -471,6 +489,16 @@ fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}) {
                         .height(40.dp)
                 ) {
                     Text("Withdraw")
+                }
+            }
+            if(leave.approvedStatus == LeaveApprovalStatus.REJECTED){
+                Button(
+                    onClick = onReRequest,
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .height(40.dp)
+                ) {
+                    Text("Re-Request")
                 }
             }
         }

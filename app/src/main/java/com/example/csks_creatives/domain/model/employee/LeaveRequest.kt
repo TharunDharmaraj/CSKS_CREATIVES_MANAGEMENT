@@ -5,6 +5,7 @@ import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_DATE
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_ID
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_POSTED_BY
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_REASON
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
@@ -14,5 +15,5 @@ data class LeaveRequest(
     @PropertyName(LEAVE_REQUEST_DATE) val leaveDate: Timestamp = Timestamp.now(),
     @PropertyName(LEAVE_REQUEST_REASON) val leaveReason: String = EMPTY_STRING,
     @PropertyName(LEAVE_REQUEST_POSTED_BY) val postedBy: String = EMPTY_STRING, // EMPLOYEE_ID
-    @PropertyName(LEAVE_REQUEST_APPROVAL_STATUS) val approvedStatus: Boolean = false // Accepted or Rejected // TODO Make Rejection Reason from admin & re-raise request
+    @PropertyName(LEAVE_REQUEST_APPROVAL_STATUS) val approvedStatus: LeaveApprovalStatus = LeaveApprovalStatus.UN_APPROVED // Accepted or Rejected
 )

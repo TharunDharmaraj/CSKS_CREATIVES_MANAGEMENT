@@ -13,5 +13,6 @@ data class EmployeeHomeScreenState(
     val isCompletedTasksLoading: Boolean = false,
     val isActiveTasksLoading: Boolean = false,
     val approvedLeaves: List<LeaveRequest> = emptyList(),
-    val rejectedLeaves: List<LeaveRequest> = emptyList(),
+    val unApprovedLeaves: List<LeaveRequest> = emptyList(),
+    val rejectedLeaves: List<LeaveRequest> = emptyList()
 )

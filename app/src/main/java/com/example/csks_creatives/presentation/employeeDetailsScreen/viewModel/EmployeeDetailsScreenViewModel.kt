@@ -253,7 +253,8 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
                     _employeeDetailsScreenState.update {
                         it.copy(
                             approvedLeavesList = groupedLeavesList.approved,
-                            unApprovedLeavesList = groupedLeavesList.unapproved
+                            unApprovedLeavesList = groupedLeavesList.unapproved,
+                            rejectedLeavesList = groupedLeavesList.rejected
                         )
                     }
                 }
@@ -286,6 +287,12 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
     fun approveEmployeeLeave(leaveRequest: LeaveRequest) {
         viewModelScope.launch {
             adminUseCase.markLeaveRequestAsApproved(leaveRequest)
+        }
+    }
+
+    fun rejectEmployeeLeave(leaveRequest: LeaveRequest) {
+        viewModelScope.launch {
+            adminUseCase.markLeaveRequestAsRejected(leaveRequest)
         }
     }
 }

@@ -15,6 +15,7 @@ import com.example.csks_creatives.data.utils.Constants.TASKS_IN_PROGRESS_OR_COMP
 import com.example.csks_creatives.data.utils.Constants.TASKS_IN_PROGRESS_SUB_COLLECTION
 import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.google.firebase.firestore.*
@@ -272,24 +273,51 @@ class AdminRepositoryImplementation @Inject constructor(
         try {
             getLeaveCollectionReference(employeeId).document(leaveRequestId).set(
                 hashMapOf(
-                    LEAVE_REQUEST_APPROVAL_STATUS to true
+                    LEAVE_REQUEST_APPROVAL_STATUS to LeaveApprovalStatus.APPROVED
                 ), SetOptions.merge()
             )
             Log.d(
-                logTag + "markLeaveRequest",
+                logTag + "approveLeaveRequest",
                 "Leave $leaveRequestId employeeId: $employeeId request marked as approved"
             )
-            getActiveLeaveRequestsReference().document(leaveRequestId).delete().await()
-            Log.d(
-                logTag + "Delete",
-                "Leave $leaveRequestId Deleted Successfully"
-            )
+            deleteLeaveRequest(leaveRequestId)
         } catch (exception: Exception) {
             Log.e(
-                logTag + "markLeaveRequest",
+                logTag + "approveLeaveRequest",
                 "Error ${exception.message}  in marking approved leaveId: $leaveRequestId employeeId: $employeeId"
             )
         }
+    }
+
+    override suspend fun markLeaveRequestAsRejected(
+        leaveRequestId: String,
+        employeeId: String
+    ) {
+        try {
+            getLeaveCollectionReference(employeeId).document(leaveRequestId).set(
+                hashMapOf(
+                    LEAVE_REQUEST_APPROVAL_STATUS to LeaveApprovalStatus.REJECTED
+                ), SetOptions.merge()
+            )
+            Log.d(
+                logTag + "rejectLeaveRequest",
+                "Leave $leaveRequestId employeeId: $employeeId request marked as rejected"
+            )
+            deleteLeaveRequest(leaveRequestId)
+        } catch (exception: Exception) {
+            Log.e(
+                logTag + "rejectLeaveRequest",
+                "Error ${exception.message}  in marking rejected leaveId: $leaveRequestId employeeId: $employeeId"
+            )
+        }
+    }
+
+    private suspend fun deleteLeaveRequest(leaveRequestId: String) {
+        getActiveLeaveRequestsReference().document(leaveRequestId).delete().await()
+        Log.d(
+            logTag + "Delete",
+            "Leave $leaveRequestId Deleted Successfully"
+        )
     }
 
     private fun getActiveLeaveRequestsReference() = firestore.collection(LEAVE_REQUESTS_COLLECTION)

@@ -127,7 +127,6 @@ class TasksUseCase @Inject constructor(
                 currentStatus = TaskStatusType.BACKLOG,
                 statusHistory = emptyList()
             )
-            Log.d("tharun", "Task to create in UC - $taskToCreate")
             tasksRepository.createTask(taskToCreate)
             if (task.employeeId.isNotEmpty()) {
                 // Write into employee collection, under inProgress

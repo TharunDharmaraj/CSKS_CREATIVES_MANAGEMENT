@@ -3,7 +3,9 @@ package com.example.csks_creatives.presentation.taskDetailScreen.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -26,6 +28,7 @@ fun TaskStatusHistoryComposable(
         modifier = Modifier
             .padding(vertical = 16.dp)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
         statusHistory.forEachIndexed { index, entry ->
             val isCurrentStatus = index == statusHistory.lastIndex

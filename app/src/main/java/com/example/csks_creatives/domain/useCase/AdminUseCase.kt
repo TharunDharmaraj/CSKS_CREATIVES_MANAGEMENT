@@ -132,4 +132,16 @@ class AdminUseCase @Inject constructor(
             return ResultState.Error("Error ${exception.message}  in Approval")
         }
     }
+
+    override suspend fun markLeaveRequestAsRejected(leaveRequest: LeaveRequest): ResultState<String> {
+        try {
+            adminRepository.markLeaveRequestAsRejected(
+                employeeId = leaveRequest.postedBy,
+                leaveRequestId = leaveRequest.leaveRequestId
+            )
+            return ResultState.Success("Leave Rejected")
+        } catch (exception: Exception) {
+            return ResultState.Error("Error ${exception.message}  in Rejection")
+        }
+    }
 }

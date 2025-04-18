@@ -15,15 +15,17 @@ interface AdminRepository {
 
     suspend fun checkEmployeeIdExists(employeeId: String): Boolean
 
-    suspend fun addActiveTaskIntoEmployeeDetails(employeeId: String, taskId : String)
+    suspend fun addActiveTaskIntoEmployeeDetails(employeeId: String, taskId: String)
 
-    suspend fun removeActiveTaskFromEmployeeDetails(employeeId: String, taskId : String)
+    suspend fun removeActiveTaskFromEmployeeDetails(employeeId: String, taskId: String)
 
-    suspend fun addCompletedTaskIntoEmployeeDetails(employeeId: String, taskId : String)
+    suspend fun addCompletedTaskIntoEmployeeDetails(employeeId: String, taskId: String)
 
-    suspend fun removeCompletedTaskFromEmployeeDetails(employeeId: String, taskId : String)
+    suspend fun removeCompletedTaskFromEmployeeDetails(employeeId: String, taskId: String)
 
-    suspend fun getAllActiveLeaveRequests() : Flow<List<LeaveRequest>>
+    suspend fun getAllActiveLeaveRequests(): Flow<List<LeaveRequest>>
 
     suspend fun markLeaveRequestAsApproved(leaveRequestId: String, employeeId: String)
+
+    suspend fun markLeaveRequestAsRejected(leaveRequestId: String, employeeId: String)
 }

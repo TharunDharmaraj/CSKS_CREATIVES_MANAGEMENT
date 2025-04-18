@@ -12,4 +12,6 @@ interface EmployeeRepository {
     suspend fun getAllApprovedAndUnApprovedRequestsForEmployee(employeeId: String): Flow<LeaveRequestsGrouped>
 
     suspend fun widthDrawLeaveRequest(employeeId: String, leaveRequest: LeaveRequest)
+
+    suspend fun reRequestDrawLeaveRequest(leaveRequest: LeaveRequest)
 }

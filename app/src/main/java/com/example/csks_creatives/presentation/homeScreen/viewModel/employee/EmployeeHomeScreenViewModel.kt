@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactory
 import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
@@ -223,14 +224,20 @@ class EmployeeHomeScreenViewModel @Inject constructor(
                 when (result) {
                     is ResultState.Success -> {
                         val leaveRequests = result.data
-                        val approved = leaveRequests.filter { it.approvedStatus }
-                            .sortedByDescending { it.leaveDate }
+                        val approved =
+                            leaveRequests.filter { it.approvedStatus == LeaveApprovalStatus.APPROVED }
+                                .sortedByDescending { it.leaveDate }
+                        val unApproved =
+                            leaveRequests.filter { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
+                                .sortedBy { it.leaveDate }
                         val rejected =
-                            leaveRequests.filter { !it.approvedStatus }.sortedBy { it.leaveDate }
+                            leaveRequests.filter { it.approvedStatus == LeaveApprovalStatus.REJECTED }
+                                .sortedBy { it.leaveDate }
 
                         _employeeHomeScreenState.update {
                             it.copy(
                                 approvedLeaves = approved,
+                                unApprovedLeaves = unApproved,
                                 rejectedLeaves = rejected
                             )
                         }
@@ -248,9 +255,19 @@ class EmployeeHomeScreenViewModel @Inject constructor(
         }
     }
 
-    fun withDrawLeaveRequest(leaveRequest: LeaveRequest){
+    fun withDrawLeaveRequest(leaveRequest: LeaveRequest) {
         viewModelScope.launch {
             employeeUseCaseFactory.widthDrawLeaveRequest(leaveRequest)
+        }
+    }
+
+    fun reRequestLeaveRequest(leaveRequest: LeaveRequest) {
+        viewModelScope.launch {
+            employeeUseCaseFactory.reRequestLeaveRequest(
+                leaveRequest.copy(
+                    approvedStatus = LeaveApprovalStatus.UN_APPROVED
+                )
+            )
         }
     }
 

@@ -2,7 +2,6 @@ package com.example.csks_creatives.application.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.csks_creatives.R
@@ -13,7 +12,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.*
 
-// TODO When app grows bigger, to use cloud functions to trigger FCM to employee device when a task is assigned to them. It is on hold now, since it requires billing
 @AndroidEntryPoint
 class MessagingService : FirebaseMessagingService() {
     private val messagingCoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -45,7 +43,7 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun showNotification(title: String, message: String) {
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(

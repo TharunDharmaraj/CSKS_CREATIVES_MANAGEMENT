@@ -283,7 +283,8 @@ fun AddClientDialog(viewModel: AdminHomeScreenViewModel) {
 @Composable
 fun LeaveRequestTaskItem(
     leaveRequest: LeaveRequest,
-    onApproval: () -> Unit
+    onApproval: () -> Unit,
+    onReject: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -319,13 +320,26 @@ fun LeaveRequestTaskItem(
                 )
             }
 
-            Button(
-                onClick = onApproval,
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .height(40.dp)
+            Column(
+                modifier = Modifier.width(IntrinsicSize.Min),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Approve")
+                Button(
+                    onClick = onReject,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                ) {
+                    Text("Reject")
+                }
+                Button(
+                    onClick = onApproval,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                ) {
+                    Text("Approve")
+                }
             }
         }
     }
@@ -374,7 +388,7 @@ fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -387,13 +401,16 @@ fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             items(state.activeLeaveRequests.size) { index ->
                 LeaveRequestTaskItem(
                     leaveRequest = state.activeLeaveRequests[index],
                     onApproval = {
                         viewModel.onLeaveRequestApproved(state.activeLeaveRequests[index])
+                    },
+                    onReject = {
+                        viewModel.onLeaveRequestRejected(state.activeLeaveRequests[index])
                     }
                 )
             }

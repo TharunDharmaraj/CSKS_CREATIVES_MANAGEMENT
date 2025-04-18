@@ -11,6 +11,7 @@ import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_POSTED_BY
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_REASON
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.employee.LeaveRequestsGrouped
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -103,10 +104,14 @@ class EmployeeRepositoryImplementation @Inject constructor(
                             leave.toObject(LeaveRequest::class.java)
                         }
 
-                        val approved = leaveList.filter { it.approvedStatus == true }
-                        val unapproved = leaveList.filter { it.approvedStatus != true }
+                        val approved =
+                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.APPROVED }
+                        val unapproved =
+                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
+                        val rejected =
+                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.REJECTED}
 
-                        trySend(LeaveRequestsGrouped(approved, unapproved)).isSuccess
+                        trySend(LeaveRequestsGrouped(approved, unapproved, rejected)).isSuccess
                     }
                 }
 
@@ -123,15 +128,32 @@ class EmployeeRepositoryImplementation @Inject constructor(
                 logTag + "Withdraw",
                 "Successfully deleted employeeId:$employeeId leaveRequest $leaveRequest"
             )
-            getLeaveRequestsCollection().document(leaveRequest.leaveRequestId).delete().await()
-            Log.d(
-                logTag + "Withdraw",
-                "Successfully deleted leaveRequest $leaveRequest from active eave requests collection"
-            )
+            deleteLeaveRequest(leaveRequest)
         } catch (exception: Exception) {
             Log.d(
                 logTag + "Withdraw",
                 "Error ${exception.message}  in withdrawing employeeId:$employeeId leaveRequest $leaveRequest"
+            )
+        }
+    }
+
+    override suspend fun reRequestDrawLeaveRequest(
+        leaveRequest: LeaveRequest
+    ) {
+        postLeaveRequest(leaveRequest)
+    }
+
+    private suspend fun deleteLeaveRequest(leaveRequest: LeaveRequest) {
+        try {
+            getLeaveRequestsCollection().document(leaveRequest.leaveRequestId).delete().await()
+            Log.d(
+                logTag + "Delete",
+                "Successfully deleted leaveRequest $leaveRequest from active eave requests collection"
+            )
+        } catch (exception: Exception) {
+            Log.e(
+                logTag + "Delete",
+                "Error in deleting leaveRequest $leaveRequest from active eave requests collection exception: $exception"
             )
         }
     }

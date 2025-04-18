@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.*
 import com.example.csks_creatives.domain.utils.LogoutEvent
@@ -262,7 +263,7 @@ class AdminHomeScreenViewModel @Inject constructor(
         viewModelScope.launch {
             adminUseCaseFactory.getAllActiveLeaveRequests().collect { result ->
                 if (result is ResultState.Success) {
-                    hasUnapprovedLeaves.value = result.data.any { it.approvedStatus == false }
+                    hasUnapprovedLeaves.value = result.data.any { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
                     _adminHomeScreenState.update {
                         it.copy(
                             activeLeaveRequests = result.data
@@ -317,6 +318,17 @@ class AdminHomeScreenViewModel @Inject constructor(
                 _uiEvent.emit(ToastUiEvent.ShowToast("Leave Approved Successfully"))
             } else if (result is ResultState.Error) {
                 _uiEvent.emit(ToastUiEvent.ShowToast("Error Approving Leave: ${result.message}"))
+            }
+        }
+    }
+
+    fun onLeaveRequestRejected(leaveRequest: LeaveRequest) {
+        viewModelScope.launch {
+            val result = adminUseCaseFactory.markLeaveRequestAsRejected(leaveRequest)
+            if (result is ResultState.Success) {
+                _uiEvent.emit(ToastUiEvent.ShowToast("Leave Rejected Successfully"))
+            } else if (result is ResultState.Error) {
+                _uiEvent.emit(ToastUiEvent.ShowToast("Error Rejected Leave: ${result.message}"))
             }
         }
     }

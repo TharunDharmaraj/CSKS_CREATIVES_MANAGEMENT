@@ -139,6 +139,9 @@ fun EmployeeDetailsScreen(
                     onApproveLeave = { leaveRequest ->
                         viewModel.approveEmployeeLeave(leaveRequest = leaveRequest)
                     },
+                    onRejectLeave = { leaveRequest ->
+                        viewModel.rejectEmployeeLeave(leaveRequest = leaveRequest)
+                    },
                     coroutineScope
                 )
             }
@@ -287,10 +290,11 @@ fun CompletedTasksScreen(
 fun EmployeeDetailSection(
     state: EmployeeDetailsScreenState,
     onApproveLeave: (LeaveRequest) -> Unit,
+    onRejectLeave: (LeaveRequest) -> Unit,
     coroutineScope: CoroutineScope
 ) {
     val pagerState = rememberPagerState(initialPage = 0)
-    val tabTitles = listOf("Unapproved", "Approved", "Summary")
+    val tabTitles = listOf("Unapproved", "Approved", "Rejected", "Summary")
 
     Column(
         modifier = Modifier
@@ -330,7 +334,8 @@ fun EmployeeDetailSection(
                             items(state.unApprovedLeavesList.size) { index ->
                                 LeaveRequestTaskItem(
                                     leaveRequest = state.unApprovedLeavesList[index],
-                                    onApproval = { onApproveLeave(state.unApprovedLeavesList[index]) }
+                                    onApproval = { onApproveLeave(state.unApprovedLeavesList[index]) },
+                                    onReject = { onRejectLeave(state.unApprovedLeavesList[index]) }
                                 )
                             }
                         }
@@ -384,8 +389,22 @@ fun EmployeeDetailSection(
                     }
                 }
 
-
                 2 -> {
+                    if (state.rejectedLeavesList.isEmpty()) {
+                        Text("No rejected leave requests.")
+                    } else {
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                            items(state.rejectedLeavesList.size) { index ->
+                                LeaveRequestTaskItem(
+                                    leaveRequest = state.rejectedLeavesList[index],
+                                    onApproval = { onApproveLeave(state.rejectedLeavesList[index]) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                3 -> {
                     if (state.approvedLeavesList.isEmpty()) {
                         Text("No approved leaves to summarize.")
                     } else {
@@ -427,7 +446,8 @@ fun EmployeeDetailSection(
 @Composable
 fun LeaveRequestTaskItem(
     leaveRequest: LeaveRequest,
-    onApproval: (() -> Unit)? = null
+    onApproval: (() -> Unit)? = null,
+    onReject: (() -> Unit)? = null
 ) {
     Card(
         modifier = Modifier
@@ -462,14 +482,31 @@ fun LeaveRequestTaskItem(
                 )
             }
 
-            if (onApproval != null) {
-                Button(
-                    onClick = onApproval,
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .height(40.dp)
-                ) {
-                    Text("Approve")
+            Column(
+                modifier = Modifier.width(IntrinsicSize.Min),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (onApproval != null) {
+                    Button(
+                        onClick = onApproval,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp)
+                            .height(40.dp)
+                    ) {
+                        Text("Approve")
+                    }
+                }
+                if (onReject != null) {
+                    Button(
+                        onClick = onReject,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp)
+                            .height(40.dp)
+                    ) {
+                        Text("Reject")
+                    }
                 }
             }
         }
