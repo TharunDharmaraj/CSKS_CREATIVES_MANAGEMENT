@@ -46,6 +46,7 @@ fun AdminHomeScreen(
         AdminBottomNavigation.Employees,
         AdminBottomNavigation.Clients,
         AdminBottomNavigation.Tasks,
+        AdminBottomNavigation.Finance,
         AdminBottomNavigation.LeaveRequests
     )
 
@@ -102,7 +103,12 @@ fun AdminHomeScreen(
                             if (showBadge) {
                                 BadgedBox(
                                     badge = {
-                                        Badge(containerColor = Color.Red, content = {})
+                                        Badge(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .offset(x = 6.dp, y = (-12).dp),
+                                            containerColor = Color.Red,
+                                            content = {})
                                     }
                                 ) {
                                     Icon(item.icon, contentDescription = item.title)
@@ -113,7 +119,6 @@ fun AdminHomeScreen(
                         }
                     )
                 }
-
             }
         }
     ) { padding ->
@@ -125,6 +130,7 @@ fun AdminHomeScreen(
                 AdminBottomNavigation.Employees -> viewModel.setHomeScreenTitle("Employees")
                 AdminBottomNavigation.Clients -> viewModel.setHomeScreenTitle("Clients")
                 AdminBottomNavigation.Tasks -> viewModel.setHomeScreenTitle("My Tasks")
+                AdminBottomNavigation.Finance -> viewModel.setHomeScreenTitle("Finance")
                 AdminBottomNavigation.LeaveRequests -> viewModel.setHomeScreenTitle("Leave Requests")
             }
         }
@@ -157,6 +163,10 @@ fun AdminHomeScreen(
 
                 AdminBottomNavigation.Tasks -> {
                     TaskListScreen(navController, viewModel)
+                }
+
+                AdminBottomNavigation.Finance -> {
+
                 }
 
                 AdminBottomNavigation.LeaveRequests -> {
