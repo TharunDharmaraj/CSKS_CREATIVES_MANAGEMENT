@@ -12,6 +12,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_DIRECTION_APP
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
+import com.example.csks_creatives.data.utils.Constants.TASK_FULLY_PAID_DATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_AMOUNT
@@ -65,6 +66,7 @@ class TasksRepositoryImplementation @Inject constructor(
                     TASK_DIRECTION_APP to task.taskDirectionApp,
                     TASK_UPLOAD_OUTPUT to task.taskUploadOutput,
                     TASK_PAID_STATUS to task.taskPaidStatus,
+                    TASK_FULLY_PAID_DATE to task.taskFullyPaidDate,
                     TASK_TYPE to task.taskType,
                     TASK_CURRENT_STATUS to task.currentStatus
                 ), SetOptions.merge()
@@ -233,6 +235,7 @@ class TasksRepositoryImplementation @Inject constructor(
                             ?.copy(taskId = document.id)
                         task?.let {
                             val statusHistory = getTaskStatusList(document.id)
+                            val paymentHistory = getTaskPaymentsList(document.id)
                             val updatedTask = it.copy(
                                 statusHistory = statusHistory.map { (id, times) ->
                                     TaskStatusHistory(
@@ -240,7 +243,13 @@ class TasksRepositoryImplementation @Inject constructor(
                                         times[0].toString(),
                                         times[1].toString()
                                     )
-                                }
+                                },
+                                paymentHistory = paymentHistory.map { pair ->
+                                    PaymentInfo(
+                                        pair.first.toInt(),
+                                        pair.second
+                                    )
+                                },
                             )
                             tasksList.add(updatedTask)
                         }

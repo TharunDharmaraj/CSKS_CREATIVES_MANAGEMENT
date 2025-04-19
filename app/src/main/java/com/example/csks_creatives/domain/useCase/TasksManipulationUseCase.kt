@@ -1,11 +1,13 @@
 package com.example.csks_creatives.domain.useCase
 
 import com.example.csks_creatives.domain.model.task.*
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.example.csks_creatives.domain.useCase.factories.TasksManipulationUseCaseFactory
+import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -101,6 +103,11 @@ class TasksManipulationUseCase @Inject constructor(
                         currentTask.taskId
                     )
                 }
+            }
+            if (currentTask.taskFullyPaidDate == EMPTY_STRING && currentTask.taskPaidStatus != initialTask.taskPaidStatus && currentTask.taskPaidStatus == TaskPaidStatus.FULLY_PAID) {
+                currentTask.copy(
+                    taskFullyPaidDate = getCurrentTimeAsString(),
+                )
             }
             tasksManipulationRepository.editTask(currentTask)
             ResultState.Success("Task '${currentTask.taskName}' updated successfully")

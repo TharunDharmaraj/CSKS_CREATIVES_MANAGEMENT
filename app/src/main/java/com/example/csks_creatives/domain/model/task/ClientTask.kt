@@ -9,6 +9,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_DIRECTION_APP
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
+import com.example.csks_creatives.data.utils.Constants.TASK_FULLY_PAID_DATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_SUB_COLLECTION
@@ -35,6 +36,7 @@ data class ClientTask(
     @PropertyName(TASK_ESTIMATE) val taskEstimate: Int = 0, // Task Estimate in hours
     @PropertyName(TASK_COST) val taskCost: Int = 0, // Cost Estimate for the task
     @PropertyName(TASK_PAID_STATUS) val taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID,
+    @PropertyName(TASK_FULLY_PAID_DATE) val taskFullyPaidDate: String = EMPTY_STRING,
     @PropertyName(TASK_TYPE) val taskType: TaskType = TaskType.SHORTS_VIDEO,
     @PropertyName(TASK_PRIORITY) val taskPriority: TaskPriority = TaskPriority.MEDIUM,
     @PropertyName(TASK_DIRECTION_APP) val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS,
@@ -53,6 +55,7 @@ data class ClientTask(
         0,
         0,
         TaskPaidStatus.NOT_PAID,
+        EMPTY_STRING,
         TaskType.SHORTS_VIDEO,
         TaskPriority.MEDIUM,
         TaskDirectionApp.TEAMS,

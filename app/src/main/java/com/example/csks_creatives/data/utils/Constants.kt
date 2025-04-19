@@ -48,6 +48,7 @@ object Constants {
     const val TASK_TYPE = "taskType"
     const val TASK_COST = "taskCost"
     const val TASK_PAID_STATUS = "taskPaidStatus"
+    const val TASK_FULLY_PAID_DATE = "taskFullyPaidDate"
     const val TASK_PRIORITY = "taskPriority"
     const val TASK_DIRECTION_APP = "taskDirectionApp"
     const val TASK_UPLOAD_OUTPUT = "taskUploadOutput"

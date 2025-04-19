@@ -9,6 +9,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_CURRENT_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_DIRECTION_APP
 import com.example.csks_creatives.data.utils.Constants.TASK_EMPLOYEE_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_ESTIMATE
+import com.example.csks_creatives.data.utils.Constants.TASK_FULLY_PAID_DATE
 import com.example.csks_creatives.data.utils.Constants.TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_PAID_STATUS
 import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_AMOUNT
@@ -28,6 +29,7 @@ import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.repository.remote.TasksManipulationRepository
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsLong
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import com.google.firebase.firestore.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -135,6 +137,7 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                     TASK_ESTIMATE to task.taskEstimate,
                     TASK_COST to task.taskCost,
                     TASK_PAID_STATUS to task.taskPaidStatus,
+                    TASK_FULLY_PAID_DATE to task.taskFullyPaidDate,
                     TASK_PRIORITY to task.taskPriority,
                     TASK_DIRECTION_APP to task.taskDirectionApp,
                     TASK_UPLOAD_OUTPUT to task.taskUploadOutput,
@@ -173,6 +176,7 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
         try {
             getTaskPath(taskId).set(
                 hashMapOf(
+                    TASK_FULLY_PAID_DATE to getCurrentTimeAsString(),
                     TASK_PAID_STATUS to TaskPaidStatus.FULLY_PAID
                 ), SetOptions.merge()
             )

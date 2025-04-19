@@ -18,7 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
-import com.example.csks_creatives.domain.utils.Utils.getMonthName
+import com.example.csks_creatives.presentation.clientTasksListScreen.components.ClientCostBreakDown
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.ClientTasksListViewModel
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
@@ -166,34 +166,49 @@ fun ClientTasksListComposable(
 
                                         Spacer(modifier = Modifier.height(8.dp))
 
-                                        Row(
+                                        LazyRow(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
-                                            Button(
-                                                onClick = {
-                                                    viewModel.onEvent(
-                                                        ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter
+                                            item {
+                                                Button(
+                                                    onClick = {
+                                                        viewModel.onEvent(
+                                                            ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter
+                                                        )
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = if (state.value.isPaidTasksVisible) Color.Green else Color.Gray
                                                     )
-                                                },
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = if (state.value.isPaidTasksVisible) Color.Green else Color.Gray
-                                                )
-                                            ) {
-                                                Text(text = "Show Paid")
-                                            }
+                                                ) {
+                                                    Text(text = "Show Paid")
+                                                }
 
-                                            Button(
-                                                onClick = {
-                                                    viewModel.onEvent(
-                                                        ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter
+                                                Button(
+                                                    onClick = {
+                                                        viewModel.onEvent(
+                                                            ClientTasksListScreenEvent.ShowOnlyPartiallyPaidTasksFilter
+                                                        )
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = if (state.value.isPartiallyPaidTasksVisible) Color.Yellow else Color.Gray
                                                     )
-                                                },
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = if (state.value.isUnpaidTasksVisible) Color.Red else Color.Gray
-                                                )
-                                            ) {
-                                                Text(text = "Show Unpaid")
+                                                ) {
+                                                    Text(text = "Show Partial")
+                                                }
+
+                                                Button(
+                                                    onClick = {
+                                                        viewModel.onEvent(
+                                                            ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter
+                                                        )
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = if (state.value.isUnpaidTasksVisible) Color.Red else Color.Gray
+                                                    )
+                                                ) {
+                                                    Text(text = "Show Unpaid")
+                                                }
                                             }
                                         }
 
@@ -268,53 +283,10 @@ fun ClientTasksListComposable(
                     }
 
                     1 -> {
-                        val yearlyBreakdown = viewModel.getYearlyAndMonthlyCostBreakdown()
-
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            val totalCost = viewModel.getTotalUnPaidCostForClient()
-                            item {
-                                Text(
-                                    "Lifetime Paid Amount: ${totalCost.first}",
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    "Lifetime Unpaid Amount: ${totalCost.second}",
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-
-                            yearlyBreakdown.forEach { (year, monthlyData) ->
-                                item {
-                                    Text(
-                                        "Year: $year",
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Blue
-                                    )
-                                }
-
-                                monthlyData.forEach { (month, cost) ->
-                                    item {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(start = 16.dp, bottom = 8.dp)
-                                        ) {
-                                            Text(
-                                                "Month: ${getMonthName(month)}",
-                                                fontSize = 18.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.Gray
-                                            )
-                                            Text(
-                                                "Paid: ${cost.first}  |  Unpaid: ${cost.second}",
-                                                fontSize = 16.sp
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        ClientCostBreakDown(
+                            { viewModel.getYearlyAndMonthlyCostBreakdown() },
+                            { viewModel.getTotalUnPaidCostForClient() }
+                        )
                     }
                 }
             }
