@@ -1,6 +1,5 @@
 package com.example.csks_creatives.presentation.clientTasksListScreen.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.task.ClientTask
@@ -210,22 +209,16 @@ class ClientTasksListViewModel @Inject constructor(
         var totalCostPaid = 0
         var totalCostUnPaid = 0
         var totalPartialPaid = 0
-        Log.d("tharun", "_allTasksForClientFromFireStore = ${_allTasksForClientFromFireStore.value}")
         _allTasksForClientFromFireStore.value.forEach { task ->
-
             if (task.taskPaidStatus == TaskPaidStatus.NOT_PAID) {
                 totalCostUnPaid += task.taskCost
             } else if (task.taskPaidStatus == TaskPaidStatus.PARTIALLY_PAID) {
-                Log.d("tharun", "Partially Paid TaskId: ${task.taskId}, Payments: ${task.paymentHistory}")
                 var totalPartialAmountForTask = 0
                 task.paymentHistory.forEach { taskPaymentHistory ->
                     totalPartialAmountForTask += taskPaymentHistory.amount
                 }
                 totalPartialPaid += totalPartialAmountForTask
-                Log.d("tharun", "totalPartialPaid $totalPartialPaid")
-                Log.d("tharun", "totalPartialAmountForTask $totalPartialAmountForTask")
                 totalCostUnPaid += task.taskCost - totalPartialAmountForTask
-                Log.d("tharun", "totalCostUnPaid $totalCostUnPaid")
             } else {
                 totalCostPaid += task.taskCost
             }
@@ -237,38 +230,44 @@ class ClientTasksListViewModel @Inject constructor(
         val costBreakdown = mutableMapOf<Int, MutableMap<Int, Triple<Int, Int, Int>>>()
 
         _allTasksForClientFromFireStore.value.forEach { task ->
-            val taskFullyPaidTime = task.taskCreationTime.toLongOrNull()
-            val taskCost = task.taskCost.toString().toIntOrNull()
+            // We are using taskFullyPaidDate for fully paid tasks, otherwise taskCreationTime
+            val relevantTimestamp = when (task.taskPaidStatus) {
+                TaskPaidStatus.FULLY_PAID -> task.taskFullyPaidDate.toLongOrNull()
+                else -> task.taskCreationTime.toLongOrNull()
+            }
+            val taskCost = task.taskCost
 
-            if (taskFullyPaidTime == null || taskCost == null) return@forEach
+            if (relevantTimestamp == null) return@forEach
 
-            val calendar = Calendar.getInstance().apply { timeInMillis = taskFullyPaidTime }
+            val calendar = Calendar.getInstance().apply { timeInMillis = relevantTimestamp }
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH) + 1
 
             val currentYearData = costBreakdown.getOrPut(year) { mutableMapOf() }
             val currentMonthData = currentYearData.getOrPut(month) { Triple(0, 0, 0) }
 
-            val updatedMonthData = if (task.taskPaidStatus == TaskPaidStatus.FULLY_PAID) {
-                currentMonthData.copy(first = currentMonthData.first + taskCost)
-            } else if (task.taskPaidStatus == TaskPaidStatus.NOT_PAID) {
-                currentMonthData.copy(second = currentMonthData.second + taskCost)
-            } else {
-                var totalPartialAmountForTask = 0
-                task.paymentHistory.forEach { taskPaymentHistory ->
-                    totalPartialAmountForTask += taskPaymentHistory.amount
+            val updatedMonthData = when (task.taskPaidStatus) {
+                TaskPaidStatus.FULLY_PAID -> {
+                    currentMonthData.copy(first = currentMonthData.first + taskCost)
                 }
-                val unPaidCost = task.taskCost - totalPartialAmountForTask
-                currentMonthData.copy(
-                    second = currentMonthData.second + unPaidCost,
-                    third = currentMonthData.third + totalPartialAmountForTask
-                )
+
+                TaskPaidStatus.NOT_PAID -> {
+                    currentMonthData.copy(second = currentMonthData.second + taskCost)
+                }
+
+                TaskPaidStatus.PARTIALLY_PAID -> {
+                    val totalPartialAmountForTask = task.paymentHistory.sumOf { it.amount }
+                    val unPaidCost = taskCost - totalPartialAmountForTask
+                    currentMonthData.copy(
+                        second = currentMonthData.second + unPaidCost,
+                        third = currentMonthData.third + totalPartialAmountForTask
+                    )
+                }
             }
             currentYearData[month] = updatedMonthData
         }
         return costBreakdown
     }
-
 
     fun setFilterAndSearchIconVisibility(isVisible: Boolean) {
         _clientTasksListState.update {

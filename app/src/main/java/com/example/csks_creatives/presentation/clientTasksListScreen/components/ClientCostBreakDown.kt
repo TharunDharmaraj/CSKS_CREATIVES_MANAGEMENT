@@ -9,8 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -60,7 +59,7 @@ fun ClientCostBreakDown(
             .padding(8.dp)
     ) {
         item {
-            PaymentSummaryPieChart(
+            ToggleablePaymentSummaryCard(
                 paid = totalCost.first,
                 unpaid = totalCost.second,
                 partiallyPaid = totalCost.third
@@ -173,75 +172,96 @@ fun ClientCostBreakDown(
 }
 
 @Composable
-fun PaymentSummaryPieChart(
+fun ToggleablePaymentSummaryCard(
     paid: Int,
     unpaid: Int,
     partiallyPaid: Int,
     modifier: Modifier = Modifier
 ) {
-    val total = paid + unpaid + partiallyPaid
-    val paidAngle = if (total == 0) 0f else (paid.toFloat() / total) * 360f
-    val unpaidAngle = if (total == 0) 0f else (unpaid.toFloat() / total) * 360f
-    val partiallyPaidAngle = 360f - paidAngle - unpaidAngle
+    var isExpanded by rememberSaveable { mutableStateOf(true) }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { isExpanded = !isExpanded },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.DarkGray)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "Client Payment Summary",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = Color.White
-            )
-            Spacer(Modifier.height(16.dp))
-
-            Canvas(modifier = Modifier.size(180.dp)) {
-                var startAngle = -90f
-
-                drawArc(
-                    color = Color.Green,
-                    startAngle = startAngle,
-                    sweepAngle = paidAngle,
-                    useCenter = true
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "Client Payment Summary",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
                 )
-                startAngle += paidAngle
-
-                drawArc(
-                    color = Color.Red,
-                    startAngle = startAngle,
-                    sweepAngle = unpaidAngle,
-                    useCenter = true
-                )
-                startAngle += unpaidAngle
-
-                drawArc(
-                    color = Color.Yellow,
-                    startAngle = startAngle,
-                    sweepAngle = partiallyPaidAngle,
-                    useCenter = true
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                    contentDescription = null,
+                    tint = Color.White
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                PaymentLegend(color = Color.Green, label = "Paid: ₹$paid")
-                PaymentLegend(color = Color.Red, label = "Unpaid: ₹$unpaid")
-                PaymentLegend(color = Color.Yellow, label = "Partially Paid: ₹$partiallyPaid")
+            AnimatedVisibility(visible = isExpanded) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(Modifier.height(16.dp))
+
+                    val total = paid + unpaid + partiallyPaid
+                    val paidAngle = if (total == 0) 0f else (paid.toFloat() / total) * 360f
+                    val unpaidAngle = if (total == 0) 0f else (unpaid.toFloat() / total) * 360f
+                    val partiallyPaidAngle = 360f - paidAngle - unpaidAngle
+
+                    Canvas(modifier = Modifier.size(180.dp)) {
+                        var startAngle = -90f
+
+                        drawArc(
+                            color = Color.Green,
+                            startAngle = startAngle,
+                            sweepAngle = paidAngle,
+                            useCenter = true
+                        )
+                        startAngle += paidAngle
+
+                        drawArc(
+                            color = Color.Red,
+                            startAngle = startAngle,
+                            sweepAngle = unpaidAngle,
+                            useCenter = true
+                        )
+                        startAngle += unpaidAngle
+
+                        drawArc(
+                            color = Color.Yellow,
+                            startAngle = startAngle,
+                            sweepAngle = partiallyPaidAngle,
+                            useCenter = true
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        PaymentLegend(color = Color.Green, label = "Paid: ₹$paid")
+                        PaymentLegend(color = Color.Red, label = "Unpaid: ₹$unpaid")
+                        PaymentLegend(
+                            color = Color.Yellow,
+                            label = "Partially Paid: ₹$partiallyPaid"
+                        )
+                    }
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun PaymentLegend(color: Color, label: String) {
