@@ -12,7 +12,7 @@ data class TaskDetailState(
     val taskAssignedTo: String = EMPTY_STRING, // EmployeeId of the task,  Editable only for Admin - Read only for Employee
     val taskEstimate: Int = 0, // Editable only for Admin - Read only for Employee
     val taskCost: Int = 0, // Editable and viewable only for admin
-    val taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID,
+    val taskPaidStatus: TaskPaidStatus = TaskPaidStatus.NOT_PAID, // Editable and viewable only for admin
     val taskType: TaskType = TaskType.SHORTS_VIDEO, // Editable for admin, Viewable for employee
     val taskPriority: TaskPriority = TaskPriority.MEDIUM, //  Editable for Admin, Viewable for Employee
     val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS, // Where the employee should find task related files. Editable for Admin, Viewable for Employee
