@@ -65,6 +65,7 @@ class TasksManipulationUseCase @Inject constructor(
         return try {
             if (currentTask == ClientTask()) return ResultState.Error("No Changes done")
             if (currentTask == initialTask) return ResultState.Error("No changes done")
+            var taskToEdit =currentTask
             if (currentTask.employeeId != initialTask.employeeId) {
                 adminRepository.removeActiveTaskFromEmployeeDetails(
                     initialTask.employeeId,
@@ -105,12 +106,12 @@ class TasksManipulationUseCase @Inject constructor(
                 }
             }
             if (currentTask.taskFullyPaidDate == EMPTY_STRING && currentTask.taskPaidStatus != initialTask.taskPaidStatus && currentTask.taskPaidStatus == TaskPaidStatus.FULLY_PAID) {
-                currentTask.copy(
+                taskToEdit = currentTask.copy(
                     taskFullyPaidDate = getCurrentTimeAsString(),
                 )
             }
-            tasksManipulationRepository.editTask(currentTask)
-            ResultState.Success("Task '${currentTask.taskName}' updated successfully")
+            tasksManipulationRepository.editTask(taskToEdit)
+            ResultState.Success("Task '${taskToEdit.taskName}' updated successfully")
         } catch (exception: Exception) {
             ResultState.Error("Failed to edit task ${exception.message}")
         }

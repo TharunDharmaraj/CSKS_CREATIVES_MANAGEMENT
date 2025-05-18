@@ -1,11 +1,6 @@
 package com.example.csks_creatives.presentation.taskDetailScreen.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -15,10 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskDirectionApp
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPriority
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskUploadOutput
+import com.example.csks_creatives.domain.model.utills.enums.tasks.*
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskDetailEvent
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.state.DropDownListState
@@ -196,23 +188,7 @@ fun TaskDetailTabContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            DropdownMenuWithSelection(
-                label = "Paid Status",
-                selectedItem = dropDownListState.taskPaidStatusList
-                    .find { it == taskState.taskPaidStatus }
-                    ?.name ?: "Select",
-                items = dropDownListState.taskPaidStatusList.map { it.name },
-                onItemSelected = { selected ->
-                    dropDownListState.taskPaidStatusList.find { it.name == selected }
-                        ?.let { paidStatus ->
-                            onEvent(TaskDetailEvent.TaskPaidStatusChanged(paidStatus))
-                        }
-                },
-                enabled = true
-            )
         }
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
