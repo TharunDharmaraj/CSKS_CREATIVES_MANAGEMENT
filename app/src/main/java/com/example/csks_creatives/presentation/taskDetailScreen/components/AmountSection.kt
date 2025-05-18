@@ -82,7 +82,7 @@ fun AmountSection(
 
                     OutlinedTextField(
                         value = taskState.taskPartialPaymentsAmount.toString(),
-                        onValueChange = { onEvent(TaskDetailEvent.TaskPartialPaymentAmountChanged(it.toInt())) },
+                        onValueChange = { onEvent(TaskDetailEvent.TaskPartialPaymentAmountChanged(it)) },
                         label = { Text("Enter Partial Amount") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),

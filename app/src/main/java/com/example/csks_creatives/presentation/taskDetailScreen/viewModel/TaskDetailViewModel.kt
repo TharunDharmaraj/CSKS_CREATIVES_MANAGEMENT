@@ -256,9 +256,10 @@ class TaskDetailViewModel @Inject constructor(
             }
 
             is TaskDetailEvent.TaskPartialPaymentAmountChanged -> {
+                if (event.taskPartialPaymentAmount.isEmpty()) return
                 _taskDetailState.update {
                     it.copy(
-                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount
+                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount.toInt()
                     )
                 }
             }

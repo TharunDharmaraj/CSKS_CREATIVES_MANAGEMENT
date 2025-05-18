@@ -19,5 +19,5 @@ sealed interface TaskDetailEvent {
     data class TaskPriorityChanged(val taskPriority: TaskPriority) : TaskDetailEvent
     data class TaskDirectionAppChanged(val taskDirectionApp: TaskDirectionApp) : TaskDetailEvent
     data class TaskUploadOutputChanged(val taskUploadOutput: TaskUploadOutput) : TaskDetailEvent
-    data class TaskPartialPaymentAmountChanged(val taskPartialPaymentAmount: Int) : TaskDetailEvent
+    data class TaskPartialPaymentAmountChanged(val taskPartialPaymentAmount: String) : TaskDetailEvent
 }
