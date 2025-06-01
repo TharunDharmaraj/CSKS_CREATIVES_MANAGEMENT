@@ -6,13 +6,16 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 
 ## 📌 Features At a Glance
 
-- 🔐 Role-based access (Admin / Employee)
-- 📬 Real-time Notifications
-- 🧾 Financial Insights (Admin & Client)
-- ⏱️ Employee Performance Tracking
-- 🗂️ Task Search, Filters, and Status Workflow
-- 🗓️ Comprehensive Leave Management
-- 💾 Session Persistence with Offline Support
+- 🔐 Role-based access: Admin / Employee
+- 📬 Real-time notifications with Firebase Cloud Messaging
+- 🧾 Financial dashboards: View payments, dues, and summaries
+- ⏱️ Employee performance tracking via task time logs
+- 🗂️ Task status workflow (similar to Jira): Backlog → In Progress → Review → Revision → Completed
+- 🧮 Payment tracking with support for Partial / Full payments
+- 📅 Leave request & approval system
+- 🔍 Filter and search tasks by status, priority, or keywords
+- 💾 Offline-first with persistent login via local cache
+- 📈 Client-wise and Admin-wise monthly/yearly financial insights
 
 ---
 
@@ -105,6 +108,7 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 
 ### 🔹 UI Layer
 - Jetpack Compose-based Screens
+- App Navigation
 - ViewModels for state management
 
 ### 🔹 Domain Layer
