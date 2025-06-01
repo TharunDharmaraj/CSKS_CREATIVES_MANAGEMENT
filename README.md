@@ -2,7 +2,7 @@
 Admin and Employee Management Android Application
 Android App Designed to Manage Employees and get a Overview of the Financials of [CSKS Creatives](https://cskscreatives.com/)
 
-**User Roles:
+**User Roles:** (Login Required) 
 - Admin
 - Employee
 
@@ -62,6 +62,14 @@ Android App Designed to Manage Employees and get a Overview of the Financials of
       - Admin Assigns a Task
       - Admin Comments inside task, assigned to that employee
 
+**Persists Login Session of Both Employees and Admin, Once logged in, till Logging Out, In Local Cache and retrievs it
+**
+
+**Architecture - Layered Architecture:**
+- UI Layer ( Composables & VM )
+- Domain ( Usecases & Models)
+- Data ( Repo & Datasource [Remote Firestore, Local RoomDB])
+- Dependancy Injection - Dagger Hilt
 
 
 Cloud functions repo for the same: https://github.com/TharunDharmaraj/CSKS_CREATIVES_CLOUD_FUNCTIONS
