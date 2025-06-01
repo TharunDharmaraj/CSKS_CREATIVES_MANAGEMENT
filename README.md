@@ -181,16 +181,16 @@ Set Up Firebase
     Clone the [CSKS_CREATIVES_CLOUD_FUNCTIONS (GitHub)](https://github.com/TharunDharmaraj/CSKS_CREATIVES_CLOUD_FUNCTIONS) repo, deploy it in Cloud Console
 
     Commands to deploy the Cloud Function, by navigating to the repo folder
-For 1st Time Setup:
-      - npm install -g firebase-tools
-      - npm install firebase-admin firebase-functions
-      - firebase init firestore
-      - firebase init functions
+    For 1st Time Setup:
+          - npm install -g firebase-tools
+          - npm install firebase-admin firebase-functions
+          - firebase init firestore
+          - firebase init functions
 
-After that:
-      - firebase init
-      - firebase login
-      - firebase deploy --only functions  
+      After that:
+            - firebase init
+            - firebase login
+            - firebase deploy --only functions  
 
 5. Run the App
 
