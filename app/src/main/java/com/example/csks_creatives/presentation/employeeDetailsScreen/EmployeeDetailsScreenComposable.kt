@@ -1,5 +1,6 @@
 package com.example.csks_creatives.presentation.employeeDetailsScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,6 +23,8 @@ import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
+import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.employeeDetailsScreen.components.EmployeeTaskCard
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.EmployeeDetailsScreenViewModel
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.event.EmployeeDetailsScreenEvent
@@ -30,6 +34,7 @@ import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,12 +47,25 @@ fun EmployeeDetailsScreen(
     navController: NavHostController,
     viewModel: EmployeeDetailsScreenViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val adminToolbarTitle = viewModel.employeeDetailsScreenTitle.collectAsState()
     val navigationItems = listOf(
         EmployeeDetailsScreenBottomNavigation.ActiveTasks,
         EmployeeDetailsScreenBottomNavigation.CompletedTasks,
         EmployeeDetailsScreenBottomNavigation.Profile
     )
+
+    LaunchedEffect(true) {
+        viewModel.uiEvent.collectLatest { event ->
+            when (event) {
+                is ToastUiEvent.ShowToast -> Toast.makeText(
+                    context,
+                    event.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
     val state = viewModel.employeeDetailsScreenState.collectAsState()
     val pagerState = rememberPagerState()
@@ -74,6 +92,7 @@ fun EmployeeDetailsScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             AppToolbar(
                 title = adminToolbarTitle.value,
@@ -132,8 +151,32 @@ fun EmployeeDetailsScreen(
             modifier = Modifier.padding(padding)
         ) { page ->
             when (page) {
-                0 -> ActiveTasksScreen(viewModel, navController)
-                1 -> CompletedTasksScreen(viewModel, navController)
+                0 -> {
+                    if (state.value.isActiveTasksLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            LoadingProgress()
+                        }
+                    } else {
+                        ActiveTasksScreen(viewModel, navController)
+                    }
+                }
+
+                1 -> {
+                    if (state.value.isCompletedTasksLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            LoadingProgress()
+                        }
+                    } else {
+                        CompletedTasksScreen(viewModel, navController)
+                    }
+                }
+
                 2 -> EmployeeDetailSection(
                     state.value,
                     onApproveLeave = { leaveRequest ->
@@ -158,19 +201,6 @@ fun ActiveTasksScreen(viewModel: EmployeeDetailsScreenViewModel, navController: 
             .padding(16.dp)
             .fillMaxSize()
     ) {
-        if (state.isActiveTasksSectionVisible && state.isSearchBarVisible) {
-            OutlinedTextField(
-                value = state.searchTextForActive,
-                onValueChange = {
-                    viewModel.onEvent(EmployeeDetailsScreenEvent.OnSearchTextChangedForActive(it))
-                },
-                label = { Text("Search Active Tasks") },
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
         if (state.tasksInProgress.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -183,6 +213,18 @@ fun ActiveTasksScreen(viewModel: EmployeeDetailsScreenViewModel, navController: 
                 )
             }
         } else {
+            if (state.isActiveTasksSectionVisible && state.isSearchBarVisible) {
+                OutlinedTextField(
+                    value = state.searchTextForActive,
+                    onValueChange = {
+                        viewModel.onEvent(EmployeeDetailsScreenEvent.OnSearchTextChangedForActive(it))
+                    },
+                    label = { Text("Search Active Tasks") },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             LazyColumn {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -227,31 +269,34 @@ fun CompletedTasksScreen(
             .padding(16.dp)
             .fillMaxSize()
     ) {
-        if (state.isCompletedTasksSectionVisible && state.isSearchBarVisible) {
-            OutlinedTextField(
-                value = state.searchTextForCompleted,
-                onValueChange = {
-                    viewModel.onEvent(EmployeeDetailsScreenEvent.OnSearchTextChangedForCompleted(it))
-                },
-                label = { Text("Search Completed Tasks") },
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
         if (state.tasksCompleted.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No completed tasks found.",
+                    text = "No active tasks found.",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = 32.dp)
                 )
             }
         } else {
+            if (state.isCompletedTasksSectionVisible && state.isSearchBarVisible) {
+                OutlinedTextField(
+                    value = state.searchTextForCompleted,
+                    onValueChange = {
+                        viewModel.onEvent(
+                            EmployeeDetailsScreenEvent.OnSearchTextChangedForCompleted(
+                                it
+                            )
+                        )
+                    },
+                    label = { Text("Search Completed Tasks") },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             LazyColumn {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically) {

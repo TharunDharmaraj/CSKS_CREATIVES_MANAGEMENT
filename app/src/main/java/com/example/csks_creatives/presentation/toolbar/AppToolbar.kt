@@ -1,7 +1,7 @@
 package com.example.csks_creatives.presentation.toolbar
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -9,7 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import com.example.csks_creatives.R
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.presentation.components.darkSlateBlue
 
@@ -17,6 +19,7 @@ import com.example.csks_creatives.presentation.components.darkSlateBlue
 @Composable
 fun AppToolbar(
     title: String,
+    canShowLogo: Boolean = false,
     canShowBackIcon: Boolean = false,
     canShowSearch: Boolean = false,
     canShowMenu: Boolean = false,
@@ -49,6 +52,12 @@ fun AppToolbar(
                 IconButton(onClick = onBackClicked) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
+            }
+            if(canShowLogo){
+                Image(
+                    painter = painterResource(R.drawable.toolbar_logo),
+                    contentDescription = "CSKS CREATIVES"
+                )
             }
         },
         actions = {

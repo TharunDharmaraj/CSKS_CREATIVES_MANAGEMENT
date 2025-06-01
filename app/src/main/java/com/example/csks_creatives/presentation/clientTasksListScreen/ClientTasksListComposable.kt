@@ -51,6 +51,7 @@ fun ClientTasksListComposable(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             AppToolbar(
                 title = "Client $clientId",

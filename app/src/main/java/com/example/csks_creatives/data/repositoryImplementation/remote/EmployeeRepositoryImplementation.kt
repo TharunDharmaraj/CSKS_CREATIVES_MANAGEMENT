@@ -109,7 +109,7 @@ class EmployeeRepositoryImplementation @Inject constructor(
                         val unapproved =
                             leaveList.filter { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
                         val rejected =
-                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.REJECTED}
+                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.REJECTED }
 
                         trySend(LeaveRequestsGrouped(approved, unapproved, rejected)).isSuccess
                     }

@@ -120,6 +120,8 @@ class TasksUseCase @Inject constructor(
             if (task.taskAttachment.isEmpty()) return ResultState.Error("Task Description Cannot Be Empty")
             if (task.taskName.isEmpty()) return ResultState.Error("Task Name Cannot Be Empty")
             if (task.clientId.isEmpty()) return ResultState.Error("Task Client Cannot be Empty")
+            if (task.taskCost == 0) return ResultState.Error("Task Cost Cannot be 0")
+            if (task.taskEstimate == 0) return ResultState.Error("Task Estimate Cannot be 0")
             val currentTime = getCurrentTimeAsString()
             val taskToCreate = task.copy(
                 taskId = currentTime,

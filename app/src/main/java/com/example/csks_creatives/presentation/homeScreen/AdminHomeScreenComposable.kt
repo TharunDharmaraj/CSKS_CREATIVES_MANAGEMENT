@@ -25,6 +25,7 @@ import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
+import com.example.csks_creatives.presentation.financeScreen.FinanceScreenComposable
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.AdminHomeScreenViewModel
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.*
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.navigation.AdminBottomNavigation
@@ -43,17 +44,19 @@ fun AdminHomeScreen(
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
     val navigationItems = listOf(
+        AdminBottomNavigation.Tasks,
         AdminBottomNavigation.Employees,
         AdminBottomNavigation.Clients,
-        AdminBottomNavigation.Tasks,
         AdminBottomNavigation.Finance,
         AdminBottomNavigation.LeaveRequests
     )
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             AppToolbar(
                 title = adminToolbarTitle.value,
+                canShowLogo = true,
                 canShowMenu = true,
                 menuItems = listOf(
                     ToolbarOverFlowMenuItem("add_employee", "Add Employee"),
@@ -166,7 +169,7 @@ fun AdminHomeScreen(
                 }
 
                 AdminBottomNavigation.Finance -> {
-
+                    FinanceScreenComposable()
                 }
 
                 AdminBottomNavigation.LeaveRequests -> {
@@ -393,36 +396,45 @@ fun CardItem(
 @Composable
 fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
     val state by viewModel.adminHomeScreenState.collectAsState()
-
-    if (state.activeLeaveRequests.isEmpty()) {
+    val isLoading by viewModel.adminHomeScreenLoadingState.collectAsState()
+    if (isLoading.isLeaveRequestsLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "No leave requests from Employees!",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            LoadingProgress()
         }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-        ) {
-            items(state.activeLeaveRequests.size) { index ->
-                LeaveRequestTaskItem(
-                    leaveRequest = state.activeLeaveRequests[index],
-                    onApproval = {
-                        viewModel.onLeaveRequestApproved(state.activeLeaveRequests[index])
-                    },
-                    onReject = {
-                        viewModel.onLeaveRequestRejected(state.activeLeaveRequests[index])
-                    }
+        if (state.activeLeaveRequests.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No leave requests from Employees!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+            ) {
+                items(state.activeLeaveRequests.size) { index ->
+                    LeaveRequestTaskItem(
+                        leaveRequest = state.activeLeaveRequests[index],
+                        onApproval = {
+                            viewModel.onLeaveRequestApproved(state.activeLeaveRequests[index])
+                        },
+                        onReject = {
+                            viewModel.onLeaveRequestRejected(state.activeLeaveRequests[index])
+                        }
+                    )
+                }
             }
         }
     }
@@ -434,31 +446,39 @@ fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScree
     val state = viewModel.adminHomeScreenState.collectAsState()
     val isLoading = viewModel.adminHomeScreenLoadingState.collectAsState().value.isClientsLoading
 
-    if (state.value.clientList.isEmpty()) {
+    if (isLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "No Clients found, tap on Add clients",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            LoadingProgress()
         }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(state.value.clientList.size) { index ->
-                if (isLoading) LoadingProgress()
-                CardItem(
-                    title = state.value.clientList[index].clientName,
-                    onClick = { navController.navigate("client_detail/${state.value.clientList[index].clientId}") },
+        if (state.value.clientList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No Clients found, tap on Add clients",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                items(state.value.clientList.size) { index ->
+                    CardItem(
+                        title = state.value.clientList[index].clientName,
+                        onClick = { navController.navigate("client_detail/${state.value.clientList[index].clientId}") },
+                    )
+                }
             }
         }
     }
@@ -469,31 +489,39 @@ fun EmployeeListScreen(navController: NavHostController, viewModel: AdminHomeScr
     val state = viewModel.adminHomeScreenState.collectAsState()
     val isLoading = viewModel.adminHomeScreenLoadingState.collectAsState().value.isEmployeesLoading
 
-    if (state.value.employeeList.isEmpty()) {
+    if (isLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "No Employees found, tap on Add Employees",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            LoadingProgress()
         }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(state.value.employeeList.size) { index ->
-                if (isLoading) LoadingProgress()
-                CardItem(
-                    title = state.value.employeeList[index].employeeName,
-                    onClick = { navController.navigate("employee_detail/${state.value.employeeList[index].employeeId}") }
+        if (state.value.employeeList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No Employees found, tap on Add Employees",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                items(state.value.employeeList.size) { index ->
+                    CardItem(
+                        title = state.value.employeeList[index].employeeName,
+                        onClick = { navController.navigate("employee_detail/${state.value.employeeList[index].employeeId}") }
+                    )
+                }
             }
         }
     }

@@ -2,12 +2,16 @@ package com.example.csks_creatives.presentation.taskDetailScreen.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.csks_creatives.domain.model.utills.enums.tasks.*
@@ -25,6 +29,7 @@ fun TaskDetailTabContent(
     onEvent: (TaskDetailEvent) -> Unit,
     getAvailableStatusOptions: () -> List<String>
 ) {
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -43,6 +48,10 @@ fun TaskDetailTabContent(
             label = { Text("Task Name") },
             singleLine = true,
             readOnly = userRole != UserRole.Admin,
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -58,14 +67,20 @@ fun TaskDetailTabContent(
             value = taskState.taskEstimate.toString(),
             onValueChange = {
                 if (userRole == UserRole.Admin) onEvent(
-                    TaskDetailEvent.TaskEstimateChanged(it.toIntOrNull() ?: 0)
+                    TaskDetailEvent.TaskEstimateChanged(it.toInt())
                 )
             },
             singleLine = true,
             label = { Text("Estimate (Hours)") },
             readOnly = userRole != UserRole.Admin,
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
         )
 
         // Assigned Employee (Dropdown)
@@ -181,12 +196,18 @@ fun TaskDetailTabContent(
             OutlinedTextField(
                 value = taskState.taskCost.toString(),
                 onValueChange = { value ->
-                    onEvent(TaskDetailEvent.TaskCostChanged(value.toIntOrNull() ?: 0))
+                    onEvent(TaskDetailEvent.TaskCostChanged(value.toInt()))
                 },
                 label = { Text("Task Cost") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
             )
         }
         Spacer(modifier = Modifier.height(12.dp))

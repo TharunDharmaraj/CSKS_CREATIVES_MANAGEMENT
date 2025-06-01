@@ -1,11 +1,10 @@
 package com.example.csks_creatives.presentation.taskDetailScreen.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,7 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import java.time.Duration
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskStatusHistoryComposable(
     statusHistory: List<TaskStatusHistory>,
@@ -110,5 +111,70 @@ fun TaskStatusHistoryComposable(
                 }
             }
         }
+
+        val isTaskCompleted = statusHistory.lastOrNull()?.taskStatusType == TaskStatusType.COMPLETED
+        if (isTaskCompleted) {
+            val intermediateStatuses = statusHistory.filter {
+                it.taskStatusType != TaskStatusType.BACKLOG &&
+                        it.taskStatusType != TaskStatusType.COMPLETED
+            }
+            if (intermediateStatuses.isNotEmpty()) {
+                val startTime = intermediateStatuses.first().startTime.toLong()
+                val endTime = intermediateStatuses.last().endTime.toLong()
+                val timeSpent = formatDuration(startTime, endTime)
+                CompletedSummary(timeSpent)
+            } else {
+                // Empty, No Intermediate Status
+                CompletedSummary("Completed Time Could not be Displayed")
+            }
+        }
     }
+}
+
+@Composable
+fun CompletedSummary(summaryText: String) {
+    Spacer(modifier = Modifier.height(12.dp))
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1B5E20)) // dark green
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Total Task Duration",
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = summaryText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun formatDuration(startMillis: Long, endMillis: Long): String {
+    val durationMillis = endMillis - startMillis
+    if (durationMillis <= 0) return "Less than a minute"
+
+    val duration = Duration.ofMillis(durationMillis)
+    val days = duration.toDays()
+    val hours = (duration.toHours() % 24)
+    val minutes = (duration.toMinutes() % 60)
+
+    return buildString {
+        if (days > 0) append("$days day${if (days > 1) "s" else ""} ")
+        if (hours > 0) append("$hours hr${if (hours > 1) "s" else ""} ")
+        if (minutes > 0) append("$minutes min${if (minutes > 1) "s" else ""}")
+    }.trim().ifEmpty { "Less than a minute" }
 }

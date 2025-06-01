@@ -28,9 +28,9 @@ class AdminHomeScreenViewModel @Inject constructor(
         adminUseCaseFactory.create()
         clientsUseCaseFactory.create()
         tasksUseCaseFactory.create()
-        fetchActiveTasks()
         fetchActiveLeaveRequests()
     }
+
     private val _homeScreenTitleState = MutableStateFlow("Welcome, Admin")
     val homeScreenTitle = _homeScreenTitleState.asStateFlow()
 
@@ -183,8 +183,8 @@ class AdminHomeScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     val result = adminUseCaseFactory.createEmployee(
                         Employee(
-                            employeeName = _addEmployeeDialogState.value.employeeName,
-                            employeePassword = _addEmployeeDialogState.value.employeePassword,
+                            employeeName = _addEmployeeDialogState.value.employeeName.lowercase(),
+                            employeePassword = _addEmployeeDialogState.value.employeePassword.lowercase(),
                         )
                     )
                     if (result is ResultState.Success) {
@@ -218,6 +218,11 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     private fun fetchEmployees() {
         viewModelScope.launch {
+            _adminHomeScreenLoadingState.update {
+                it.copy(
+                    isEmployeesLoading = true
+                )
+            }
             val result = adminUseCaseFactory.getEmployeesList(isForceFetchFromServer = true)
             if (result is ResultState.Success) {
                 _adminHomeScreenState.value =
@@ -232,20 +237,34 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     private fun fetchClients() {
         viewModelScope.launch {
-            val result = clientsUseCaseFactory.getClients(isForceFetchFromServer = true)
-            if (result is ResultState.Success) {
-                _adminHomeScreenState.value =
-                    _adminHomeScreenState.value.copy(clientList = result.data)
-                _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                    isClientsLoading = false
+            _adminHomeScreenLoadingState.update {
+                it.copy(
+                    isClientsLoading = true
                 )
-                isClientsFetched = true
+            }
+            val result = clientsUseCaseFactory.getClients(isForceFetchFromServer = true)
+            when (result) {
+                is ResultState.Error -> TODO()
+                ResultState.Loading -> {
+                    _adminHomeScreenLoadingState
+                }
+                is ResultState.Success<List<Client>> -> {
+                    _adminHomeScreenState.value =
+                        _adminHomeScreenState.value.copy(clientList = result.data)
+                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
+                        isClientsLoading = false
+                    )
+                    isClientsFetched = true
+                }
             }
         }
     }
 
     private fun fetchActiveTasks() {
         viewModelScope.launch {
+            _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
+                isActiveTasksLoading = true
+            )
             tasksUseCaseFactory.getAllActiveTasks().collect { result ->
                 if (result is ResultState.Success) {
                     _adminHomeScreenState.value =
@@ -263,10 +282,16 @@ class AdminHomeScreenViewModel @Inject constructor(
         viewModelScope.launch {
             adminUseCaseFactory.getAllActiveLeaveRequests().collect { result ->
                 if (result is ResultState.Success) {
-                    hasUnapprovedLeaves.value = result.data.any { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
+                    hasUnapprovedLeaves.value =
+                        result.data.any { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
                     _adminHomeScreenState.update {
                         it.copy(
                             activeLeaveRequests = result.data
+                        )
+                    }
+                    _adminHomeScreenLoadingState.update {
+                        it.copy(
+                            isLeaveRequestsLoading = false
                         )
                     }
                 }
@@ -277,6 +302,11 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     private fun fetchCompletedTasks() {
         viewModelScope.launch {
+            _adminHomeScreenLoadingState.update {
+                it.copy(
+                    isCompletedTasksLoading = true
+                )
+            }
             tasksUseCaseFactory.getAllCompletedTasks().collect { result ->
                 if (result is ResultState.Success) {
                     _adminHomeScreenState.value =
@@ -292,6 +322,11 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     private fun fetchBacklogTasks() {
         viewModelScope.launch {
+            _adminHomeScreenLoadingState.update {
+                it.copy(
+                    isBacklogTasksLoading = true
+                )
+            }
             tasksUseCaseFactory.getAllBacklogTasks().collect { result ->
                 if (result is ResultState.Success) {
                     _adminHomeScreenState.value =

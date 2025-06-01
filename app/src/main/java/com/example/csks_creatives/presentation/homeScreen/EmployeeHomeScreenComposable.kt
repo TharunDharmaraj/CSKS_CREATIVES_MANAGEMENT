@@ -48,9 +48,11 @@ fun EmployeeHomeScreenComposable(
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             AppToolbar(
                 title = "Welcome, $employeeId",
+                canShowLogo = true,
                 canShowSearch = false,
                 canShowMenu = true,
                 menuItems = listOf(
@@ -311,7 +313,6 @@ fun EmployeeHomeScreenComposable(
             }
         }
 
-
         LeaveRequestDialog(
             isVisible = state.isAddLeaveDialogVisible,
             state = leaveRequestDialogState,
@@ -454,7 +455,11 @@ fun LeaveRequestDialog(
 }
 
 @Composable
-fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}, onReRequest: () -> Unit = {}) {
+fun LeaveRequestCard(
+    leave: LeaveRequest,
+    onWidthDrawRequest: () -> Unit = {},
+    onReRequest: () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -491,7 +496,7 @@ fun LeaveRequestCard(leave: LeaveRequest, onWidthDrawRequest: () -> Unit = {}, o
                     Text("Withdraw")
                 }
             }
-            if(leave.approvedStatus == LeaveApprovalStatus.REJECTED){
+            if (leave.approvedStatus == LeaveApprovalStatus.REJECTED) {
                 Button(
                     onClick = onReRequest,
                     modifier = Modifier

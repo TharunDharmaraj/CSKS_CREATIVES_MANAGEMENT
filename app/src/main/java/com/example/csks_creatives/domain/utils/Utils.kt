@@ -1,15 +1,18 @@
 package com.example.csks_creatives.domain.utils
 
-import com.example.csks_creatives.data.utils.Constants.BACKLOG
 import com.example.csks_creatives.data.utils.Constants.COMPLETED
 import com.example.csks_creatives.data.utils.Constants.FULLY_PAID
 import com.example.csks_creatives.data.utils.Constants.IN_PROGRESS
 import com.example.csks_creatives.data.utils.Constants.IN_REVIEW
 import com.example.csks_creatives.data.utils.Constants.NOT_PAID
 import com.example.csks_creatives.data.utils.Constants.PARTIALLY_PAID
-import com.example.csks_creatives.data.utils.Constants.REVISION_ONE
-import com.example.csks_creatives.data.utils.Constants.REVISION_THREE
-import com.example.csks_creatives.data.utils.Constants.REVISION_TWO
+import com.example.csks_creatives.data.utils.Constants.REVISION_1
+import com.example.csks_creatives.data.utils.Constants.REVISION_2
+import com.example.csks_creatives.data.utils.Constants.REVISION_3
+import com.example.csks_creatives.data.utils.Constants.REVISION_4
+import com.example.csks_creatives.data.utils.Constants.REVISION_5
+import com.example.csks_creatives.data.utils.Constants.REVISION_6
+import com.example.csks_creatives.data.utils.Constants.REVISION_7
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
@@ -33,40 +36,90 @@ object Utils {
             TaskStatusType.BACKLOG -> listOf(
                 IN_PROGRESS,
                 IN_REVIEW,
-                REVISION_ONE,
-                REVISION_TWO,
-                REVISION_THREE,
+                REVISION_1,
+                REVISION_2,
+                REVISION_3,
+                REVISION_4,
+                REVISION_5,
+                REVISION_6,
+                REVISION_7,
                 COMPLETED
             )
 
-            TaskStatusType.BLOCKED -> listOf(
-                BACKLOG,
-                IN_PROGRESS,
-                IN_REVIEW,
-                REVISION_ONE,
-                REVISION_TWO,
-                REVISION_THREE,
-                COMPLETED
-            )
+//            TaskStatusType.BLOCKED -> listOf(
+//                BACKLOG,
+//                IN_PROGRESS,
+//                IN_REVIEW,
+//                REVISION_1,
+//                REVISION_2,
+//                REVISION_3,
+//                REVISION_4,
+//                REVISION_5,
+//                REVISION_6,
+//                REVISION_7,
+//                COMPLETED
+//            )
 
             TaskStatusType.IN_PROGRESS -> listOf(
                 IN_REVIEW,
-                REVISION_ONE,
-                REVISION_TWO,
-                REVISION_THREE,
+                REVISION_1,
+                REVISION_2,
+                REVISION_3,
+                REVISION_4,
+                REVISION_5,
+                REVISION_6,
+                REVISION_7,
                 COMPLETED
             )
 
             TaskStatusType.IN_REVIEW -> listOf(
-                REVISION_ONE,
-                REVISION_TWO,
-                REVISION_THREE,
+                REVISION_1,
+                REVISION_2,
+                REVISION_3,
+                REVISION_4,
+                REVISION_5,
+                REVISION_6,
+                REVISION_7,
                 COMPLETED
             )
 
-            TaskStatusType.REVISION_ONE -> listOf(REVISION_TWO, REVISION_THREE, COMPLETED)
-            TaskStatusType.REVISION_TWO -> listOf(REVISION_THREE, COMPLETED)
-            TaskStatusType.REVISION_THREE -> listOf(COMPLETED)
+            TaskStatusType.REVISION_1 -> listOf(
+                REVISION_2, REVISION_3, REVISION_4,
+                REVISION_5,
+                REVISION_6,
+                REVISION_7, COMPLETED
+            )
+
+            TaskStatusType.REVISION_2 -> listOf(
+                REVISION_3, REVISION_4,
+                REVISION_5,
+                REVISION_6,
+                REVISION_7, COMPLETED
+            )
+
+            TaskStatusType.REVISION_3 -> listOf(
+                REVISION_4,
+                REVISION_5,
+                REVISION_6,
+                REVISION_7, COMPLETED
+            )
+
+            TaskStatusType.REVISION_4 -> listOf(
+                REVISION_5,
+                REVISION_6,
+                REVISION_7, COMPLETED
+            )
+
+            TaskStatusType.REVISION_5 -> listOf(
+                REVISION_6,
+                REVISION_7, COMPLETED
+            )
+
+            TaskStatusType.REVISION_6 -> listOf(
+                REVISION_7, COMPLETED
+            )
+
+            TaskStatusType.REVISION_7 -> listOf(COMPLETED)
             TaskStatusType.COMPLETED -> listOf(COMPLETED)
         }
     }

@@ -259,7 +259,7 @@ class TaskDetailViewModel @Inject constructor(
                 if (event.taskPartialPaymentAmount.isEmpty()) return
                 _taskDetailState.update {
                     it.copy(
-                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount.toInt()
+                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount
                     )
                 }
             }
@@ -267,7 +267,7 @@ class TaskDetailViewModel @Inject constructor(
             TaskDetailEvent.AddTaskPartialPayment -> {
                 addPartialTaskAmount(
                     _taskDetailState.value.taskId,
-                    _taskDetailState.value.taskPartialPaymentsAmount
+                    _taskDetailState.value.taskPartialPaymentsAmount.filter { it.isDigit() }.toInt()
                 )
             }
         }
@@ -430,7 +430,7 @@ class TaskDetailViewModel @Inject constructor(
     private fun addPartialTaskAmount(taskId: String, amount: Int) = viewModelScope.launch {
         val remainingAmount =
             _taskDetailState.value.taskCost - _taskDetailState.value.taskPaymentsHistory.sumOf { it.amount }
-        tasksManipulationUseCaseFactory.addPartialTaskAmount(taskId, amount, remainingAmount).let {
+        tasksManipulationUseCaseFactory.addPartialTaskAmount(taskId, amount, remainingAmount).let { it ->
             when (it) {
                 is ResultState.Error -> {
                     _uiEvent.emit(ShowToast(it.message))
@@ -441,8 +441,8 @@ class TaskDetailViewModel @Inject constructor(
                 }
 
                 is ResultState.Success -> {
-                    _taskDetailState.update {
-                        it.copy(
+                    _taskDetailState.update { state ->
+                        state.copy(
                             taskPartialPaymentsAmount = 0
                         )
                     }

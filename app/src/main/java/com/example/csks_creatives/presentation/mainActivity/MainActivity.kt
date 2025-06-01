@@ -22,7 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.example.csks_creatives.presentation.AppNavigation
-import com.example.csks_creatives.presentation.components.charCoal
+import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.mainActivity.viewModel.MainViewModel
 import com.example.csks_creatives.ui.theme.CSKS_CREATIVESTheme
 import com.example.csks_creatives.ui.theme.SetStatusAndNavigationBarColor
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     NotificationPermissionRequester()
                 }
-                SetStatusAndNavigationBarColor(charCoal)
+                SetStatusAndNavigationBarColor(darkSlateBlue)
 
                 val navController = rememberNavController()
                 val mainState by viewModel.mainState.collectAsState()
@@ -109,9 +109,7 @@ fun NotificationPermissionRequester() {
     }
 
     // Optional: Block screen or show dialog until permission is granted
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-        !permissionState.status.isGranted
-    ) {
+    if (!permissionState.status.isGranted) {
         Box(
             modifier = Modifier
                 .fillMaxSize()

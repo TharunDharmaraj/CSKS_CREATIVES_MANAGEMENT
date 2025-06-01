@@ -30,15 +30,19 @@ fun CommentsComposable(
     val coroutineScope = rememberCoroutineScope()
 
     // Scroll to bottom once on first composition
-    LaunchedEffect(taskState.taskComments.size) {
+    LaunchedEffect(taskState.taskComments.size, commentState.commentString) {
         if (taskState.taskComments.isNotEmpty()) {
             coroutineScope.launch {
-                listState.scrollToItem(taskState.taskComments.lastIndex)
+                listState.animateScrollToItem(taskState.taskComments.lastIndex)
             }
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+    ) {
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -127,7 +131,8 @@ fun PostCommentsComposable(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)) {
+            .padding(8.dp)
+    ) {
         OutlinedTextField(
             value = commentState.commentString,
             onValueChange = { onCommentStringChanged(it) },

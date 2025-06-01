@@ -16,6 +16,8 @@ data class EmployeeDetailsScreenState(
     val isSearchBarVisible: Boolean = true,
     val isCompletedTasksSectionVisible: Boolean = true,
     val isActiveTasksSectionVisible: Boolean = true,
+    val isCompletedTasksLoading: Boolean = true,
+    val isActiveTasksLoading: Boolean = true,
     val tasksCompleted: List<ClientTaskOverview> = emptyList(),
     val tasksInProgress: List<ClientTaskOverview> = emptyList(),
     val approvedLeavesList: List<LeaveRequest> = emptyList(),

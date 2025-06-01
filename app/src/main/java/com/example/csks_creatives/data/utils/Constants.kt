@@ -7,6 +7,7 @@ object Constants {
     const val CLIENT_COLLECTION = "Client"
     const val TASKS_COLLECTION = "Tasks"
     const val LEAVE_REQUESTS_COLLECTION = "LeaveRequests"
+    const val PARSED_FINANCE_COLLECTION = "ParsedFinance"
 
     // Employee Collection Fields
     const val EMPLOYEE_EMPLOYEE_ID = "employeeId"
@@ -36,6 +37,13 @@ object Constants {
     // Clients Collection Fields
     const val CLIENT_ID = "ClientId"
     const val CLIENT_NAME = "ClientName"
+
+    // Parsed Finance Collection Fields
+    const val PARSED_FINANCE_MONTH_SUB_COLLECTION = "Month"
+    const val TOTAL_COST_FINANCE = "totalCost"
+    const val TOTAL_FULLY_PAID_COST_FINANCE = "totalFullyPaidCost"
+    const val TOTAL_PARTIALLY_PAID_COST_FINANCE = "totalPartiallyPaidCost"
+    const val TOTAL_UN_PAID_COST_FINANCE = "totalUnpaidCost"
 
     // Task Collection Fields
     const val TASK_ID = "taskId"
@@ -73,10 +81,13 @@ object Constants {
     const val BACKLOG = "BACKLOG"
     const val IN_PROGRESS = "IN_PROGRESS"
     const val IN_REVIEW = "IN_REVIEW"
-    const val REVISION_ONE = "REVISION_ONE"
-    const val REVISION_TWO = "REVISION_TWO"
-    const val REVISION_THREE = "REVISION_THREE"
-    const val BLOCKED = "BLOCKED"
+    const val REVISION_1 = "REVISION_1"
+    const val REVISION_2 = "REVISION_2"
+    const val REVISION_3 = "REVISION_3"
+    const val REVISION_4 = "REVISION_4"
+    const val REVISION_5 = "REVISION_5"
+    const val REVISION_6 = "REVISION_6"
+    const val REVISION_7 = "REVISION_7"
     const val COMPLETED = "COMPLETED"
 
     // Task Paid Status

@@ -1,6 +1,7 @@
 package com.example.csks_creatives.presentation.taskDetailScreen
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +45,7 @@ fun TaskDetailsComposable(
         viewModel.initialize(userRole, isTaskCreation, taskId, employeeId)
     }
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             val actionButtonText: String
             val title: String

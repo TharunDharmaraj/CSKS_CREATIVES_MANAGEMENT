@@ -65,6 +65,14 @@ object RepositoryModule {
         return EmployeeRepositoryImplementation(firestore)
     }
 
+    @Provides
+    @Singleton
+    fun provideFinanceRepository(
+        firestore: FirebaseFirestore
+    ): FinanceRepository {
+        return FinanceRepositoryImplementation(firestore)
+    }
+
     // local Repository
     @Provides
     @Singleton

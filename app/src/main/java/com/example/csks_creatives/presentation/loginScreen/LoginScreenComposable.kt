@@ -4,8 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +35,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavH
     val context = LocalContext.current
     val loginState = viewModel.loginScreenState.collectAsState()
     val focusManager = LocalFocusManager.current
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
@@ -53,6 +56,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavH
                         popUpTo("login") { inclusive = true }
                     }
                 }
+
                 UserRole.Admin -> navController.navigate("admin_home") {
                     popUpTo("login") { inclusive = true }
                 }
@@ -67,8 +71,10 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavH
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .background(charCoal)
-            .padding(LOGIN_SCREEN_PADDING),
+            .padding(LOGIN_SCREEN_PADDING)
+            .imePadding(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -76,7 +82,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), navController: NavH
             modifier = Modifier
                 .width(LOGIN_SCREEN_FIELDS_SIZE)
                 .height(100.dp),
-            painter = painterResource(R.drawable.logo),
+            painter = painterResource(R.drawable.toolbar_logo),
             contentDescription = "CSKS CREATIVES"
         )
         UserNameInputTextField(

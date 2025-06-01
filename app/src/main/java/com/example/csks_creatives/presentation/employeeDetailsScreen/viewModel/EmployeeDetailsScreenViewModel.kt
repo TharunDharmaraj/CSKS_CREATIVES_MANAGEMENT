@@ -8,8 +8,10 @@ import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.*
 import com.example.csks_creatives.domain.utils.LogoutEvent
+import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStamp
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.event.EmployeeDetailsScreenEvent
 import com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.state.EmployeeDetailsScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,13 +21,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EmployeeDetailsScreenViewModel @Inject constructor(
-    private val adminUseCase: AdminUseCaseFactory,
-    private val tasksUseCase: TasksUseCaseFactory,
+    private val adminUseCaseFactory: AdminUseCaseFactory,
+    private val tasksUseCaseFactory: TasksUseCaseFactory,
     private val employeeUseCaseFactory: EmployeeUseCaseFactory
 ) : ViewModel() {
     init {
-        adminUseCase.create()
-        tasksUseCase.create()
+        adminUseCaseFactory.create()
+        tasksUseCaseFactory.create()
     }
 
     private val _activeTasksIds = MutableStateFlow<List<String>>(emptyList())
@@ -39,8 +41,11 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
     private val activeTasksFetchFromFirestore =
         MutableStateFlow<List<ClientTaskOverview>>(emptyList())
 
-    private val _employeeDetailScreenTitle = MutableStateFlow("")
+    private val _employeeDetailScreenTitle = MutableStateFlow(EMPTY_STRING)
     val employeeDetailsScreenTitle = _employeeDetailScreenTitle.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<ToastUiEvent>()
+    val uiEvent: SharedFlow<ToastUiEvent> = _uiEvent.asSharedFlow()
 
     private var hasInitialized = false
 
@@ -141,7 +146,7 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
 
     private fun getEmployeeDetails(employeeId: String) {
         viewModelScope.launch {
-            adminUseCase.getEmployeeDetails(employeeId).collect { result ->
+            adminUseCaseFactory.getEmployeeDetails(employeeId).collect { result ->
                 if (result is ResultState.Success) {
                     val employeeDetails = result.data
                     observeTaskIds()
@@ -163,6 +168,12 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
             _activeTasksIds.collect { taskIds ->
                 if (taskIds.isNotEmpty()) {
                     getActiveTasksList(taskIds)
+                } else {
+                    _employeeDetailsScreenState.value =
+                        _employeeDetailsScreenState.value.copy(
+                            isActiveTasksLoading = false,
+                            tasksInProgress = emptyList()
+                        )
                 }
             }
         }
@@ -171,6 +182,12 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
             _completedTasksIds.collect { taskIds ->
                 if (taskIds.isNotEmpty()) {
                     getCompletedTasksList(taskIds)
+                } else {
+                    _employeeDetailsScreenState.value =
+                        _employeeDetailsScreenState.value.copy(
+                            isCompletedTasksLoading = false,
+                            tasksCompleted = emptyList()
+                        )
                 }
             }
         }
@@ -180,22 +197,52 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
         if (tasksCompleted.isNotEmpty()) {
             tasksCompleted.forEach { taskId ->
                 viewModelScope.launch {
-                    tasksUseCase.getTaskOverView(taskId).collect { taskOverViewResult ->
-                        if (taskOverViewResult is ResultState.Success) {
-                            val taskOverViewData = taskOverViewResult.data
-                            val completedTasksList = tasksUseCase.getUniqueTaskOverViewList(
-                                taskOverViewData, _employeeDetailsScreenState.value.tasksCompleted
-                            )
-                            _employeeDetailsScreenState.value =
-                                _employeeDetailsScreenState.value.copy(
-                                    tasksCompleted = completedTasksList.sortedByDescending { it.taskCreationTime }
-                                )
-                            tasksCompletedFetchFromFirestore.value =
-                                _employeeDetailsScreenState.value.tasksCompleted
+                    tasksUseCaseFactory.getTaskOverView(taskId).collect { taskOverViewResult ->
+                        when (taskOverViewResult) {
+                            is ResultState.Error -> {
+                                _employeeDetailsScreenState.value =
+                                    _employeeDetailsScreenState.value.copy(
+                                        isCompletedTasksLoading = false
+                                    )
+                                _uiEvent.emit(ToastUiEvent.ShowToast("Error retrieving data ${taskOverViewResult.message}"))
+                            }
+
+                            ResultState.Loading -> {
+                                _employeeDetailsScreenState.value =
+                                    _employeeDetailsScreenState.value.copy(
+                                        isCompletedTasksLoading = true
+                                    )
+                            }
+
+                            is ResultState.Success<ClientTaskOverview> -> {
+                                _employeeDetailsScreenState.value =
+                                    _employeeDetailsScreenState.value.copy(
+                                        isCompletedTasksLoading = true
+                                    )
+                                val taskOverViewData = taskOverViewResult.data
+                                val completedTasksList =
+                                    tasksUseCaseFactory.getUniqueTaskOverViewList(
+                                        taskOverViewData,
+                                        _employeeDetailsScreenState.value.tasksCompleted
+                                    )
+                                _employeeDetailsScreenState.value =
+                                    _employeeDetailsScreenState.value.copy(
+                                        isCompletedTasksLoading = false,
+                                        tasksCompleted = completedTasksList.sortedByDescending { it.taskCreationTime }
+                                    )
+                                tasksCompletedFetchFromFirestore.value =
+                                    _employeeDetailsScreenState.value.tasksCompleted
+                            }
                         }
                     }
                 }
             }
+        } else {
+            _employeeDetailsScreenState.value =
+                _employeeDetailsScreenState.value.copy(
+                    isCompletedTasksLoading = false,
+                    tasksCompleted = emptyList()
+                )
         }
     }
 
@@ -203,37 +250,69 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
         if (activeTasks.isNotEmpty()) {
             activeTasks.forEach { taskId ->
                 viewModelScope.launch {
-                    tasksUseCase.getTaskOverView(taskId).collect { taskOverViewResult ->
-                        if (taskOverViewResult is ResultState.Success) {
-                            val taskOverViewData = taskOverViewResult.data
-                            var activeTasksList = tasksUseCase.getUniqueTaskOverViewList(
-                                taskOverViewData,
-                                _employeeDetailsScreenState.value.tasksInProgress
-                            )
-                            // Handling When a task is moved from In_Progress to completed, we need to update the UI accordingly
-                            if (taskOverViewData.currentStatus == TaskStatusType.COMPLETED) {
-                                val newCompletedTasksList =
-                                    (_employeeDetailsScreenState.value.tasksCompleted + taskOverViewData).sortedByDescending { it.taskCreationTime }
+                    tasksUseCaseFactory.getTaskOverView(taskId).collect { taskOverViewResult ->
+                        when (taskOverViewResult) {
+                            is ResultState.Error -> {
                                 _employeeDetailsScreenState.update {
                                     it.copy(
-                                        tasksCompleted = newCompletedTasksList
+                                        isActiveTasksLoading = false
                                     )
                                 }
-                                activeTasksList = tasksUseCase.removeCompletedTaskFromActiveList(
-                                    taskOverViewData,
-                                    activeTasksList
-                                )
+                                _uiEvent.emit(ToastUiEvent.ShowToast("Error retrieving data ${taskOverViewResult.message}"))
                             }
-                            _employeeDetailsScreenState.value =
-                                _employeeDetailsScreenState.value.copy(
-                                    tasksInProgress = activeTasksList.sortedByDescending { it.taskCreationTime }
+
+                            ResultState.Loading -> {
+                                _employeeDetailsScreenState.update {
+                                    it.copy(
+                                        isActiveTasksLoading = true
+                                    )
+                                }
+                            }
+
+                            is ResultState.Success<ClientTaskOverview> -> {
+                                _employeeDetailsScreenState.update {
+                                    it.copy(
+                                        isActiveTasksLoading = true
+                                    )
+                                }
+                                val taskOverViewData = taskOverViewResult.data
+                                var activeTasksList = tasksUseCaseFactory.getUniqueTaskOverViewList(
+                                    taskOverViewData,
+                                    _employeeDetailsScreenState.value.tasksInProgress
                                 )
-                            activeTasksFetchFromFirestore.value =
-                                _employeeDetailsScreenState.value.tasksInProgress
+                                // Handling When a task is moved from In_Progress to completed, we need to update the UI accordingly
+                                if (taskOverViewData.currentStatus == TaskStatusType.COMPLETED) {
+                                    val newCompletedTasksList =
+                                        (_employeeDetailsScreenState.value.tasksCompleted + taskOverViewData).sortedByDescending { it.taskCreationTime }
+                                    _employeeDetailsScreenState.update {
+                                        it.copy(
+                                            tasksCompleted = newCompletedTasksList
+                                        )
+                                    }
+                                    activeTasksList =
+                                        tasksUseCaseFactory.removeCompletedTaskFromActiveList(
+                                            taskOverViewData,
+                                            activeTasksList
+                                        )
+                                }
+                                _employeeDetailsScreenState.value =
+                                    _employeeDetailsScreenState.value.copy(
+                                        isActiveTasksLoading = false,
+                                        tasksInProgress = activeTasksList.sortedByDescending { it.taskCreationTime }
+                                    )
+                                activeTasksFetchFromFirestore.value =
+                                    _employeeDetailsScreenState.value.tasksInProgress
+                            }
                         }
                     }
                 }
             }
+        } else {
+            _employeeDetailsScreenState.value =
+                _employeeDetailsScreenState.value.copy(
+                    isActiveTasksLoading = false,
+                    tasksInProgress = emptyList()
+                )
         }
     }
 
@@ -269,13 +348,13 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
     }
 
     fun getTimeTakenForCompletion(taskId: String) =
-        tasksUseCase.getTimeTakenForCompletedTask(
+        tasksUseCaseFactory.getTimeTakenForCompletedTask(
             taskId,
             _employeeDetailsScreenState.value.tasksCompleted
         )
 
     fun getTimeTakenForActiveTask(taskId: String) =
-        tasksUseCase.getTimeTakenForActiveTask(
+        tasksUseCaseFactory.getTimeTakenForActiveTask(
             taskId,
             _employeeDetailsScreenState.value.tasksInProgress
         )
@@ -286,13 +365,13 @@ class EmployeeDetailsScreenViewModel @Inject constructor(
 
     fun approveEmployeeLeave(leaveRequest: LeaveRequest) {
         viewModelScope.launch {
-            adminUseCase.markLeaveRequestAsApproved(leaveRequest)
+            adminUseCaseFactory.markLeaveRequestAsApproved(leaveRequest)
         }
     }
 
     fun rejectEmployeeLeave(leaveRequest: LeaveRequest) {
         viewModelScope.launch {
-            adminUseCase.markLeaveRequestAsRejected(leaveRequest)
+            adminUseCaseFactory.markLeaveRequestAsRejected(leaveRequest)
         }
     }
 }

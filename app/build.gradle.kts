@@ -11,7 +11,24 @@ plugins {
 android {
     namespace = "com.example.csks_creatives"
     compileSdk = 35
+    flavorDimensions += "version"
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("keystore/release.keystore")
+            storePassword = "RELEASE_KEY_PASSWORD"
+            keyAlias = "my-key-alias"
+            keyPassword = "RELEASE_KEY_PASSWORD"
+        }
+    }
+
+    productFlavors {
+        create("releaseFlavor") {
+            dimension = "version"
+            applicationIdSuffix = ""
+            versionNameSuffix = ""
+        }
+    }
     defaultConfig {
         applicationId = "com.example.csks_creatives"
         minSdk = 24
@@ -35,6 +52,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

@@ -3,13 +3,16 @@ package com.example.csks_creatives.data.utils
 import com.example.csks_creatives.data.database.ClientItem
 import com.example.csks_creatives.data.database.EmployeeItem
 import com.example.csks_creatives.data.utils.Constants.BACKLOG
-import com.example.csks_creatives.data.utils.Constants.BLOCKED
 import com.example.csks_creatives.data.utils.Constants.COMPLETED
 import com.example.csks_creatives.data.utils.Constants.IN_PROGRESS
 import com.example.csks_creatives.data.utils.Constants.IN_REVIEW
-import com.example.csks_creatives.data.utils.Constants.REVISION_ONE
-import com.example.csks_creatives.data.utils.Constants.REVISION_THREE
-import com.example.csks_creatives.data.utils.Constants.REVISION_TWO
+import com.example.csks_creatives.data.utils.Constants.REVISION_1
+import com.example.csks_creatives.data.utils.Constants.REVISION_3
+import com.example.csks_creatives.data.utils.Constants.REVISION_2
+import com.example.csks_creatives.data.utils.Constants.REVISION_4
+import com.example.csks_creatives.data.utils.Constants.REVISION_5
+import com.example.csks_creatives.data.utils.Constants.REVISION_6
+import com.example.csks_creatives.data.utils.Constants.REVISION_7
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
@@ -20,10 +23,13 @@ object Utils {
             BACKLOG -> TaskStatusType.BACKLOG
             IN_PROGRESS -> TaskStatusType.IN_PROGRESS
             IN_REVIEW -> TaskStatusType.IN_REVIEW
-            REVISION_ONE -> TaskStatusType.REVISION_ONE
-            REVISION_TWO -> TaskStatusType.REVISION_TWO
-            REVISION_THREE -> TaskStatusType.REVISION_THREE
-            BLOCKED -> TaskStatusType.BLOCKED
+            REVISION_1 -> TaskStatusType.REVISION_1
+            REVISION_2 -> TaskStatusType.REVISION_2
+            REVISION_3 -> TaskStatusType.REVISION_3
+            REVISION_4 -> TaskStatusType.REVISION_4
+            REVISION_5 -> TaskStatusType.REVISION_5
+            REVISION_6 -> TaskStatusType.REVISION_6
+            REVISION_7 -> TaskStatusType.REVISION_7
             COMPLETED -> TaskStatusType.COMPLETED
             else -> TaskStatusType.BACKLOG
         }
@@ -34,10 +40,13 @@ object Utils {
             TaskStatusType.BACKLOG -> BACKLOG
             TaskStatusType.IN_PROGRESS -> IN_PROGRESS
             TaskStatusType.IN_REVIEW -> IN_REVIEW
-            TaskStatusType.REVISION_ONE -> REVISION_ONE
-            TaskStatusType.REVISION_TWO -> REVISION_TWO
-            TaskStatusType.REVISION_THREE -> REVISION_THREE
-            TaskStatusType.BLOCKED -> BLOCKED
+            TaskStatusType.REVISION_1 -> REVISION_1
+            TaskStatusType.REVISION_2 -> REVISION_2
+            TaskStatusType.REVISION_3 -> REVISION_3
+            TaskStatusType.REVISION_4 -> REVISION_4
+            TaskStatusType.REVISION_5 -> REVISION_5
+            TaskStatusType.REVISION_6 -> REVISION_6
+            TaskStatusType.REVISION_7 -> REVISION_7
             TaskStatusType.COMPLETED -> COMPLETED
         }
     }

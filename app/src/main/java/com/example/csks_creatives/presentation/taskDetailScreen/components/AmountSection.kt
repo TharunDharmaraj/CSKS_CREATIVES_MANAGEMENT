@@ -2,10 +2,12 @@ package com.example.csks_creatives.presentation.taskDetailScreen.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
@@ -76,22 +78,32 @@ fun AmountSection(
                 if (taskState.taskPaidStatus == TaskPaidStatus.PARTIALLY_PAID) {
 
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Remaining Amount: ₹$remaining", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        "Remaining Amount: ₹$remaining",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
                         value = taskState.taskPartialPaymentsAmount.toString(),
-                        onValueChange = { onEvent(TaskDetailEvent.TaskPartialPaymentAmountChanged(it)) },
+                        onValueChange = { onEvent(TaskDetailEvent.TaskPartialPaymentAmountChanged(it.toInt())) },
                         label = { Text("Enter Partial Amount") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Go
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onGo = { onEvent(TaskDetailEvent.AddTaskPartialPayment) }
+                        ),
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Button(
+                        modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             onEvent(TaskDetailEvent.AddTaskPartialPayment)
                         }

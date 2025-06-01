@@ -75,4 +75,13 @@ object UseCaseModule {
             employeeRepository = employeeRepository
         )
     }
+
+    @Provides
+    fun provideFinanceUseCase(
+        financeRepository: FinanceRepository
+    ): FinanceUseCaseFactory {
+        return FinanceUseCase(
+            financeRepository = financeRepository
+        )
+    }
 }
