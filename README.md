@@ -62,8 +62,7 @@ Android App Designed to Manage Employees and get a Overview of the Financials of
       - Admin Assigns a Task
       - Admin Comments inside task, assigned to that employee
 
-**Persists Login Session of Both Employees and Admin, Once logged in, till Logging Out, In Local Cache and retrievs it
-**
+**App Persists Login Session of Both Employees and Admin, Once logged in, till Logging Out, In Local Cache and retrievs it**
 
 **Architecture - Layered Architecture:**
 - UI Layer ( Composables & VM )
