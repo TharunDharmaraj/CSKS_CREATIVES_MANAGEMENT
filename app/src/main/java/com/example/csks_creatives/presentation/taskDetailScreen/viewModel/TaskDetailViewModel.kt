@@ -256,10 +256,10 @@ class TaskDetailViewModel @Inject constructor(
             }
 
             is TaskDetailEvent.TaskPartialPaymentAmountChanged -> {
-                if (event.taskPartialPaymentAmount.isEmpty()) return
+                if (event.taskPartialPaymentAmount.isEmpty() || event.taskPartialPaymentAmount.toInt() <= 0) return
                 _taskDetailState.update {
                     it.copy(
-                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount
+                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount.toInt()
                     )
                 }
             }
@@ -267,7 +267,7 @@ class TaskDetailViewModel @Inject constructor(
             TaskDetailEvent.AddTaskPartialPayment -> {
                 addPartialTaskAmount(
                     _taskDetailState.value.taskId,
-                    _taskDetailState.value.taskPartialPaymentsAmount.filter { it.isDigit() }.toInt()
+                    _taskDetailState.value.taskPartialPaymentsAmount
                 )
             }
         }
@@ -430,25 +430,26 @@ class TaskDetailViewModel @Inject constructor(
     private fun addPartialTaskAmount(taskId: String, amount: Int) = viewModelScope.launch {
         val remainingAmount =
             _taskDetailState.value.taskCost - _taskDetailState.value.taskPaymentsHistory.sumOf { it.amount }
-        tasksManipulationUseCaseFactory.addPartialTaskAmount(taskId, amount, remainingAmount).let { it ->
-            when (it) {
-                is ResultState.Error -> {
-                    _uiEvent.emit(ShowToast(it.message))
-                }
-
-                ResultState.Loading -> {
-                    // Ignore
-                }
-
-                is ResultState.Success -> {
-                    _taskDetailState.update { state ->
-                        state.copy(
-                            taskPartialPaymentsAmount = 0
-                        )
+        tasksManipulationUseCaseFactory.addPartialTaskAmount(taskId, amount, remainingAmount)
+            .let { it ->
+                when (it) {
+                    is ResultState.Error -> {
+                        _uiEvent.emit(ShowToast(it.message))
                     }
-                    _uiEvent.emit(ShowToast(it.data))
+
+                    ResultState.Loading -> {
+                        // Ignore
+                    }
+
+                    is ResultState.Success -> {
+                        _taskDetailState.update { state ->
+                            state.copy(
+                                taskPartialPaymentsAmount = 0
+                            )
+                        }
+                        _uiEvent.emit(ShowToast(it.data))
+                    }
                 }
             }
-        }
     }
 }
