@@ -132,11 +132,12 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 > Handles data syncing, notifications, and performance optimization
 
 👉 [CSKS_CREATIVES_CLOUD_FUNCTIONS (GitHub)](https://github.com/TharunDharmaraj/CSKS_CREATIVES_CLOUD_FUNCTIONS)
+
+---
+
 ## 🚀 How to Run
 
 Follow these steps to run the project locally on your machine:
-
----
 
 ### 🔧 Prerequisites
 
@@ -144,8 +145,6 @@ Follow these steps to run the project locally on your machine:
 - Firebase account
 - Firebase Project with **Billing Enabled**  
   _(Required for Cloud Functions, Firestore Triggers, and Notifications)_
-
----
 
 ### 🛠️ Steps
 
@@ -178,6 +177,20 @@ Set Up Firebase
     Download google-services.json for your Android app
 
     Place it in the root of your project’s /app folder
+
+    Clone the [CSKS_CREATIVES_CLOUD_FUNCTIONS (GitHub)](https://github.com/TharunDharmaraj/CSKS_CREATIVES_CLOUD_FUNCTIONS) repo, deploy it in Cloud Console
+
+    Commands to deploy the Cloud Function, by navigating to the repo folder
+For 1st Time Setup:
+      - npm install -g firebase-tools
+      - npm install firebase-admin firebase-functions
+      - firebase init firestore
+      - firebase init functions
+
+After that:
+      - firebase init
+      - firebase login
+      - firebase deploy --only functions  
 
 5. Run the App
 
