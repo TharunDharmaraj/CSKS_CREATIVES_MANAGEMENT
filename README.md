@@ -1,6 +1,18 @@
 # 📱 CSKS Creatives Management  
 **Admin and Employee Management Android Application**  
-Android app designed to manage employees, tasks, and finances for [CSKS Creatives](https://cskscreatives.com/)
+Designed to manage employees, tasks, and finances for [CSKS Creatives](https://cskscreatives.com/)
+
+---
+
+## 📌 Features At a Glance
+
+- 🔐 Role-based access (Admin / Employee)
+- 📬 Real-time Notifications
+- 🧾 Financial Insights (Admin & Client)
+- ⏱️ Employee Performance Tracking
+- 🗂️ Task Search, Filters, and Status Workflow
+- 🗓️ Comprehensive Leave Management
+- 💾 Session Persistence with Offline Support
 
 ---
 
@@ -116,18 +128,6 @@ Android app designed to manage employees, tasks, and finances for [CSKS Creative
 > Handles data syncing, notifications, and performance optimization
 
 👉 [CSKS_CREATIVES_CLOUD_FUNCTIONS (GitHub)](https://github.com/TharunDharmaraj/CSKS_CREATIVES_CLOUD_FUNCTIONS)
-
----
-
-## 📌 Features At a Glance
-
-- 🔐 Role-based access (Admin / Employee)
-- 📬 Real-time Notifications
-- 🧾 Financial Insights (Admin & Client)
-- ⏱️ Employee Performance Tracking
-- 🗂️ Task Search, Filters, and Status Workflow
-- 🗓️ Comprehensive Leave Management
-- 💾 Session Persistence with Offline Support
 
 ---
 
