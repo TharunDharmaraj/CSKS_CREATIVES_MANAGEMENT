@@ -132,6 +132,56 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 > Handles data syncing, notifications, and performance optimization
 
 👉 [CSKS_CREATIVES_CLOUD_FUNCTIONS (GitHub)](https://github.com/TharunDharmaraj/CSKS_CREATIVES_CLOUD_FUNCTIONS)
+## 🚀 How to Run
+
+Follow these steps to run the project locally on your machine:
+
+---
+
+### 🔧 Prerequisites
+
+- Android Studio Giraffe or later
+- Firebase account
+- Firebase Project with **Billing Enabled**  
+  _(Required for Cloud Functions, Firestore Triggers, and Notifications)_
+
+---
+
+### 🛠️ Steps
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/csks-creatives-management.git
+cd csks-creatives-management
+
+Set Up Firebase
+
+    Go to Firebase Console
+
+    Create a new Firebase project or use an existing one
+
+    Enable Billing on your Firebase project
+
+    Enable the following Firebase services:
+
+        🔥 Firestore Database
+
+        🔐 Firebase Authentication
+
+        📲 Cloud Messaging
+
+4. Add google-services.json
+
+    In Firebase Console:
+    Go to Project Settings > General
+
+    Download google-services.json for your Android app
+
+    Place it in the root of your project’s /app folder
+
+5. Run the App
+
+```
 
 ---
 
