@@ -1,5 +1,6 @@
 package com.example.csks_creatives.presentation.clientTasksListScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,9 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
@@ -21,7 +24,9 @@ import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.presentation.clientTasksListScreen.components.ClientCostBreakDown
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.ClientTasksListViewModel
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
+import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.EditClientNameDialogEvent
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.components.ui.TaskItem
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
@@ -36,14 +41,26 @@ fun ClientTasksListComposable(
     navController: NavController,
     viewModel: ClientTasksListViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val state = viewModel.clientsTasksListState.collectAsState()
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
+    val toolbarTitle = viewModel.clientName.collectAsState().value
 
     val tabTitles = listOf("Tasks", "Amounts")
 
     LaunchedEffect(Unit) {
         viewModel.initialize(clientId)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is ToastUiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     LaunchedEffect(pagerState.currentPage) {
@@ -54,12 +71,13 @@ fun ClientTasksListComposable(
         contentWindowInsets = WindowInsets(0),
         topBar = {
             AppToolbar(
-                title = "Client $clientId",
+                title = "Client $toolbarTitle",
                 canShowMenu = true,
                 canShowSearch = state.value.canShowSearchIcon,
                 canShowFilterTasks = state.value.isFilterTasksIconVisible,
                 canShowBackIcon = true,
                 menuItems = listOf(
+                    ToolbarOverFlowMenuItem("editClient", "Edit Client Name"),
                     ToolbarOverFlowMenuItem("logout", "Logout")
                 ),
                 onFilterTasksIconClicked = {
@@ -75,6 +93,9 @@ fun ClientTasksListComposable(
                         navController.navigate("login") {
                             popUpTo(0) { inclusive = true }
                         }
+                    }
+                    if (itemId == "editClient") {
+                        viewModel.makeEmployeeEditDialogVisible()
                     }
                 }
             )
@@ -292,5 +313,51 @@ fun ClientTasksListComposable(
                 }
             }
         }
+        if (state.value.isEditClientNameDialogVisible) {
+            RenameClientDialog(viewModel)
+        }
     }
+}
+
+@Composable
+fun RenameClientDialog(viewModel: ClientTasksListViewModel) {
+    val state = viewModel.editClientNameDialogState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
+    AlertDialog(
+        onDismissRequest = { viewModel.onEditDialogEvent(EditClientNameDialogEvent.CancelClicked) },
+        title = { Text("Rename Client") },
+        text = {
+            TextField(
+                value = state.value.clientName,
+                singleLine = true,
+                onValueChange = {
+                    viewModel.onEditDialogEvent(
+                        EditClientNameDialogEvent.OnClientNameTextEdit(
+                            it
+                        )
+                    )
+                },
+                label = { Text("Client Name") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = {
+                coroutineScope.launch {
+                    viewModel.onEditDialogEvent(EditClientNameDialogEvent.SaveClicked)
+                }
+            }) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            Button(onClick = { viewModel.onEditDialogEvent(EditClientNameDialogEvent.CancelClicked) }) {
+                Text("Cancel")
+            }
+        },
+        properties = DialogProperties(
+            dismissOnClickOutside = false,
+            dismissOnBackPress = false
+        )
+    )
 }

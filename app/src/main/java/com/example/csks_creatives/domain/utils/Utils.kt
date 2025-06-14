@@ -173,7 +173,6 @@ object Utils {
         val timeForTaskCompleted = taskCompletedTime.toLong()
         val timeTakenMillis = timeForTaskCompleted - timeForTaskInProgress
         return getFormattedTaskTakenTime(timeTakenMillis)
-
     }
 
     fun getFormattedTaskTakenTime(timeDifference: Long): String {

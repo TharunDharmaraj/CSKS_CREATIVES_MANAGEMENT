@@ -48,11 +48,13 @@ object UseCaseModule {
     @Provides
     fun provideTasksUseCaseFactory(
         tasksRepository: TasksRepository,
-        adminRepository: AdminRepository
+        adminRepository: AdminRepository,
+        clientsRepository: ClientsRepository
     ): TasksUseCaseFactory {
         return TasksUseCase(
             tasksRepository = tasksRepository,
-            adminRepository = adminRepository
+            adminRepository = adminRepository,
+            clientsRepository = clientsRepository
         )
     }
 

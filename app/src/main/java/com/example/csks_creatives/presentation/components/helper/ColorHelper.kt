@@ -9,7 +9,7 @@ object ColorHelper {
             TaskPriority.CRITICAL -> Color.Magenta
             TaskPriority.HIGH -> Color.Red
             TaskPriority.MEDIUM -> Color.Yellow
-            TaskPriority.LOW -> Color.Blue
+            TaskPriority.LOW -> Color.LightGray
         }
     }
 }

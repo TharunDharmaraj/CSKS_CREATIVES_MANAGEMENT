@@ -8,8 +8,11 @@ import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
+import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.EditClientNameDialogEvent
+import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.state.ClientNameDialogState
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.state.ClientTasksListState
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
+import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -26,10 +29,19 @@ class ClientTasksListViewModel @Inject constructor(
 
     private val _allTasksForClientFromFireStore = MutableStateFlow<List<ClientTask>>(emptyList())
 
+    private var hasInitialized = false
+
+    private val _uiEvent = MutableSharedFlow<ToastUiEvent>()
+    val uiEvent: SharedFlow<ToastUiEvent> = _uiEvent.asSharedFlow()
+
+    private val _clientName = MutableStateFlow("")
+    var clientName = _clientName.asStateFlow()
+
+    private val _editClientNameDialogState = MutableStateFlow(ClientNameDialogState())
+    var editClientNameDialogState = _editClientNameDialogState.asStateFlow()
+
     private val _clientTasksListState = MutableStateFlow(ClientTasksListState())
     val clientsTasksListState = _clientTasksListState.asStateFlow()
-
-    private var hasInitialized = false
 
     fun onEvent(clientTaskListScreenEvent: ClientTasksListScreenEvent) {
         when (clientTaskListScreenEvent) {
@@ -114,7 +126,29 @@ class ClientTasksListViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
 
+    fun onEditDialogEvent(editDialogEvent: EditClientNameDialogEvent) {
+        when (editDialogEvent) {
+            EditClientNameDialogEvent.CancelClicked -> {
+                _clientTasksListState.update { it.copy(isEditClientNameDialogVisible = false) }
+            }
+
+            is EditClientNameDialogEvent.OnClientNameTextEdit -> {
+                _editClientNameDialogState.update {
+                    it.copy(
+                        clientName = editDialogEvent.clientName
+                    )
+                }
+            }
+
+            EditClientNameDialogEvent.SaveClicked -> {
+                editClientName(
+                    clientId = _clientTasksListState.value.clientId,
+                    clientName = _editClientNameDialogState.value.clientName
+                )
+            }
         }
     }
 
@@ -196,7 +230,15 @@ class ClientTasksListViewModel @Inject constructor(
     fun initialize(clientId: String) {
         if (hasInitialized) return
         hasInitialized = true
+        _clientTasksListState.value = _clientTasksListState.value.copy(clientId)
+        getClientName(clientId)
         getClientTasks(DateOrder.Descending, clientId)
+    }
+
+    private fun getClientName(clientId: String) {
+        viewModelScope.launch {
+            _clientName.value = tasksUseCaseFactory.getClientName(clientId)
+        }
     }
 
     fun emitLogoutEvent(isUserLoggedOut: Boolean) {
@@ -210,17 +252,23 @@ class ClientTasksListViewModel @Inject constructor(
         var totalCostUnPaid = 0
         var totalPartialPaid = 0
         _allTasksForClientFromFireStore.value.forEach { task ->
-            if (task.taskPaidStatus == TaskPaidStatus.NOT_PAID) {
-                totalCostUnPaid += task.taskCost
-            } else if (task.taskPaidStatus == TaskPaidStatus.PARTIALLY_PAID) {
-                var totalPartialAmountForTask = 0
-                task.paymentHistory.forEach { taskPaymentHistory ->
-                    totalPartialAmountForTask += taskPaymentHistory.amount
+            when (task.taskPaidStatus) {
+                TaskPaidStatus.NOT_PAID -> {
+                    totalCostUnPaid += task.taskCost
                 }
-                totalPartialPaid += totalPartialAmountForTask
-                totalCostUnPaid += task.taskCost - totalPartialAmountForTask
-            } else {
-                totalCostPaid += task.taskCost
+
+                TaskPaidStatus.PARTIALLY_PAID -> {
+                    var totalPartialAmountForTask = 0
+                    task.paymentHistory.forEach { taskPaymentHistory ->
+                        totalPartialAmountForTask += taskPaymentHistory.amount
+                    }
+                    totalPartialPaid += totalPartialAmountForTask
+                    totalCostUnPaid += task.taskCost - totalPartialAmountForTask
+                }
+
+                else -> {
+                    totalCostPaid += task.taskCost
+                }
             }
         }
         return Triple(totalCostPaid, totalCostUnPaid, totalPartialPaid)
@@ -275,6 +323,39 @@ class ClientTasksListViewModel @Inject constructor(
                 isFilterTasksIconVisible = isVisible,
                 isSearchBarVisible = isVisible
             )
+        }
+    }
+
+    fun makeEmployeeEditDialogVisible() {
+        _clientTasksListState.update { it.copy(isEditClientNameDialogVisible = true) }
+        _editClientNameDialogState.update {
+            it.copy(clientName = _clientName.value)
+        }
+    }
+
+    fun editClientName(clientName: String, clientId: String) {
+        viewModelScope.launch {
+            val result = tasksUseCaseFactory.editClientName(clientId, clientName)
+            when (result) {
+                is ResultState.Error -> {
+                    _uiEvent.emit(ToastUiEvent.ShowToast(result.message))
+                }
+
+                ResultState.Loading -> {
+
+                }
+
+                is ResultState.Success<String> -> {
+                    _uiEvent.emit(ToastUiEvent.ShowToast(result.data))
+                    _editClientNameDialogState.update {
+                        it.copy(
+                            clientName = ""
+                        )
+                    }
+                    _clientName.value = clientName
+                }
+            }
+            _clientTasksListState.update { it.copy(isEditClientNameDialogVisible = false) }
         }
     }
 }

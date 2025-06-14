@@ -30,7 +30,7 @@ fun AmountSection(
         LazyColumn {
             item {
                 OutlinedTextField(
-                    value = taskState.taskCost.toString(),
+                    value = taskState.taskCost.toString().ifEmpty { "0" },
                     onValueChange = { value ->
                         onEvent(TaskDetailEvent.TaskCostChanged(value.toIntOrNull() ?: 0))
                     },

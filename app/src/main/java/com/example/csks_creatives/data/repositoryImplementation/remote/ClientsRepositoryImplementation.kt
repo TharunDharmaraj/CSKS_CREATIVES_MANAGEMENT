@@ -63,4 +63,37 @@ class ClientsRepositoryImplementation @Inject constructor(
             return true
         }
     }
+
+    override suspend fun getClientName(clientId: String): String {
+        try {
+            val clientSnapShot =
+                firestore.collection(CLIENT_COLLECTION).document(clientId).get().await()
+            if (clientSnapShot.exists()) {
+                Log.d(logTag + "getClientName", "Client $clientId Already Exists")
+                return clientSnapShot.getString(CLIENT_NAME) as String
+            }
+            Log.d(logTag + "getClientName", "Client $clientId Not Exists")
+            return clientId
+        } catch (exception: Exception) {
+            Log.d(logTag + "getClientName", "Error ${exception.message} getting clientName")
+            return clientId
+        }
+    }
+
+    override suspend fun editClientName(clientId: String, newClientName: String) {
+        try {
+            firestore.collection(CLIENT_COLLECTION).document(clientId).set(
+                hashMapOf(
+                    CLIENT_NAME to newClientName
+                ),
+                SetOptions.merge()
+            )
+            Log.d(
+                logTag + "editClientName",
+                "New ClientName $newClientName set successfully for ClientId: $clientId"
+            )
+        } catch (exception: Exception) {
+            Log.d(logTag + "editClientName", "Error ${exception.message} setting new clientName")
+        }
+    }
 }

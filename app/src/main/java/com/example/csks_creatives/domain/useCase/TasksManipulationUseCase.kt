@@ -65,7 +65,7 @@ class TasksManipulationUseCase @Inject constructor(
         return try {
             if (currentTask == ClientTask()) return ResultState.Error("No Changes done")
             if (currentTask == initialTask) return ResultState.Error("No changes done")
-            var taskToEdit =currentTask
+            var taskToEdit = currentTask
             if (currentTask.employeeId != initialTask.employeeId) {
                 adminRepository.removeActiveTaskFromEmployeeDetails(
                     initialTask.employeeId,
@@ -110,6 +110,7 @@ class TasksManipulationUseCase @Inject constructor(
                     taskFullyPaidDate = getCurrentTimeAsString(),
                 )
             }
+            // TODO Check here
             tasksManipulationRepository.editTask(taskToEdit)
             ResultState.Success("Task '${taskToEdit.taskName}' updated successfully")
         } catch (exception: Exception) {

@@ -248,6 +248,7 @@ class AdminHomeScreenViewModel @Inject constructor(
                 ResultState.Loading -> {
                     _adminHomeScreenLoadingState
                 }
+
                 is ResultState.Success<List<Client>> -> {
                     _adminHomeScreenState.value =
                         _adminHomeScreenState.value.copy(clientList = result.data)

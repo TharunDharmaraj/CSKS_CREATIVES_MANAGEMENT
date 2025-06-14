@@ -5,8 +5,7 @@ import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
-import com.example.csks_creatives.domain.repository.remote.AdminRepository
-import com.example.csks_creatives.domain.repository.remote.TasksRepository
+import com.example.csks_creatives.domain.repository.remote.*
 import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
 import com.example.csks_creatives.domain.utils.Utils.calculateFormattedTaskTakenTime
 import com.example.csks_creatives.domain.utils.Utils.getActiveTasks
@@ -17,14 +16,30 @@ import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import kotlin.collections.sortedByDescending
 
 class TasksUseCase @Inject constructor(
     private val tasksRepository: TasksRepository,
-    private val adminRepository: AdminRepository
+    private val adminRepository: AdminRepository,
+    private val clientsRepository: ClientsRepository
 ) : TasksUseCaseFactory {
     private val logTag = "tasksUseCase"
     override fun create(): TasksUseCase {
-        return TasksUseCase(tasksRepository, adminRepository)
+        return TasksUseCase(tasksRepository, adminRepository, clientsRepository)
+    }
+
+    override suspend fun getClientName(clientId: String) = clientsRepository.getClientName(clientId)
+
+    override suspend fun editClientName(
+        clientId: String,
+        clientName: String
+    ): ResultState<String> {
+        return try {
+            clientsRepository.editClientName(clientId, clientName)
+            ResultState.Success("Client Name Updated Successfully")
+        } catch (exception: Exception) {
+            ResultState.Error("Exception in Updating ClientName: $exception")
+        }
     }
 
     override fun getTasksForClient(
@@ -120,7 +135,6 @@ class TasksUseCase @Inject constructor(
             if (task.taskAttachment.isEmpty()) return ResultState.Error("Task Description Cannot Be Empty")
             if (task.taskName.isEmpty()) return ResultState.Error("Task Name Cannot Be Empty")
             if (task.clientId.isEmpty()) return ResultState.Error("Task Client Cannot be Empty")
-            if (task.taskCost == 0) return ResultState.Error("Task Cost Cannot be 0")
             if (task.taskEstimate == 0) return ResultState.Error("Task Estimate Cannot be 0")
             val currentTime = getCurrentTimeAsString()
             val taskToCreate = task.copy(
@@ -172,7 +186,7 @@ class TasksUseCase @Inject constructor(
         emit(ResultState.Loading)
         try {
             tasksRepository.getActiveTasks().collect { tasks ->
-                emit(ResultState.Success(tasks))
+                emit(ResultState.Success(tasks.sortedByDescending { it.taskCreationTime }))
             }
         } catch (exception: Exception) {
             emit(ResultState.Error("Failed to get All active Tasks ${exception.message} "))
@@ -183,7 +197,7 @@ class TasksUseCase @Inject constructor(
         emit(ResultState.Loading)
         try {
             tasksRepository.getTasksInBackLog().collect { tasks ->
-                emit(ResultState.Success(tasks))
+                emit(ResultState.Success(tasks.sortedByDescending { it.taskCreationTime }))
             }
         } catch (exception: Exception) {
             emit(ResultState.Error("Failed to get All Backlog Tasks exception: ${exception.message}"))
@@ -194,7 +208,7 @@ class TasksUseCase @Inject constructor(
         emit(ResultState.Loading)
         try {
             tasksRepository.getCompletedTasks().collect { tasks ->
-                emit(ResultState.Success(tasks))
+                emit(ResultState.Success(tasks.sortedByDescending { it.taskCreationTime }))
             }
         } catch (exception: Exception) {
             emit(ResultState.Error("Failed to get All Completed Tasks exception: ${exception.message}"))

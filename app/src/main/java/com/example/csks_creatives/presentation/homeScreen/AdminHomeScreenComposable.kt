@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPriority
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
@@ -394,6 +395,72 @@ fun CardItem(
 }
 
 @Composable
+fun TaskCardItem(
+    title: String,
+    cardBorder: BorderStroke? = null,
+    subtitle: String? = null,
+    priority: TaskPriority,
+    onClick: () -> Unit,
+    creationTime: String
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        border = cardBorder ?: BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    subtitle?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Column {
+                    Surface(
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text(
+                            text = formatTimeStampToGetJustDate(creationTime),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = getBorderColorBasedOnTaskPriority(priority).copy(alpha = 0.1f),
+                        border = BorderStroke(1.dp, getBorderColorBasedOnTaskPriority(priority)),
+                    ) {
+                        Text(
+                            text = priority.name,
+                            color = getBorderColorBasedOnTaskPriority(priority),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
     val state by viewModel.adminHomeScreenState.collectAsState()
     val isLoading by viewModel.adminHomeScreenLoadingState.collectAsState()
@@ -630,13 +697,15 @@ fun TaskListContent(
                 verticalArrangement = Arrangement.Top
             ) {
                 items(tasks.size) { index ->
-                    CardItem(
+                    TaskCardItem(
                         title = tasks[index].taskName,
                         subtitle = tasks[index].taskType.name,
+                        creationTime = tasks[index].taskCreationTime,
                         cardBorder = BorderStroke(
                             width = 2.dp,
                             color = getBorderColorBasedOnTaskPriority(tasks[index].taskPriority)
                         ),
+                        priority = tasks[index].taskPriority,
                         onClick = {
                             navController.navigate("task_detail/${tasks[index].taskId}/$ADMIN_NAME")
                         }

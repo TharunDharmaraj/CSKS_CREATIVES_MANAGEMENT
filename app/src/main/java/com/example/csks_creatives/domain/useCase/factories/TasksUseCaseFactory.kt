@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.Flow
 interface TasksUseCaseFactory {
     fun create(): TasksUseCase
 
+    suspend fun getClientName(clientId: String): String
+
+    suspend fun editClientName(clientId: String, clientName: String): ResultState<String>
+
     fun getTasksForClient(order: DateOrder, clientId: String): Flow<ResultState<List<ClientTask>>>
 
     fun getTasksForEmployee(
