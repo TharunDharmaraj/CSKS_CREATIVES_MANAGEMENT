@@ -275,7 +275,7 @@ fun CompletedTasksScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No active tasks found.",
+                    text = "No Completed tasks found.",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = 32.dp)
                 )
