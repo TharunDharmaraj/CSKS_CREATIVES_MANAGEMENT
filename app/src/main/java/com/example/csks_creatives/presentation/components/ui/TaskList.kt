@@ -58,6 +58,7 @@ fun TaskItem(task: ClientTask, onTaskClick: () -> Unit) {
                         TaskStatusType.BACKLOG -> Color.Red
                         TaskStatusType.IN_PROGRESS -> Color.Yellow
                         TaskStatusType.COMPLETED -> Color.Green
+                        TaskStatusType.IN_REVIEW -> Color.Magenta
                         else -> Color.Gray
                     }
                 )

@@ -31,11 +31,11 @@ interface TasksUseCaseFactory {
 
     suspend fun getTaskOverView(taskId: String): Flow<ResultState<ClientTaskOverview>>
 
-    suspend fun getAllActiveTasks(): Flow<ResultState<List<ClientTask>>>
+    suspend fun getAllActiveTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>>
 
-    suspend fun getAllBacklogTasks(): Flow<ResultState<List<ClientTask>>>
+    suspend fun getAllBacklogTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>>
 
-    suspend fun getAllCompletedTasks(): Flow<ResultState<List<ClientTask>>>
+    suspend fun getAllCompletedTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>>
 
     fun getUniqueTaskOverViewList(
         taskOverViewData: ClientTaskOverview,

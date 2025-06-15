@@ -10,6 +10,7 @@ import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprov
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.*
 import com.example.csks_creatives.domain.utils.LogoutEvent
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.*
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.state.*
@@ -142,6 +143,35 @@ class AdminHomeScreenViewModel @Inject constructor(
                     )
                 }
             }
+
+            is AdminHomeScreenEvent.ToggleOrderDate -> {
+                _adminHomeScreenState.update {
+                    it.copy(
+                        tasksOrder = adminHomeScreenEvent.order
+                    )
+                }
+                updateTasksOrder(adminHomeScreenEvent.order)
+            }
+        }
+    }
+
+    private fun updateTasksOrder(order: DateOrder) {
+        if (order == DateOrder.Descending) {
+            _adminHomeScreenState.update { it ->
+                it.copy(
+                    activeTaskList = _adminHomeScreenState.value.activeTaskList.sortedByDescending { task -> task.taskCreationTime },
+                    backlogTaskList = _adminHomeScreenState.value.backlogTaskList.sortedByDescending { task -> task.taskCreationTime },
+                    completedTasksList = _adminHomeScreenState.value.completedTasksList.sortedByDescending { task -> task.taskCreationTime }
+                )
+            }
+        } else {
+            _adminHomeScreenState.update { it ->
+                it.copy(
+                    activeTaskList = _adminHomeScreenState.value.activeTaskList.sortedBy { task -> task.taskCreationTime },
+                    backlogTaskList = _adminHomeScreenState.value.backlogTaskList.sortedBy { task -> task.taskCreationTime },
+                    completedTasksList = _adminHomeScreenState.value.completedTasksList.sortedBy { task -> task.taskCreationTime }
+                )
+            }
         }
     }
 
@@ -191,7 +221,9 @@ class AdminHomeScreenViewModel @Inject constructor(
                         fetchEmployees()
                         _uiEvent.emit(ToastUiEvent.ShowToast("Employee Added Successfully"))
                         _adminHomeScreenVisibilityState.value =
-                            _adminHomeScreenVisibilityState.value.copy(isAddEmployeeDialogVisible = false)
+                            _adminHomeScreenVisibilityState.value.copy(
+                                isAddEmployeeDialogVisible = false
+                            )
                     }
                     if (result is ResultState.Error) {
                         _uiEvent.emit(ToastUiEvent.ShowToast("Error Adding Employee ${result.message}"))
@@ -252,9 +284,10 @@ class AdminHomeScreenViewModel @Inject constructor(
                 is ResultState.Success<List<Client>> -> {
                     _adminHomeScreenState.value =
                         _adminHomeScreenState.value.copy(clientList = result.data)
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isClientsLoading = false
-                    )
+                    _adminHomeScreenLoadingState.value =
+                        _adminHomeScreenLoadingState.value.copy(
+                            isClientsLoading = false
+                        )
                     isClientsFetched = true
                 }
             }
@@ -266,16 +299,18 @@ class AdminHomeScreenViewModel @Inject constructor(
             _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
                 isActiveTasksLoading = true
             )
-            tasksUseCaseFactory.getAllActiveTasks().collect { result ->
-                if (result is ResultState.Success) {
-                    _adminHomeScreenState.value =
-                        _adminHomeScreenState.value.copy(activeTaskList = result.data)
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isActiveTasksLoading = false
-                    )
-                    isActiveTasksFetched = true
+            tasksUseCaseFactory.getAllActiveTasks(_adminHomeScreenState.value.tasksOrder)
+                .collect { result ->
+                    if (result is ResultState.Success) {
+                        _adminHomeScreenState.value =
+                            _adminHomeScreenState.value.copy(activeTaskList = result.data)
+                        _adminHomeScreenLoadingState.value =
+                            _adminHomeScreenLoadingState.value.copy(
+                                isActiveTasksLoading = false
+                            )
+                        isActiveTasksFetched = true
+                    }
                 }
-            }
         }
     }
 
@@ -308,16 +343,18 @@ class AdminHomeScreenViewModel @Inject constructor(
                     isCompletedTasksLoading = true
                 )
             }
-            tasksUseCaseFactory.getAllCompletedTasks().collect { result ->
-                if (result is ResultState.Success) {
-                    _adminHomeScreenState.value =
-                        _adminHomeScreenState.value.copy(completedTasksList = result.data)
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isCompletedTasksLoading = false
-                    )
-                    isCompletedTasksFetched = true
+            tasksUseCaseFactory.getAllCompletedTasks(_adminHomeScreenState.value.tasksOrder)
+                .collect { result ->
+                    if (result is ResultState.Success) {
+                        _adminHomeScreenState.value =
+                            _adminHomeScreenState.value.copy(completedTasksList = result.data)
+                        _adminHomeScreenLoadingState.value =
+                            _adminHomeScreenLoadingState.value.copy(
+                                isCompletedTasksLoading = false
+                            )
+                        isCompletedTasksFetched = true
+                    }
                 }
-            }
         }
     }
 
@@ -328,16 +365,18 @@ class AdminHomeScreenViewModel @Inject constructor(
                     isBacklogTasksLoading = true
                 )
             }
-            tasksUseCaseFactory.getAllBacklogTasks().collect { result ->
-                if (result is ResultState.Success) {
-                    _adminHomeScreenState.value =
-                        _adminHomeScreenState.value.copy(backlogTaskList = result.data)
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isBacklogTasksLoading = false
-                    )
-                    isBacklogTasksFetched = true
+            tasksUseCaseFactory.getAllBacklogTasks(_adminHomeScreenState.value.tasksOrder)
+                .collect { result ->
+                    if (result is ResultState.Success) {
+                        _adminHomeScreenState.value =
+                            _adminHomeScreenState.value.copy(backlogTaskList = result.data)
+                        _adminHomeScreenLoadingState.value =
+                            _adminHomeScreenLoadingState.value.copy(
+                                isBacklogTasksLoading = false
+                            )
+                        isBacklogTasksFetched = true
+                    }
                 }
-            }
         }
     }
 

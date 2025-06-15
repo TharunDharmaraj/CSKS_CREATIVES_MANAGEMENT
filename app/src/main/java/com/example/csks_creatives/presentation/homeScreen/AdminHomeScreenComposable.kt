@@ -6,6 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -21,9 +25,11 @@ import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPriority
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
+import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.financeScreen.FinanceScreenComposable
@@ -401,8 +407,18 @@ fun TaskCardItem(
     subtitle: String? = null,
     priority: TaskPriority,
     onClick: () -> Unit,
-    creationTime: String
+    creationTime: String,
+    currentState: TaskStatusType
 ) {
+    val statusColor = when (currentState) {
+        TaskStatusType.IN_PROGRESS -> Color.Yellow
+        TaskStatusType.IN_REVIEW -> Color.Magenta
+        else -> Color.Gray
+    }
+
+    val showStatusChip =
+        currentState != TaskStatusType.COMPLETED && currentState != TaskStatusType.BACKLOG
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -413,35 +429,54 @@ fun TaskCardItem(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+
+            // Row 1: Title + Status
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    subtitle?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                if (showStatusChip) {
                     Surface(
-                        shape = RoundedCornerShape(50)
+                        shape = RoundedCornerShape(50),
+                        color = statusColor.copy(alpha = 0.1f),
+                        border = BorderStroke(1.dp, statusColor)
                     ) {
                         Text(
-                            text = formatTimeStampToGetJustDate(creationTime),
+                            text = currentState.name,
+                            fontSize = 14.sp,
+                            color = statusColor,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Row 2: Subtitle + Date (left), Priority (right)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (subtitle != null) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
                     Surface(
                         shape = RoundedCornerShape(50),
                         color = getBorderColorBasedOnTaskPriority(priority).copy(alpha = 0.1f),
@@ -455,10 +490,19 @@ fun TaskCardItem(
                         )
                     }
                 }
+
+                Surface(shape = RoundedCornerShape(50)) {
+                    Text(
+                        text = formatTimeStampToGetJustDate(creationTime),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
@@ -631,7 +675,13 @@ fun TaskListScreen(navController: NavHostController, viewModel: AdminHomeScreenV
                         tasks = state.activeTaskList,
                         tasksListName = "Active Tasks",
                         isLoading = loadingState.isActiveTasksLoading,
-                        navController = navController
+                        navController = navController,
+                        order = state.tasksOrder,
+                        orderChangeEvent = { dateOrder ->
+                            viewModel.onHomeScreenEvent(
+                                AdminHomeScreenEvent.ToggleOrderDate(dateOrder)
+                            )
+                        }
                     )
                 }
 
@@ -641,7 +691,13 @@ fun TaskListScreen(navController: NavHostController, viewModel: AdminHomeScreenV
                         tasks = state.backlogTaskList,
                         tasksListName = "Backlog Tasks",
                         isLoading = loadingState.isBacklogTasksLoading,
-                        navController = navController
+                        navController = navController,
+                        order = state.tasksOrder,
+                        orderChangeEvent = { dateOrder ->
+                            viewModel.onHomeScreenEvent(
+                                AdminHomeScreenEvent.ToggleOrderDate(dateOrder)
+                            )
+                        }
                     )
                 }
 
@@ -651,7 +707,13 @@ fun TaskListScreen(navController: NavHostController, viewModel: AdminHomeScreenV
                         tasks = state.completedTasksList,
                         tasksListName = "Completed Tasks",
                         isLoading = loadingState.isCompletedTasksLoading,
-                        navController = navController
+                        navController = navController,
+                        order = state.tasksOrder,
+                        orderChangeEvent = { dateOrder ->
+                            viewModel.onHomeScreenEvent(
+                                AdminHomeScreenEvent.ToggleOrderDate(dateOrder)
+                            )
+                        }
                     )
                 }
             }
@@ -664,7 +726,9 @@ fun TaskListContent(
     tasks: List<ClientTask>,
     tasksListName: String = "tasks",
     isLoading: Boolean,
-    navController: NavHostController
+    order: DateOrder,
+    navController: NavHostController,
+    orderChangeEvent: (DateOrder) -> Unit
 ) {
     when {
         isLoading -> {
@@ -696,11 +760,15 @@ fun TaskListContent(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.Top
             ) {
+                item {
+                    DateOrderComposable(order, orderChangeEvent)
+                }
                 items(tasks.size) { index ->
                     TaskCardItem(
                         title = tasks[index].taskName,
                         subtitle = tasks[index].taskType.name,
                         creationTime = tasks[index].taskCreationTime,
+                        currentState = tasks[index].currentStatus,
                         cardBorder = BorderStroke(
                             width = 2.dp,
                             color = getBorderColorBasedOnTaskPriority(tasks[index].taskPriority)
@@ -714,4 +782,32 @@ fun TaskListContent(
             }
         }
     }
+}
+
+@Composable
+fun DateOrderComposable(taskDateOrder: DateOrder, onTaskDateOrderChange: (DateOrder) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Sort by Date Created",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+        IconButton(
+            onClick = {
+                val newOrder =
+                    if (taskDateOrder is DateOrder.Ascending)
+                        DateOrder.Descending else DateOrder.Ascending
+                onTaskDateOrderChange(newOrder)
+            }
+        ) {
+            Icon(
+                imageVector = if (taskDateOrder is DateOrder.Ascending) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                contentDescription = "Sort Order"
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(8.dp))
 }

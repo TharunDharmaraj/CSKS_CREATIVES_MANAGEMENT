@@ -16,7 +16,6 @@ import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
-import kotlin.collections.sortedByDescending
 
 class TasksUseCase @Inject constructor(
     private val tasksRepository: TasksRepository,
@@ -182,36 +181,34 @@ class TasksUseCase @Inject constructor(
             }
         }.flowOn(Dispatchers.IO)
 
-    override suspend fun getAllActiveTasks(): Flow<ResultState<List<ClientTask>>> = flow {
-        emit(ResultState.Loading)
-        try {
-            tasksRepository.getActiveTasks().collect { tasks ->
-                emit(ResultState.Success(tasks.sortedByDescending { it.taskCreationTime }))
-            }
-        } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All active Tasks ${exception.message} "))
-        }
-    }.flowOn(Dispatchers.IO)
+    override suspend fun getAllActiveTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>> {
+        return getTasksWithOrder({ tasksRepository.getActiveTasks() }, tasksOrder, "active")
+    }
 
-    override suspend fun getAllBacklogTasks(): Flow<ResultState<List<ClientTask>>> = flow {
-        emit(ResultState.Loading)
-        try {
-            tasksRepository.getTasksInBackLog().collect { tasks ->
-                emit(ResultState.Success(tasks.sortedByDescending { it.taskCreationTime }))
-            }
-        } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All Backlog Tasks exception: ${exception.message}"))
-        }
-    }.flowOn(Dispatchers.IO)
+    override suspend fun getAllBacklogTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>> {
+        return getTasksWithOrder({ tasksRepository.getTasksInBackLog() }, tasksOrder, "backlog")
+    }
 
-    override suspend fun getAllCompletedTasks(): Flow<ResultState<List<ClientTask>>> = flow {
+    override suspend fun getAllCompletedTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>> {
+        return getTasksWithOrder({ tasksRepository.getCompletedTasks() }, tasksOrder, "completed")
+    }
+
+    private fun getTasksWithOrder(
+        fetchTasks: suspend () -> Flow<List<ClientTask>>,
+        order: DateOrder,
+        tag: String
+    ): Flow<ResultState<List<ClientTask>>> = flow {
         emit(ResultState.Loading)
         try {
-            tasksRepository.getCompletedTasks().collect { tasks ->
-                emit(ResultState.Success(tasks.sortedByDescending { it.taskCreationTime }))
+            fetchTasks().collect { tasks ->
+                val sorted = when (order) {
+                    DateOrder.Descending -> tasks.sortedByDescending { it.taskCreationTime }
+                    DateOrder.Ascending -> tasks.sortedBy { it.taskCreationTime }
+                }
+                emit(ResultState.Success(sorted))
             }
-        } catch (exception: Exception) {
-            emit(ResultState.Error("Failed to get All Completed Tasks exception: ${exception.message}"))
+        } catch (e: Exception) {
+            emit(ResultState.Error("Failed to get $tag tasks: ${e.message}"))
         }
     }.flowOn(Dispatchers.IO)
 
