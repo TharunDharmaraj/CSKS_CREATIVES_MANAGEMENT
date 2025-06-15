@@ -86,7 +86,8 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 
 ### 📋 Task Interaction
 - View current and completed tasks
-- Change task status (except financial fields)
+- View Time Taken for Tasks
+- Change task status
 - Comment on tasks
 
 ### 🗓️ Leave Management
