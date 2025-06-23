@@ -12,7 +12,6 @@ import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.useCase.factories.*
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.getAvailableStatusOptions
-import com.example.csks_creatives.domain.utils.Utils.getTasksPaidStatusList
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.*
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCreationUiEvent.NavigateBack
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCreationUiEvent.ShowToast
@@ -256,10 +255,13 @@ class TaskDetailViewModel @Inject constructor(
             }
 
             is TaskDetailEvent.TaskPartialPaymentAmountChanged -> {
-                if (event.taskPartialPaymentAmount.isEmpty() || event.taskPartialPaymentAmount.toInt() <= 0) return
+                if (event.taskPartialPaymentAmount.isEmpty() || (event.taskPartialPaymentAmount.toIntOrNull()
+                        ?: 0) <= 0
+                ) return
                 _taskDetailState.update {
                     it.copy(
-                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount.toInt()
+                        taskPartialPaymentsAmount = event.taskPartialPaymentAmount.toIntOrNull()
+                            ?: 0
                     )
                 }
             }
@@ -392,10 +394,6 @@ class TaskDetailViewModel @Inject constructor(
         } else {
             getAvailableStatusOptions(getInitialTaskStatus())
         }
-    }
-
-    fun getAvailablePaidStatus(): List<String> {
-        return getTasksPaidStatusList(_taskDetailState.value.taskPaidStatus)
     }
 
     fun hasUnsavedChanges(): Boolean {

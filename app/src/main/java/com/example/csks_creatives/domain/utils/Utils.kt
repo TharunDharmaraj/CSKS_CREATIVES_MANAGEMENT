@@ -124,25 +124,6 @@ object Utils {
         }
     }
 
-    fun getTasksPaidStatusList(currentPaidStatus: TaskPaidStatus): List<String> {
-        return when (currentPaidStatus) {
-            TaskPaidStatus.FULLY_PAID -> listOf(
-                FULLY_PAID
-            )
-
-            TaskPaidStatus.PARTIALLY_PAID -> listOf(
-                PARTIALLY_PAID,
-                FULLY_PAID
-            )
-
-            TaskPaidStatus.NOT_PAID -> listOf(
-                NOT_PAID,
-                PARTIALLY_PAID,
-                FULLY_PAID
-            )
-        }
-    }
-
     fun getCurrentTimeAsLong(): Long = System.currentTimeMillis()
 
     fun getCurrentTimeAsString(): String = System.currentTimeMillis().toString()

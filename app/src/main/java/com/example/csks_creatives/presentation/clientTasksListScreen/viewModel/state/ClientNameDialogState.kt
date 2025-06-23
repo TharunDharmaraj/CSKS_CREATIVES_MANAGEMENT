@@ -1,5 +1,5 @@
 package com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.state
 
 data class ClientNameDialogState(
-    val employeeName: String = "",
+    val clientName: String = "",
 )

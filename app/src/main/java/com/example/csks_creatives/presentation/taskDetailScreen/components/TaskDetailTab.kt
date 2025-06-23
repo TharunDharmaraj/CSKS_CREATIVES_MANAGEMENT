@@ -50,8 +50,7 @@ fun TaskDetailTabContent(
             readOnly = userRole != UserRole.Admin,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-            ),
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -67,7 +66,7 @@ fun TaskDetailTabContent(
             value = taskState.taskEstimate.toString(),
             onValueChange = {
                 if (userRole == UserRole.Admin) onEvent(
-                    TaskDetailEvent.TaskEstimateChanged(it.toInt())
+                    TaskDetailEvent.TaskEstimateChanged(it.toIntOrNull() ?: 0)
                 )
             },
             singleLine = true,
@@ -75,25 +74,24 @@ fun TaskDetailTabContent(
             readOnly = userRole != UserRole.Admin,
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
+                keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-            ),
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }),
         )
 
         // Assigned Employee (Dropdown)
         GenericDropdownMenu(
             label = "Assigned Employee",
-            selectedItem = dropDownListState.employeeList
-                .find { it.employeeId == taskState.taskAssignedTo }?.employeeName ?: "Select",
+            selectedItem = dropDownListState.employeeList.find { it.employeeId == taskState.taskAssignedTo }?.employeeName
+                ?: "Select",
             items = dropDownListState.employeeList.map { it.employeeName },
             onItemSelected = { selected ->
-                dropDownListState.employeeList
-                    .find { it.employeeName == selected }
-                    ?.employeeId
-                    ?.let { onEvent(TaskDetailEvent.TaskAssignedToEmployeeChanged(it)) }
+                dropDownListState.employeeList.find { it.employeeName == selected }?.employeeId?.let {
+                    onEvent(
+                        TaskDetailEvent.TaskAssignedToEmployeeChanged(it)
+                    )
+                }
             },
             enabled = userRole == UserRole.Admin,
             isVisible = userRole != UserRole.Employee
@@ -102,14 +100,15 @@ fun TaskDetailTabContent(
         // Assign Task to Client
         GenericDropdownMenu(
             label = "Assigned Task To Client",
-            selectedItem = dropDownListState.clientsList
-                .find { it.clientId == taskState.taskClientId }?.clientName ?: "Select",
+            selectedItem = dropDownListState.clientsList.find { it.clientId == taskState.taskClientId }?.clientName
+                ?: "Select",
             items = dropDownListState.clientsList.map { it.clientName },
             onItemSelected = { selected ->
-                dropDownListState.clientsList
-                    .find { it.clientName == selected }
-                    ?.clientId
-                    ?.let { onEvent(TaskDetailEvent.TaskClientIdChanged(it)) }
+                dropDownListState.clientsList.find { it.clientName == selected }?.clientId?.let {
+                    onEvent(
+                        TaskDetailEvent.TaskClientIdChanged(it)
+                    )
+                }
             },
             enabled = userRole == UserRole.Admin,
             isVisible = userRole != UserRole.Employee
@@ -121,8 +120,7 @@ fun TaskDetailTabContent(
             selectedItem = taskState.taskType.name,
             items = dropDownListState.taskTypeList.map { it.name },
             onItemSelected = { selected ->
-                dropDownListState.taskTypeList
-                    .find { it.name == selected }
+                dropDownListState.taskTypeList.find { it.name == selected }
                     ?.let { onEvent(TaskDetailEvent.TaskTypeChanged(it)) }
             },
             enabled = userRole == UserRole.Admin
@@ -187,8 +185,7 @@ fun TaskDetailTabContent(
                             )
                         )
                     )
-                }
-            )
+                })
         }
         Spacer(Modifier.height(10.dp))
 
@@ -196,18 +193,17 @@ fun TaskDetailTabContent(
             OutlinedTextField(
                 value = taskState.taskCost.toString(),
                 onValueChange = { value ->
-                    onEvent(TaskDetailEvent.TaskCostChanged(value.toInt()))
+                    val intValue = value.toIntOrNull() ?: 0
+                    onEvent(TaskDetailEvent.TaskCostChanged(intValue))
                 },
                 label = { Text("Task Cost") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
+                    keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
                 ),
                 keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                ),
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             )
         }
         Spacer(modifier = Modifier.height(12.dp))

@@ -3,11 +3,9 @@ package com.example.csks_creatives.presentation.taskDetailScreen.components
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.*
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.TaskDetailViewModel
@@ -24,37 +22,6 @@ fun TaskDetailComposable(
     val commentState = viewModel.taskCommentState.collectAsState()
     val visibilityState = viewModel.visibilityState.collectAsState()
     val dropDownListState = viewModel.dropDownListState.collectAsState()
-    var annotatedText by remember { mutableStateOf(AnnotatedString("")) }
-    val descriptionText by remember { mutableStateOf(taskState.value.taskDescription) }
-
-    LaunchedEffect(descriptionText) {
-        annotatedText = buildAnnotatedString {
-            val regex = "(https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=]+)".toRegex()
-            var lastIndex = 0
-            regex.findAll(descriptionText).forEach { matchResult ->
-                val start = matchResult.range.first
-                val end = matchResult.range.last + 1
-
-                // Add normal text before the link
-                append(descriptionText.substring(lastIndex, start))
-
-                // Add clickable link
-                pushStringAnnotation(tag = "URL", annotation = matchResult.value)
-                withStyle(
-                    style = SpanStyle(
-                        color = Color.Blue, textDecoration = TextDecoration.Underline
-                    )
-                ) {
-                    append(matchResult.value)
-                }
-                pop()
-
-                lastIndex = end
-            }
-
-            append(descriptionText.substring(lastIndex))
-        }
-    }
 
     BackHandler {
         if (viewModel.hasUnsavedChanges().not()) {

@@ -1,5 +1,7 @@
 package com.example.csks_creatives.presentation.taskDetailScreen.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
@@ -14,6 +16,7 @@ import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.state.
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun TaskDetailPager(
