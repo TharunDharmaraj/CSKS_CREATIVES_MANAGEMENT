@@ -107,19 +107,25 @@ class TaskDetailViewModel @Inject constructor(
         when (event) {
             TaskDetailEvent.CreateTask -> {
                 viewModelScope.launch {
+                    if (_actionButtonEnabled.value.not()) {
+                        return@launch
+                    }
+                    _actionButtonEnabled.value = false
                     val task = _taskDetailState.value.toClientTask()
                     when (val result = tasksUseCaseFactory.createTask(task)) {
                         is ResultState.Success -> {
+                            _actionButtonEnabled.value = true
                             _uiEvent.emit(ShowToast(result.data))
                             _uiEvent.emit(NavigateBack)
                         }
 
                         is ResultState.Error -> {
+                            _actionButtonEnabled.value = true
                             _uiEvent.emit(ShowToast("Failed Create task ${result.message}"))
                         }
 
                         is ResultState.Loading -> {
-
+                            _actionButtonEnabled.value = false
                         }
                     }
                 }
@@ -127,6 +133,10 @@ class TaskDetailViewModel @Inject constructor(
 
             TaskDetailEvent.SaveTask -> {
                 viewModelScope.launch {
+                    if (_actionButtonEnabled.value.not()) {
+                        return@launch
+                    }
+                    _actionButtonEnabled.value = false
                     val initialTask = initialTaskDetailState.value.toClientTask()
                     val currentTask = _taskDetailState.value.toClientTask()
                     when (val result = tasksManipulationUseCaseFactory.editTask(
@@ -134,16 +144,20 @@ class TaskDetailViewModel @Inject constructor(
                         initialTask = initialTask
                     )) {
                         is ResultState.Success -> {
+                            _actionButtonEnabled.value = true
                             _uiEvent.emit(ShowToast(result.data))
                             _uiEvent.emit(NavigateBack)
                         }
 
                         is ResultState.Error -> {
+                            _actionButtonEnabled.value = true
                             _uiEvent.emit(ShowToast(result.message))
                             _uiEvent.emit(NavigateBack)
                         }
 
-                        else -> {}
+                        else -> {
+                            _actionButtonEnabled.value = false
+                        }
                     }
                 }
             }

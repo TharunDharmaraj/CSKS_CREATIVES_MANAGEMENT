@@ -117,9 +117,9 @@ fun EmployeeHomeScreenComposable(
         }
 
         LazyColumn(
+            contentPadding = padding,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             when (selectedTab) {

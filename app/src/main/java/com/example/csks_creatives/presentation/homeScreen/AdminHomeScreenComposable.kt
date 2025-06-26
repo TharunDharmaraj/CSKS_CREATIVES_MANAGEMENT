@@ -59,7 +59,6 @@ fun AdminHomeScreen(
     )
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0),
         topBar = {
             AppToolbar(
                 title = adminToolbarTitle.value,
@@ -158,7 +157,9 @@ fun AdminHomeScreen(
         HorizontalPager(
             count = navigationItems.size,
             state = pagerState,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
         ) { page ->
             when (navigationItems[page]) {
                 AdminBottomNavigation.Employees -> {

@@ -41,8 +41,7 @@ fun AppToolbar(
     var showMenu by remember { mutableStateOf(false) }
     TopAppBar(
         modifier = Modifier
-            .fillMaxWidth()
-            .systemBarsPadding(),
+            .fillMaxWidth(),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = darkSlateBlue,
         ),

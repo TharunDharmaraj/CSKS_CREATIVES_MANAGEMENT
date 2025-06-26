@@ -36,7 +36,10 @@ fun TaskDetailsComposable(
                 }
 
                 is TaskCreationUiEvent.NavigateBack -> {
-                    navController.popBackStack()
+                    if (!navController.navigateUp()) {
+                        // at root – send the user somewhere explicit, or just ignore
+                        // Ignore
+                    }
                 }
             }
         }
