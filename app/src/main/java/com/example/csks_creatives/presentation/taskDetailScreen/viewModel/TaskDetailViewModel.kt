@@ -51,6 +51,9 @@ class TaskDetailViewModel @Inject constructor(
     private val _taskCommentState = MutableStateFlow(TaskCommentState())
     val taskCommentState = _taskCommentState.asStateFlow()
 
+    private val _isTaskDeletionDialogVisible = MutableStateFlow(false)
+    val isTaskDeletionDialogVisible = _isTaskDeletionDialogVisible.asStateFlow()
+
     private val _visibilityState = MutableStateFlow(TaskDetailsSectionVisibilityState())
     val visibilityState = _visibilityState.asStateFlow()
 
@@ -304,6 +307,31 @@ class TaskDetailViewModel @Inject constructor(
         }
     }
 
+    fun onTaskDeleteEvent(event: TaskDeletionEvent) {
+        when (event) {
+            TaskDeletionEvent.CancelDeleteTask -> {
+                postTaskDeletionDialogValue(false)
+            }
+
+            TaskDeletionEvent.DeleteTask -> {
+                viewModelScope.launch {
+                    val result =
+                        tasksManipulationUseCaseFactory.deleteTask(
+                            _taskDetailState.value.taskId,
+                            _taskDetailState.value.taskAssignedTo
+                        )
+                    if (result is ResultState.Success) {
+                        postTaskDeletionDialogValue(false)
+                        _uiEvent.emit(ShowToast(result.data))
+                        _uiEvent.emit(NavigateBack)
+                    } else {
+                        _uiEvent.emit(ShowToast("Failed to delete task"))
+                    }
+                }
+            }
+        }
+    }
+
     private fun fetchClients() {
         viewModelScope.launch {
             when (val result = clientsUseCaseFactory.getClients(isForceFetchFromServer = false)) {
@@ -373,7 +401,7 @@ class TaskDetailViewModel @Inject constructor(
                         taskPaymentsHistory = task.paymentHistory
                     )
                     _taskName.value = task.taskName
-                    _paidStatus.value = getTaskPaidStatus(_taskDetailState.value)
+                    _paidStatus.value = _taskDetailState.value.taskPaidStatus
                     _actionButtonEnabled.value = true
                     saveTaskStatus()
                 }
@@ -398,9 +426,6 @@ class TaskDetailViewModel @Inject constructor(
         initialTaskStatus = _taskDetailState.value.taskCurrentStatus
         isTaskSaved = true
     }
-
-    private fun getTaskPaidStatus(taskDetailState: TaskDetailState) =
-        taskDetailState.taskPaidStatus
 
     fun getAvailableStatusOptions(): List<String> {
         return if (getIsTaskSavedStatus().not()) {
@@ -464,4 +489,7 @@ class TaskDetailViewModel @Inject constructor(
                 }
             }
     }
+
+    fun postTaskDeletionDialogValue(value: Boolean) =
+        _visibilityState.update { it.copy(isTaskDeletionDialogVisible = value) }
 }

@@ -19,6 +19,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_AMOUNT
 import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_PAYMENT_DATE
 import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_PRIORITY
+import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_ELAPSED_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
@@ -271,7 +272,8 @@ class TasksRepositoryImplementation @Inject constructor(
                 .document(BACKLOG).set(
                     hashMapOf(
                         TASK_STATUS_HISTORY_START_TIME to taskCreationTime.toLong(),
-                        TASK_STATUS_HISTORY_END_TIME to TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
+                        TASK_STATUS_HISTORY_END_TIME to TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE,
+                        TASK_STATUS_HISTORY_ELAPSED_TIME to 0L
                     ), SetOptions.merge()
                 )
         } catch (exception: Exception) {

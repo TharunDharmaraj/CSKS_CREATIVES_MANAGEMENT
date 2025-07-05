@@ -414,6 +414,7 @@ fun TaskCardItem(
     val statusColor = when (currentState) {
         TaskStatusType.IN_PROGRESS -> Color.Yellow
         TaskStatusType.IN_REVIEW -> Color.Magenta
+        TaskStatusType.PAUSED -> Color.Red
         else -> Color.Gray
     }
 

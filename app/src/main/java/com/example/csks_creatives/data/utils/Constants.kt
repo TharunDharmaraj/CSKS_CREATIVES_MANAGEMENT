@@ -62,10 +62,16 @@ object Constants {
     const val TASK_UPLOAD_OUTPUT = "taskUploadOutput"
     const val TASK_CURRENT_STATUS = "currentStatus"
     const val COMMENT_SUB_COLLECTION = "Comment"
+
+
+    // Task Status History Sub Collection
     const val TASK_STATUS_HISTORY_SUB_COLLECTION = "StatusHistory"
     const val TASK_STATUS_HISTORY_START_TIME = "startTime"
     const val TASK_STATUS_HISTORY_END_TIME = "endTime"
+    const val TASK_STATUS_HISTORY_ELAPSED_TIME = "elapsedTime"
     const val TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE = 0L
+
+    // Task - Payments Info Sub Collection
     const val TASK_PAYMENTS_INFO_SUB_COLLECTION = "PaymentsInfo"
     const val TASK_PAYMENTS_INFO_AMOUNT = "amount"
     const val TASK_PAYMENTS_INFO_PAYMENT_DATE = "paymentDate"
@@ -81,13 +87,8 @@ object Constants {
     const val BACKLOG = "BACKLOG"
     const val IN_PROGRESS = "IN_PROGRESS"
     const val IN_REVIEW = "IN_REVIEW"
-    const val REVISION_1 = "REVISION_1"
-    const val REVISION_2 = "REVISION_2"
-    const val REVISION_3 = "REVISION_3"
-    const val REVISION_4 = "REVISION_4"
-    const val REVISION_5 = "REVISION_5"
-    const val REVISION_6 = "REVISION_6"
-    const val REVISION_7 = "REVISION_7"
+    const val IN_REVISION = "IN_REVISION"
+    const val PAUSED = "PAUSED"
     const val COMPLETED = "COMPLETED"
 
     // Task Paid Status

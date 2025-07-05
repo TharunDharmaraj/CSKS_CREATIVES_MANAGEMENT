@@ -19,4 +19,6 @@ interface TasksManipulationUseCaseFactory {
     suspend fun editTask(currentTask: ClientTask, initialTask: ClientTask): ResultState<String>
 
     suspend fun addPartialTaskAmount(taskId: String, partialAmount: Int, remainingAmount: Int): ResultState<String>
+
+    suspend fun deleteTask(taskId: String, employeeId: String): ResultState<String>
 }

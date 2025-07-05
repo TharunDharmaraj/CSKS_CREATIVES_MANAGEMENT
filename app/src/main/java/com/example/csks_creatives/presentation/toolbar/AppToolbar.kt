@@ -1,7 +1,7 @@
 package com.example.csks_creatives.presentation.toolbar
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -31,6 +31,7 @@ fun AppToolbar(
     isActionButtonEnabled: Boolean = false,
     actionButtonText: String = "Save",
     menuItems: List<ToolbarOverFlowMenuItem> = emptyList(),
+    onDeleteTaskIconClicked: () -> Unit = {},
     onFilterTasksIconClicked: () -> Unit = {},
     onBackClicked: () -> Unit = {},
     onSearchClicked: () -> Unit = {},
@@ -52,7 +53,7 @@ fun AppToolbar(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
-            if(canShowLogo){
+            if (canShowLogo) {
                 Image(
                     painter = painterResource(R.drawable.toolbar_logo),
                     contentDescription = "CSKS CREATIVES"
@@ -61,6 +62,9 @@ fun AppToolbar(
         },
         actions = {
             if (canShowTaskPaidStatusButton) {
+                IconButton(onClick = onDeleteTaskIconClicked) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                }
                 IconButton(onClick = { /* Ignore */ }) {
                     Icon(
                         imageVector = when (taskPaidStatus) {

@@ -1,6 +1,8 @@
 package com.example.csks_creatives.presentation.taskDetailScreen.components
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -9,7 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.TaskDetailViewModel
+import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskDeletionEvent
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskDetailComposable(
     viewModel: TaskDetailViewModel = hiltViewModel(),
@@ -27,6 +31,32 @@ fun TaskDetailComposable(
         if (viewModel.hasUnsavedChanges().not()) {
             onBackPress()
         }
+    }
+
+    if (visibilityState.value.isTaskDeletionDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { viewModel.changeBackButtonVisibilityState(false) },
+            title = { Text("Delete ${taskState.value.taskTitle}?") },
+            text = {
+                Text(
+                    "Are You Sure Want to Delete This Task? \n " +
+                            "You will not be able to recover this task."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.onTaskDeleteEvent(TaskDeletionEvent.DeleteTask)
+                }) {
+                    Text("Delete Permanently")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.onTaskDeleteEvent(TaskDeletionEvent.CancelDeleteTask)
+                }) {
+                    Text("Cancel")
+                }
+            })
     }
 
     if (visibilityState.value.isBackButtonDialogVisible) {

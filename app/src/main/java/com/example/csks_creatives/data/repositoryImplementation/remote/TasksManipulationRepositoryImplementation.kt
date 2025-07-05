@@ -1,7 +1,10 @@
 package com.example.csks_creatives.data.repositoryImplementation.remote
 
 import android.util.Log
+import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASKS_COLLECTION
+import com.example.csks_creatives.data.utils.Constants.TASKS_COMPLETED_SUB_COLLECTION
+import com.example.csks_creatives.data.utils.Constants.TASKS_IN_PROGRESS_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_ATTACHMENT
 import com.example.csks_creatives.data.utils.Constants.TASK_CLIENT_ID
 import com.example.csks_creatives.data.utils.Constants.TASK_COST
@@ -16,6 +19,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_AMOUNT
 import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_PAYMENT_DATE
 import com.example.csks_creatives.data.utils.Constants.TASK_PAYMENTS_INFO_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASK_PRIORITY
+import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_ELAPSED_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
 import com.example.csks_creatives.data.utils.Constants.TASK_STATUS_HISTORY_START_TIME
@@ -67,23 +71,21 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             val currentTime = getCurrentTimeAsLong()
             if (lastUpdatedStatusDocument != null) {
                 lastUpdatedStatusDocument.reference.set(
-                    hashMapOf(TASK_STATUS_HISTORY_END_TIME to currentTime),
+                    hashMapOf(
+                        TASK_STATUS_HISTORY_ELAPSED_TIME to getElapsedTime(lastUpdatedStatusDocument),
+                        TASK_STATUS_HISTORY_END_TIME to currentTime,
+                        TASK_STATUS_HISTORY_START_TIME to 0L
+                    ),
                     SetOptions.merge()
                 ).await()
             } else {
                 Log.d(logTag + "Status", "No Document found lastUpdatedStatusDocument is null")
             }
-            val newStatusHashMap: HashMap<String, Long> = if (status == TaskStatusType.COMPLETED) {
-                hashMapOf(
-                    TASK_STATUS_HISTORY_START_TIME to currentTime,
-                    TASK_STATUS_HISTORY_END_TIME to currentTime
-                )
-            } else {
+            val newStatusHashMap: HashMap<String, Long> =
                 hashMapOf(
                     TASK_STATUS_HISTORY_START_TIME to currentTime,
                     TASK_STATUS_HISTORY_END_TIME to TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
                 )
-            }
             statusCollectionRef.document(convertStatusTypeToString(status)).set(
                 newStatusHashMap, SetOptions.merge()
             )
@@ -94,6 +96,25 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                 "Failed with ${exception.message}  to changed TaskId $taskId to $status"
             )
         }
+    }
+
+    private fun getElapsedTime(lastUpdatedStatusDocument: DocumentSnapshot): Long {
+        val time = getStartAndEndTime(lastUpdatedStatusDocument)
+        val alreadyElapsedTime = getAlreadyElapsedTime(lastUpdatedStatusDocument)
+        return alreadyElapsedTime + (getCurrentTimeAsLong() - time.first)
+    }
+
+    private fun getAlreadyElapsedTime(lastUpdatedStatusDocument: DocumentSnapshot) =
+        lastUpdatedStatusDocument.getLong(TASK_STATUS_HISTORY_ELAPSED_TIME) ?: 0L
+
+    private fun getStartAndEndTime(document: DocumentSnapshot): Pair<Long, Long> {
+        val startTime =
+            document.getLong(TASK_STATUS_HISTORY_START_TIME)
+                ?: 0L
+        val endTime =
+            document.getLong(TASK_STATUS_HISTORY_END_TIME)
+                ?: 0L
+        return Pair(startTime, endTime)
     }
 
     override suspend fun fetchTaskStatusHistory(taskId: String): Flow<List<TaskStatusHistory>> =
@@ -110,13 +131,14 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
                 if (documentSnapshot != null) {
                     val taskStatusHistoryList = documentSnapshot.documents.mapNotNull { document ->
                         val status = document.id.let { TaskStatusType.valueOf(it) }
-                        val startTime =
-                            document.getLong(TASK_STATUS_HISTORY_START_TIME)
-                                ?: return@mapNotNull null
-                        val endTime =
-                            document.getLong(TASK_STATUS_HISTORY_END_TIME)
-                                ?: getCurrentTimeAsLong()
-                        TaskStatusHistory(status, startTime.toString(), endTime.toString())
+                        val taskTimings = getStartAndEndTime(document)
+                        val elapsedTime = getAlreadyElapsedTime(document)
+                        TaskStatusHistory(
+                            status,
+                            taskTimings.first.toString(),
+                            taskTimings.second.toString(),
+                            elapsedTime
+                        )
                     }
                     trySend(taskStatusHistoryList).isSuccess
                 }
@@ -188,6 +210,61 @@ class TasksManipulationRepositoryImplementation @Inject constructor(
             )
         }
     }
+
+    override suspend fun removeTaskFromEmployeeDetails(employeeId: String, taskId: String) {
+        try {
+            val completedRef = getEmployeeTasksPathComplete(employeeId).document(taskId)
+            val inProgressRef = getEmployeeTasksPathInProgress(employeeId).document(taskId)
+
+            if (completedRef.get().await().exists()) {
+                completedRef.delete().await()
+                Log.d(
+                    logTag + "removeTask",
+                    "Deleted task $taskId from Completed for employee $employeeId"
+                )
+                return
+            }
+
+            if (inProgressRef.get().await().exists()) {
+                inProgressRef.delete().await()
+                Log.d(
+                    logTag + "removeTask",
+                    "Deleted task $taskId from In‑Progress for employee $employeeId"
+                )
+            } else {
+                Log.d(
+                    logTag + "removeTask",
+                    "Task $taskId not found in either sub‑collection for employee $employeeId"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(
+                logTag + "removeTask",
+                "Error deleting task $taskId for employee $employeeId: ${e.message}"
+            )
+        }
+    }
+
+    override suspend fun deleteTaskFromTasksCollection(taskId: String, employeeId: String) {
+        try {
+            getTaskPath(taskId).delete().await()
+            Log.d(logTag + "deleteTask", "TaskId: $taskId Deleted SuccessFully")
+        } catch (exception: Exception) {
+            Log.d(
+                logTag + "deleteTask",
+                "Exception in deleting TaskId: $taskId Exception: ${exception.message}"
+            )
+        }
+    }
+
+    private fun getEmployeeTasksPathComplete(employeeId: String) =
+        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
+            .collection(TASKS_COMPLETED_SUB_COLLECTION)
+
+
+    private fun getEmployeeTasksPathInProgress(employeeId: String) =
+        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
+            .collection(TASKS_IN_PROGRESS_SUB_COLLECTION)
 
     private fun getTaskPath(taskId: String) =
         firestore.collection(TASKS_COLLECTION).document(taskId)

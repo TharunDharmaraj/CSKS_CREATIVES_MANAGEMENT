@@ -1,7 +1,8 @@
 package com.example.csks_creatives.presentation.taskDetailScreen
 
+import android.os.Build
 import android.widget.Toast
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -15,6 +16,7 @@ import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskDetailEvent
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskDetailsComposable(
     viewModel: TaskDetailViewModel = hiltViewModel(),
@@ -36,10 +38,7 @@ fun TaskDetailsComposable(
                 }
 
                 is TaskCreationUiEvent.NavigateBack -> {
-                    if (!navController.navigateUp()) {
-                        // at root – send the user somewhere explicit, or just ignore
-                        // Ignore
-                    }
+                    navController.navigateUp()
                 }
             }
         }
@@ -48,7 +47,6 @@ fun TaskDetailsComposable(
         viewModel.initialize(userRole, isTaskCreation, taskId, employeeId)
     }
     Scaffold(
-        contentWindowInsets = WindowInsets(0),
         topBar = {
             val actionButtonText: String
             val title: String
@@ -72,6 +70,9 @@ fun TaskDetailsComposable(
                     if (viewModel.hasUnsavedChanges().not()) {
                         navController.popBackStack()
                     }
+                },
+                onDeleteTaskIconClicked = {
+                    viewModel.postTaskDeletionDialogValue(true)
                 },
                 canShowActionButton = true,
                 actionButtonText = actionButtonText,

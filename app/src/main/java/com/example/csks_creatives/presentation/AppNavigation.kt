@@ -1,5 +1,7 @@
 package com.example.csks_creatives.presentation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -14,6 +16,7 @@ import com.example.csks_creatives.presentation.homeScreen.EmployeeHomeScreenComp
 import com.example.csks_creatives.presentation.loginScreen.LoginScreen
 import com.example.csks_creatives.presentation.taskDetailScreen.TaskDetailsComposable
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "login") {

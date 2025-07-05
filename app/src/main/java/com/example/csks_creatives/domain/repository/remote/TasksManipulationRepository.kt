@@ -18,4 +18,8 @@ interface TasksManipulationRepository {
     suspend fun addPartialTaskAmount(taskId: String, paymentInfo: PaymentInfo)
 
     suspend fun markTaskAsFullyPaid(taskId: String)
+
+    suspend fun removeTaskFromEmployeeDetails(employeeId: String, taskId: String)
+
+    suspend fun deleteTaskFromTasksCollection(taskId: String, employeeId: String)
 }

@@ -143,4 +143,15 @@ class TasksManipulationUseCase @Inject constructor(
             ResultState.Error("Failed to Add amount ${exception.message} ")
         }
     }
+
+    override suspend fun deleteTask(taskId: String, employeeId: String): ResultState<String> {
+        return try {
+            tasksManipulationRepository.removeTaskFromEmployeeDetails(employeeId, taskId)
+            tasksManipulationRepository.deleteTaskFromTasksCollection(taskId, employeeId).let {
+                ResultState.Success("Deleted Task")
+            }
+        } catch (exception: Exception) {
+            ResultState.Error("Failed to Delete Task ${exception.message} ")
+        }
+    }
 }

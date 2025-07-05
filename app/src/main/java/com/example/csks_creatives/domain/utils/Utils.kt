@@ -1,20 +1,12 @@
 package com.example.csks_creatives.domain.utils
 
+import com.example.csks_creatives.data.utils.Constants.BACKLOG
 import com.example.csks_creatives.data.utils.Constants.COMPLETED
-import com.example.csks_creatives.data.utils.Constants.FULLY_PAID
 import com.example.csks_creatives.data.utils.Constants.IN_PROGRESS
 import com.example.csks_creatives.data.utils.Constants.IN_REVIEW
-import com.example.csks_creatives.data.utils.Constants.NOT_PAID
-import com.example.csks_creatives.data.utils.Constants.PARTIALLY_PAID
-import com.example.csks_creatives.data.utils.Constants.REVISION_1
-import com.example.csks_creatives.data.utils.Constants.REVISION_2
-import com.example.csks_creatives.data.utils.Constants.REVISION_3
-import com.example.csks_creatives.data.utils.Constants.REVISION_4
-import com.example.csks_creatives.data.utils.Constants.REVISION_5
-import com.example.csks_creatives.data.utils.Constants.REVISION_6
-import com.example.csks_creatives.data.utils.Constants.REVISION_7
+import com.example.csks_creatives.data.utils.Constants.IN_REVISION
+import com.example.csks_creatives.data.utils.Constants.PAUSED
 import com.example.csks_creatives.domain.model.task.ClientTask
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.google.firebase.Timestamp
 import java.text.DateFormatSymbols
@@ -36,91 +28,52 @@ object Utils {
             TaskStatusType.BACKLOG -> listOf(
                 IN_PROGRESS,
                 IN_REVIEW,
-                REVISION_1,
-                REVISION_2,
-                REVISION_3,
-                REVISION_4,
-                REVISION_5,
-                REVISION_6,
-                REVISION_7,
+                IN_REVISION,
+                PAUSED,
                 COMPLETED
             )
 
-//            TaskStatusType.BLOCKED -> listOf(
-//                BACKLOG,
-//                IN_PROGRESS,
-//                IN_REVIEW,
-//                REVISION_1,
-//                REVISION_2,
-//                REVISION_3,
-//                REVISION_4,
-//                REVISION_5,
-//                REVISION_6,
-//                REVISION_7,
-//                COMPLETED
-//            )
-
             TaskStatusType.IN_PROGRESS -> listOf(
                 IN_REVIEW,
-                REVISION_1,
-                REVISION_2,
-                REVISION_3,
-                REVISION_4,
-                REVISION_5,
-                REVISION_6,
-                REVISION_7,
+                IN_REVISION,
+                PAUSED,
                 COMPLETED
             )
 
             TaskStatusType.IN_REVIEW -> listOf(
-                REVISION_1,
-                REVISION_2,
-                REVISION_3,
-                REVISION_4,
-                REVISION_5,
-                REVISION_6,
-                REVISION_7,
+                IN_REVISION,
+                PAUSED,
                 COMPLETED
             )
 
-            TaskStatusType.REVISION_1 -> listOf(
-                REVISION_2, REVISION_3, REVISION_4,
-                REVISION_5,
-                REVISION_6,
-                REVISION_7, COMPLETED
+            TaskStatusType.IN_REVISION -> listOf(
+                PAUSED,
+                COMPLETED
             )
 
-            TaskStatusType.REVISION_2 -> listOf(
-                REVISION_3, REVISION_4,
-                REVISION_5,
-                REVISION_6,
-                REVISION_7, COMPLETED
+            TaskStatusType.COMPLETED -> listOf(
+                BACKLOG,
+                COMPLETED
             )
 
-            TaskStatusType.REVISION_3 -> listOf(
-                REVISION_4,
-                REVISION_5,
-                REVISION_6,
-                REVISION_7, COMPLETED
+            TaskStatusType.PAUSED -> listOf(
+                BACKLOG,
+                IN_PROGRESS,
+                IN_REVIEW,
+                IN_REVISION,
+                COMPLETED
             )
 
-            TaskStatusType.REVISION_4 -> listOf(
-                REVISION_5,
-                REVISION_6,
-                REVISION_7, COMPLETED
+            // Added for backward compatibility with version 1.0
+            TaskStatusType.REVISION_1, TaskStatusType.REVISION_2, TaskStatusType.REVISION_3,
+            TaskStatusType.REVISION_4, TaskStatusType.REVISION_5, TaskStatusType.REVISION_6,
+            TaskStatusType.REVISION_7 -> listOf(
+                IN_PROGRESS,
+                IN_REVIEW,
+                IN_REVISION,
+                PAUSED,
+                COMPLETED
             )
-
-            TaskStatusType.REVISION_5 -> listOf(
-                REVISION_6,
-                REVISION_7, COMPLETED
-            )
-
-            TaskStatusType.REVISION_6 -> listOf(
-                REVISION_7, COMPLETED
-            )
-
-            TaskStatusType.REVISION_7 -> listOf(COMPLETED)
-            TaskStatusType.COMPLETED -> listOf(COMPLETED)
         }
     }
 
@@ -129,19 +82,19 @@ object Utils {
     fun getCurrentTimeAsString(): String = System.currentTimeMillis().toString()
 
     fun formatTimeStamp(timeStampInMilliSeconds: String): String {
-        if (timeStampInMilliSeconds.toString().isEmpty()) return "TimeStamp Empty"
+        if (timeStampInMilliSeconds.isEmpty()) return "TimeStamp Empty"
         val timeFormat = SimpleDateFormat("HH:mm:ss MMM dd yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun formatTimeStampToGetJustDate(timeStampInMilliSeconds: String): String {
-        if (timeStampInMilliSeconds.toString().isEmpty()) return "Date Empty"
+        if (timeStampInMilliSeconds.isEmpty()) return "Date Empty"
         val timeFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun getFormattedDateTimeFormat(timeStampInMilliSeconds: String): String {
-        if (timeStampInMilliSeconds.toString().isEmpty()) return "Task Creation Time Empty"
+        if (timeStampInMilliSeconds.isEmpty()) return "Task Creation Time Empty"
         val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
         return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }

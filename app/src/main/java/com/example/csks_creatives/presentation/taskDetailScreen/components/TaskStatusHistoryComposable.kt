@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,14 +26,19 @@ fun TaskStatusHistoryComposable(
 ) {
     if (!isVisible) return
 
+    val orderedHistory =
+        remember(statusHistory) { statusHistory.sortedBy { it.taskStatusType.order } }
+
+    val currentStatusType = orderedHistory.firstOrNull { it.endTime == "0" }?.taskStatusType
+
     Column(
         modifier = Modifier
             .padding(vertical = 16.dp)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        statusHistory.forEachIndexed { index, entry ->
-            val isCurrentStatus = index == statusHistory.lastIndex
+        orderedHistory.forEach { entry ->
+            val isCurrentStatus = entry.taskStatusType == currentStatusType
 
             Card(
                 modifier = Modifier
@@ -65,6 +71,7 @@ fun TaskStatusHistoryComposable(
                             TaskStatusType.BACKLOG -> Icons.Default.Lock
                             TaskStatusType.IN_PROGRESS -> Icons.Default.PlayArrow
                             TaskStatusType.IN_REVIEW -> Icons.Default.Build
+                            TaskStatusType.PAUSED -> Icons.Default.Home
                             TaskStatusType.COMPLETED -> Icons.Default.CheckCircle
                             else -> Icons.Default.MailOutline
                         },
@@ -112,16 +119,22 @@ fun TaskStatusHistoryComposable(
             }
         }
 
-        val isTaskCompleted = statusHistory.lastOrNull()?.taskStatusType == TaskStatusType.COMPLETED
+        val isTaskCompleted =
+            (statusHistory.lastOrNull()?.taskStatusType == TaskStatusType.COMPLETED) && (statusHistory.lastOrNull()?.endTime == "0" || statusHistory.lastOrNull()?.endTime == statusHistory.lastOrNull()?.startTime)
         if (isTaskCompleted) {
             val intermediateStatuses = statusHistory.filter {
                 it.taskStatusType != TaskStatusType.BACKLOG &&
                         it.taskStatusType != TaskStatusType.COMPLETED
             }
+            // Added for backward compatibility
+            val revisions =
+                statusHistory.filter { it.taskStatusType.order > 99 && it.elapsedTime == 0L }
+            val pausedStatus = statusHistory.find { it.taskStatusType == TaskStatusType.PAUSED }
             if (intermediateStatuses.isNotEmpty()) {
-                val startTime = intermediateStatuses.first().startTime.toLong()
-                val endTime = intermediateStatuses.last().endTime.toLong()
-                val timeSpent = formatDuration(startTime, endTime)
+                val totalElapsedTime =
+                    intermediateStatuses.sumOf { it.elapsedTime } + revisions.sumOf { it.endTime.toLong() - it.startTime.toLong() } + -(pausedStatus?.elapsedTime
+                        ?: 0L)
+                val timeSpent = formatDuration(totalElapsedTime)
                 CompletedSummary(timeSpent)
             } else {
                 // Empty, No Intermediate Status
@@ -143,7 +156,9 @@ fun CompletedSummary(summaryText: String) {
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1B5E20)) // dark green
     ) {
         Column(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -163,11 +178,10 @@ fun CompletedSummary(summaryText: String) {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun formatDuration(startMillis: Long, endMillis: Long): String {
-    val durationMillis = endMillis - startMillis
-    if (durationMillis <= 0) return "Less than a minute"
+fun formatDuration(totalElapsedTime: Long): String {
+    if (totalElapsedTime <= 0) return "Less than a minute"
 
-    val duration = Duration.ofMillis(durationMillis)
+    val duration = Duration.ofMillis(totalElapsedTime)
     val days = duration.toDays()
     val hours = (duration.toHours() % 24)
     val minutes = (duration.toMinutes() % 60)
