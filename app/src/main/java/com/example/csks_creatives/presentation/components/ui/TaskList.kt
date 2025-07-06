@@ -14,20 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
-import com.example.csks_creatives.domain.utils.Utils.calculateFormattedTaskTakenTime
 import com.example.csks_creatives.domain.utils.Utils.getFormattedDateTimeFormat
 
 @Composable
-fun TaskItem(task: ClientTask, onTaskClick: () -> Unit) {
-    val timeTaken = remember(task) {
-        if (task.currentStatus == TaskStatusType.COMPLETED) {
-            val backlogEnd =
-                task.statusHistory.find { it.taskStatusType == TaskStatusType.BACKLOG }!!.endTime
-            val completedStart =
-                task.statusHistory.find { it.taskStatusType == TaskStatusType.COMPLETED }!!.startTime
-            calculateFormattedTaskTakenTime(backlogEnd, completedStart)
-        } else ""
-    }
+fun TaskItem(task: ClientTask, onTaskClick: () -> Unit, taskElapsedTime: String) {
+    val timeTaken = remember { taskElapsedTime }
 
     Card(
         modifier = Modifier

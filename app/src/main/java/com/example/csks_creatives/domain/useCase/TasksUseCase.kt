@@ -1,20 +1,23 @@
 package com.example.csks_creatives.domain.useCase
 
+import android.annotation.SuppressLint
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.*
 import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
-import com.example.csks_creatives.domain.utils.Utils.calculateFormattedTaskTakenTime
+import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.getActiveTasks
 import com.example.csks_creatives.domain.utils.Utils.getCompletedTasks
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
-import com.example.csks_creatives.domain.utils.Utils.getFormattedTaskTakenTime
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import java.time.Duration
 import javax.inject.Inject
 
 class TasksUseCase @Inject constructor(
@@ -22,7 +25,6 @@ class TasksUseCase @Inject constructor(
     private val adminRepository: AdminRepository,
     private val clientsRepository: ClientsRepository
 ) : TasksUseCaseFactory {
-    private val logTag = "tasksUseCase"
     override fun create(): TasksUseCase {
         return TasksUseCase(tasksRepository, adminRepository, clientsRepository)
     }
@@ -224,6 +226,7 @@ class TasksUseCase @Inject constructor(
         tasksInProgressList: List<ClientTaskOverview>
     ) = tasksInProgressList.filter { it.taskId != completedTaskId.taskId }
 
+    @SuppressLint("NewApi")
     override fun getTimeTakenForActiveTask(
         taskId: String,
         tasksInProgress: List<ClientTaskOverview>
@@ -231,49 +234,64 @@ class TasksUseCase @Inject constructor(
         if (tasksInProgress.isNotEmpty()) {
             tasksInProgress.forEach { task ->
                 if (task.taskId == taskId && task.taskCreationTime.isNotEmpty()) {
-                    return calculateFormattedTaskTakenTime(
-                        task.taskCreationTime,
-                        getCurrentTimeAsString()
-                    )
+                    return formatDuration(task.taskElapsedTime)
                 }
             }
         }
         return "123456"
     }
 
+    @SuppressLint("NewApi")
     override fun getTimeTakenForCompletedTask(
         taskId: String,
         tasksCompleted: List<ClientTaskOverview>
     ): String {
         tasksCompleted.forEach { task ->
             if (task.taskId == taskId) {
-                return calculateFormattedTaskTakenTime(
-                    task.taskInProgressTime,
-                    task.taskCompletedTime
-                )
+                return formatDuration(task.taskElapsedTime)
             }
         }
         return "123456789"
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun getTimeTakenForCompletedTask(clientTask: ClientTask): String {
-        val inProgressEntry =
-            clientTask.statusHistory.find { it.taskStatusType == TaskStatusType.IN_PROGRESS }
-        val completedEntry =
-            clientTask.statusHistory.find { it.taskStatusType == TaskStatusType.COMPLETED }
+        if (clientTask.currentStatus == TaskStatusType.COMPLETED) {
+            val intermediateStatuses = clientTask.statusHistory.filter {
+                it.taskStatusType != TaskStatusType.BACKLOG &&
+                        it.taskStatusType != TaskStatusType.COMPLETED
+            }
+            // Added for backward compatibility
+            val revisions =
+                clientTask.statusHistory.filter { it.taskStatusType.order > 99 && it.elapsedTime == 0L }
+            val pausedStatus =
+                clientTask.statusHistory.find { it.taskStatusType == TaskStatusType.PAUSED }
 
-        if (inProgressEntry == null || completedEntry == null ||
-            inProgressEntry.startTime.isEmpty() || completedEntry.startTime.isEmpty()
-        ) {
-            return "No In-Progress Time Available"
-        }
+            if (intermediateStatuses.isNotEmpty()) {
+                val totalElapsedTime =
+                    intermediateStatuses.sumOf { it.elapsedTime } + revisions.sumOf { it.endTime.toLong() - it.startTime.toLong() } - (pausedStatus?.elapsedTime
+                        ?: 0L)
+                return formatDuration(totalElapsedTime)
+            } else {
+                // Empty, No Intermediate Status
+                return "No In-Progress Time Available"
+            }
+        } else return EMPTY_STRING
+    }
 
-        return try {
-            val diffMillis = completedEntry.startTime.toLong() - inProgressEntry.startTime.toLong()
-            getFormattedTaskTakenTime(diffMillis)
-        } catch (e: Exception) {
-            Log.e(logTag, "Exception in getTimeTakenForCompletedTask for clientTask $clientTask $e")
-            "0"
-        }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun formatDuration(totalElapsedTime: Long): String {
+        if (totalElapsedTime <= 0) return "Less than a minute"
+
+        val duration = Duration.ofMillis(totalElapsedTime)
+        val days = duration.toDays()
+        val hours = (duration.toHours() % 24)
+        val minutes = (duration.toMinutes() % 60)
+
+        return buildString {
+            if (days > 0) append("$days day${if (days > 1) "s" else ""} ")
+            if (hours > 0) append("$hours hr${if (hours > 1) "s" else ""} ")
+            if (minutes > 0) append("$minutes min${if (minutes > 1) "s" else ""}")
+        }.trim().ifEmpty { "Less than a minute" }
     }
 }

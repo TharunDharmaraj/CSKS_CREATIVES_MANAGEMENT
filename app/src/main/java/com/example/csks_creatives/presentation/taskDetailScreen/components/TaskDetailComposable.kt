@@ -94,7 +94,7 @@ fun TaskDetailComposable(
             isTaskCreation = isTaskCreation,
             onEvent = { viewModel.onEvent(it) },
             onCommentEvent = { viewModel.onCommentEvent(it) },
-            getAvailableStatusOptions = { viewModel.getAvailableStatusOptions() }
+            getAvailableStatusOptions = { viewModel.getAvailableStatusOptions(userRole) }
         )
     }
 }

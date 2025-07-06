@@ -358,4 +358,7 @@ class ClientTasksListViewModel @Inject constructor(
             _clientTasksListState.update { it.copy(isEditClientNameDialogVisible = false) }
         }
     }
+
+    fun getTaskElapsedTime(clientTask: ClientTask) =
+        tasksUseCaseFactory.getTimeTakenForCompletedTask(clientTask)
 }

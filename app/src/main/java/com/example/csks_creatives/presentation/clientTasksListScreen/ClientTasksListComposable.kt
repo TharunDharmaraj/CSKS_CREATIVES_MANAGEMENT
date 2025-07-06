@@ -294,7 +294,8 @@ fun ClientTasksListComposable(
                                                 task = state.value.tasksList[index],
                                                 onTaskClick = {
                                                     navController.navigate("task_detail/${state.value.tasksList[index].taskId}/$ADMIN_NAME")
-                                                }
+                                                },
+                                                taskElapsedTime = viewModel.getTaskElapsedTime(state.value.tasksList[index])
                                             )
                                         }
                                     }

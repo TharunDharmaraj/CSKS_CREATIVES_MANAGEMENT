@@ -16,6 +16,5 @@ data class ClientTaskOverview(
     val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS,
     val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES,
     val currentStatus: TaskStatusType = TaskStatusType.BACKLOG,
-    val taskInProgressTime: String = EMPTY_STRING,
-    val taskCompletedTime: String = EMPTY_STRING
+    val taskElapsedTime: Long = 0L
 )

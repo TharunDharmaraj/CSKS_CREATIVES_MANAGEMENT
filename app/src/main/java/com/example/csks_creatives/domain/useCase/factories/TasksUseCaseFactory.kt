@@ -21,9 +21,15 @@ interface TasksUseCaseFactory {
         order: DateOrder
     ): Flow<ResultState<Pair<List<ClientTask>, List<ClientTask>>>>
 
-    fun getActiveTasksForEmployee(employeeId: String, order: DateOrder) : Flow<ResultState<List<ClientTask>>>
+    fun getActiveTasksForEmployee(
+        employeeId: String,
+        order: DateOrder
+    ): Flow<ResultState<List<ClientTask>>>
 
-    fun getCompletedTasksForEmployee(employeeId: String, order: DateOrder) : Flow<ResultState<List<ClientTask>>>
+    fun getCompletedTasksForEmployee(
+        employeeId: String,
+        order: DateOrder
+    ): Flow<ResultState<List<ClientTask>>>
 
     suspend fun createTask(task: ClientTask): ResultState<String>
 

@@ -8,6 +8,7 @@ import com.example.csks_creatives.data.utils.Constants.IN_REVISION
 import com.example.csks_creatives.data.utils.Constants.PAUSED
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.google.firebase.Timestamp
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
@@ -23,7 +24,7 @@ object Utils {
     fun List<ClientTask>.getCompletedTasks(): List<ClientTask> =
         this.filter { it.currentStatus == TaskStatusType.COMPLETED }
 
-    fun getAvailableStatusOptions(currentStatus: TaskStatusType): List<String> {
+    fun getAvailableStatusOptions(currentStatus: TaskStatusType, userRole: UserRole): List<String> {
         return when (currentStatus) {
             TaskStatusType.BACKLOG -> listOf(
                 IN_PROGRESS,
@@ -51,13 +52,18 @@ object Utils {
                 COMPLETED
             )
 
-            TaskStatusType.COMPLETED -> listOf(
-                BACKLOG,
-                COMPLETED
-            )
+            TaskStatusType.COMPLETED -> if (userRole is UserRole.Admin) {
+                listOf(
+                    BACKLOG,
+                    COMPLETED
+                )
+            } else {
+                listOf(
+                    COMPLETED
+                )
+            }
 
             TaskStatusType.PAUSED -> listOf(
-                BACKLOG,
                 IN_PROGRESS,
                 IN_REVIEW,
                 IN_REVISION,
@@ -97,31 +103,6 @@ object Utils {
         if (timeStampInMilliSeconds.isEmpty()) return "Task Creation Time Empty"
         val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
         return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
-    }
-
-    fun calculateFormattedTaskTakenTime(
-        taskInProgressTime: String,
-        taskCompletedTime: String
-    ): String {
-        val timeForTaskInProgress = taskInProgressTime.toLong()
-        val timeForTaskCompleted = taskCompletedTime.toLong()
-        val timeTakenMillis = timeForTaskCompleted - timeForTaskInProgress
-        return getFormattedTaskTakenTime(timeTakenMillis)
-    }
-
-    fun getFormattedTaskTakenTime(timeDifference: Long): String {
-        val seconds = timeDifference / 1000
-        val minutes = seconds / 60
-        val hours = minutes / 60
-        val days = hours / 24
-
-        return if (days >= 1) {
-            val remainingHours = hours % 24
-            "$days day${if (days > 1) "s" else ""}, $remainingHours hour${if (remainingHours > 1) "s" else ""}"
-        } else {
-            val remainingMinutes = minutes % 60
-            "$hours hour${if (hours > 1) "s" else ""}, $remainingMinutes minute${if (remainingMinutes > 1) "s" else ""}"
-        }
     }
 
     fun getMonthName(month: Int): String {

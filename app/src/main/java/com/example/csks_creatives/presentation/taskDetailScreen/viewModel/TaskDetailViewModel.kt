@@ -427,11 +427,11 @@ class TaskDetailViewModel @Inject constructor(
         isTaskSaved = true
     }
 
-    fun getAvailableStatusOptions(): List<String> {
+    fun getAvailableStatusOptions(userRole: UserRole): List<String> {
         return if (getIsTaskSavedStatus().not()) {
-            getAvailableStatusOptions(_taskDetailState.value.taskCurrentStatus)
+            getAvailableStatusOptions(_taskDetailState.value.taskCurrentStatus, userRole)
         } else {
-            getAvailableStatusOptions(getInitialTaskStatus())
+            getAvailableStatusOptions(getInitialTaskStatus(), userRole)
         }
     }
 

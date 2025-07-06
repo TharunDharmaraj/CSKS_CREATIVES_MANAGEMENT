@@ -1,6 +1,7 @@
 .gradle
 **/build/
 !src/**/build/
+app/keystore/*
 app/google-services.json
 
 # Ignore Gradle GUI config

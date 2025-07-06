@@ -31,6 +31,7 @@ import com.example.csks_creatives.data.utils.Utils.convertStringStatusToStatusTy
 import com.example.csks_creatives.domain.model.task.*
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.repository.remote.TasksRepository
+import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsLong
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import com.google.firebase.firestore.*
 import kotlinx.coroutines.*
@@ -105,7 +106,8 @@ class TasksRepositoryImplementation @Inject constructor(
                                 TaskStatusHistory(
                                     convertStringStatusToStatusType(id),
                                     times[0].toString(),
-                                    times[1].toString()
+                                    times[1].toString(),
+                                    times[2]
                                 )
                             }
                         )
@@ -138,19 +140,7 @@ class TasksRepositoryImplementation @Inject constructor(
                         .get()
                         .await()
 
-                    var inProgressStartTime: String? = null
-                    var completedStartTime: String? = null
-
-                    for (statusDoc in statusHistory.documents) {
-                        val status = statusDoc.id
-                        val startTime =
-                            statusDoc.getLong(TASK_STATUS_HISTORY_START_TIME)?.toString()
-
-                        when (status) {
-                            "IN_PROGRESS" -> inProgressStartTime = startTime
-                            "COMPLETED" -> completedStartTime = startTime
-                        }
-                    }
+                    val totalElapsedTime = getTotalElapsedTime(statusHistory)
 
                     val taskOverView = ClientTaskOverview(
                         taskId = task.taskId,
@@ -165,8 +155,7 @@ class TasksRepositoryImplementation @Inject constructor(
                         taskDirectionApp = task.taskDirectionApp,
                         taskUploadOutput = task.taskUploadOutput,
                         currentStatus = task.currentStatus,
-                        taskInProgressTime = inProgressStartTime ?: "133",
-                        taskCompletedTime = completedStartTime ?: "153"
+                        taskElapsedTime = totalElapsedTime
                     )
 
                     trySend(taskOverView)
@@ -175,6 +164,40 @@ class TasksRepositoryImplementation @Inject constructor(
         }
 
         awaitClose { listener.remove() }
+    }
+
+    private fun getTotalElapsedTime(statusHistory: QuerySnapshot): Long {
+        val history = statusHistory.documents.mapNotNull { doc ->
+            val type =
+                runCatching { TaskStatusType.valueOf(doc.id) }.getOrNull() ?: return@mapNotNull null
+            TaskStatusHistory(
+                taskStatusType = type,
+                startTime = doc.getLong(TASK_STATUS_HISTORY_START_TIME)?.toString() ?: "0",
+                endTime = doc.getLong(TASK_STATUS_HISTORY_END_TIME)?.toString() ?: "0",
+                elapsedTime = doc.getLong(TASK_STATUS_HISTORY_ELAPSED_TIME) ?: 0L
+            )
+        }
+
+        val intermediateStatuses = history.filter {
+            it.taskStatusType != TaskStatusType.BACKLOG && it.taskStatusType != TaskStatusType.COMPLETED
+        }
+
+        val intermediateStatusWithElapsedTimeAsZero =
+            intermediateStatuses.filter { it.elapsedTime == 0L }
+
+        val revisions = history.filter {
+            it.taskStatusType.order > 99 && it.elapsedTime == 0L
+        }
+
+        val pausedStatus = history.find { it.taskStatusType == TaskStatusType.PAUSED }
+
+        return if (intermediateStatuses.isNotEmpty()) {
+            intermediateStatuses.sumOf { it.elapsedTime } +
+                    revisions.sumOf { it.endTime.toLong() - it.startTime.toLong() } -
+                    (pausedStatus?.elapsedTime ?: 0L) +
+                    // We need to accommodate the case where a status is just selected and not changed (Current State), so we calculate based on StartTime, to correctly display the elapsed time
+                    intermediateStatusWithElapsedTimeAsZero.sumOf { getCurrentTimeAsLong() - it.startTime.toLong() }
+        } else 0L
     }
 
     override fun getTasksForClient(clientId: String): Flow<List<ClientTask>> =
@@ -242,7 +265,8 @@ class TasksRepositoryImplementation @Inject constructor(
                                     TaskStatusHistory(
                                         convertStringStatusToStatusType(id),
                                         times[0].toString(),
-                                        times[1].toString()
+                                        times[1].toString(),
+                                        times[2]
                                     )
                                 },
                                 paymentHistory = paymentHistory.map { pair ->
@@ -296,7 +320,8 @@ class TasksRepositoryImplementation @Inject constructor(
                 val endTime =
                     documentSnapshot.getLong(TASK_STATUS_HISTORY_END_TIME)
                         ?: TASK_STATUS_HISTORY_END_TIME_DEFAULT_VALUE
-                statusHistoryMap[documentSnapshot.id] = listOf(startTime, endTime)
+                val elapsedTime = documentSnapshot.getLong(TASK_STATUS_HISTORY_ELAPSED_TIME) ?: 0
+                statusHistoryMap[documentSnapshot.id] = listOf(startTime, endTime, elapsedTime)
             }
         } catch (exception: Exception) {
             Log.d(logTag + "StatusList", "Error building statusMap ${exception.message} ")

@@ -132,7 +132,7 @@ fun TaskStatusHistoryComposable(
             val pausedStatus = statusHistory.find { it.taskStatusType == TaskStatusType.PAUSED }
             if (intermediateStatuses.isNotEmpty()) {
                 val totalElapsedTime =
-                    intermediateStatuses.sumOf { it.elapsedTime } + revisions.sumOf { it.endTime.toLong() - it.startTime.toLong() } + -(pausedStatus?.elapsedTime
+                    intermediateStatuses.sumOf { it.elapsedTime } + revisions.sumOf { it.endTime.toLong() - it.startTime.toLong() } - (pausedStatus?.elapsedTime
                         ?: 0L)
                 val timeSpent = formatDuration(totalElapsedTime)
                 CompletedSummary(timeSpent)
