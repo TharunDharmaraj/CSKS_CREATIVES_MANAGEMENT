@@ -420,7 +420,7 @@ fun TaskCardItem(
 
     val showStatusChip =
         currentState != TaskStatusType.COMPLETED && currentState != TaskStatusType.BACKLOG
-
+    val textWeight = if(showStatusChip) 0.72f else 1f
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -441,22 +441,29 @@ fun TaskCardItem(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(textWeight)
                 )
 
                 if (showStatusChip) {
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = statusColor.copy(alpha = 0.1f),
-                        border = BorderStroke(1.dp, statusColor)
+                    Box(
+                        modifier = Modifier
+                            .weight(0.28f)
+                            .wrapContentWidth(Alignment.End)
                     ) {
-                        Text(
-                            text = currentState.name,
-                            fontSize = 14.sp,
-                            color = statusColor,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = statusColor.copy(alpha = 0.1f),
+                            border = BorderStroke(0.7.dp, statusColor)
+                        ) {
+                            Text(
+                                text = currentState.name,
+                                fontSize = 10.sp,
+                                color = statusColor,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
                     }
                 }
             }
