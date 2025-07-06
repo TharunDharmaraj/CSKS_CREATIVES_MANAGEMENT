@@ -420,7 +420,7 @@ fun TaskCardItem(
 
     val showStatusChip =
         currentState != TaskStatusType.COMPLETED && currentState != TaskStatusType.BACKLOG
-    val textWeight = if(showStatusChip) 0.72f else 1f
+    val textWeight = if (showStatusChip) 0.72f else 1f
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -779,7 +779,10 @@ fun TaskListContent(
                         currentState = tasks[index].currentStatus,
                         cardBorder = BorderStroke(
                             width = 2.dp,
-                            color = getBorderColorBasedOnTaskPriority(tasks[index].taskPriority)
+                            color = getBorderColorBasedOnTaskPriority(
+                                tasks[index].taskPriority,
+                                isTaskCompleted = tasks[index].currentStatus == TaskStatusType.COMPLETED
+                            )
                         ),
                         priority = tasks[index].taskPriority,
                         onClick = {

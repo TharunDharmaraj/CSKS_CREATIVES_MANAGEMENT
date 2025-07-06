@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
@@ -335,7 +336,10 @@ fun TaskItemCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         border = BorderStroke(
             width = 2.dp,
-            color = getBorderColorBasedOnTaskPriority(task.taskPriority)
+            color = getBorderColorBasedOnTaskPriority(
+                task.taskPriority,
+                isTaskCompleted = task.currentStatus == TaskStatusType.COMPLETED
+            )
         ),
         onClick = onItemClick
     ) {
