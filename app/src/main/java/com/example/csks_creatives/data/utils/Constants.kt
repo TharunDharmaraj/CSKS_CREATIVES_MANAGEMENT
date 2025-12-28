@@ -26,6 +26,7 @@ object Constants {
     const val LEAVE_REQUEST_ID = "leaveRequestId"
     const val LEAVE_REQUEST_DATE = "leaveDate"
     const val LEAVE_REQUEST_REASON = "leaveReason"
+    const val LEAVE_DURATION = "leaveDuration"
     const val LEAVE_REQUEST_POSTED_BY = "postedBy"
     const val LEAVE_REQUEST_APPROVAL_STATUS = "approvedStatus"
 

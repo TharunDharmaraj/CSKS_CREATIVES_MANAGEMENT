@@ -5,3 +5,8 @@ enum class LeaveApprovalStatus {
     UN_APPROVED,
     REJECTED
 }
+
+enum class LeaveDuration {
+    HALF_DAY,
+    FULL_DAY
+}

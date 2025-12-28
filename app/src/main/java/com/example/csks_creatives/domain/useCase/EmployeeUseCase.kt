@@ -3,6 +3,7 @@ package com.example.csks_creatives.domain.useCase
 import android.util.Log
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.employee.LeaveRequestsGrouped
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveDuration
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
 import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactory
@@ -25,7 +26,8 @@ class EmployeeUseCase @Inject constructor(
     override suspend fun addLeaveRequest(
         leaveDate: Date,
         leaveReason: String,
-        postedBy: String
+        postedBy: String,
+        leaveDuration: LeaveDuration
     ): ResultState<String> {
         return try {
             val currentDate = Calendar.getInstance().apply {
@@ -42,6 +44,7 @@ class EmployeeUseCase @Inject constructor(
             val leaveRequest = LeaveRequest(
                 leaveRequestId = getCurrentTimeAsString(),
                 leaveReason = leaveReason,
+                leaveDuration = leaveDuration,
                 leaveDate = leaveDate.toTimestamp(),
                 postedBy = postedBy
             )
@@ -91,7 +94,7 @@ class EmployeeUseCase @Inject constructor(
             }
         }
 
-    override suspend fun widthDrawLeaveRequest(leaveRequest: LeaveRequest) {
+    override suspend fun withDrawLeaveRequest(leaveRequest: LeaveRequest) {
         try {
             if (leaveRequest.postedBy.isEmpty()) return
             employeeRepository.widthDrawLeaveRequest(
