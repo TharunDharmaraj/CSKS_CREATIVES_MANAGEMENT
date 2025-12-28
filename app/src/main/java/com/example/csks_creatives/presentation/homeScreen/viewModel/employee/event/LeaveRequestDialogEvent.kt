@@ -7,5 +7,7 @@ sealed class LeaveRequestDialogEvent {
     object CloseDialog : LeaveRequestDialogEvent()
     data class OnLeaveRequestDateChanged(val date: Date) : LeaveRequestDialogEvent()
     data class OnLeaveRequestReasonChanged(val leaveReason: String) : LeaveRequestDialogEvent()
+
+    data class OnLeaveDurationChanged(val isHalfDay: Boolean) : LeaveRequestDialogEvent()
     object SubmitLeaveRequest : LeaveRequestDialogEvent()
 }

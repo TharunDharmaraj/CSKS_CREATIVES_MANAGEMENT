@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveDuration
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
 import com.example.csks_creatives.domain.useCase.factories.EmployeeUseCaseFactory
 import com.example.csks_creatives.domain.useCase.factories.TasksUseCaseFactory
@@ -88,6 +89,14 @@ class EmployeeHomeScreenViewModel @Inject constructor(
                 }
             }
 
+            is LeaveRequestDialogEvent.OnLeaveDurationChanged -> {
+                _leaveRequestDialogState.update {
+                    it.copy(
+                        leaveDuration = if(leaveRequestDialogEvent.isHalfDay) LeaveDuration.HALF_DAY else LeaveDuration.FULL_DAY
+                    )
+                }
+            }
+
             LeaveRequestDialogEvent.OpenDialog -> {
                 _employeeHomeScreenState.update {
                     it.copy(
@@ -101,6 +110,7 @@ class EmployeeHomeScreenViewModel @Inject constructor(
                     val result = employeeUseCaseFactory.addLeaveRequest(
                         postedBy = employeeId,
                         leaveDate = _leaveRequestDialogState.value.leaveRequestDate,
+                        leaveDuration = _leaveRequestDialogState.value.leaveDuration,
                         leaveReason = _leaveRequestDialogState.value.leaveRequestReason
                     )
                     when (result) {
@@ -257,7 +267,7 @@ class EmployeeHomeScreenViewModel @Inject constructor(
 
     fun withDrawLeaveRequest(leaveRequest: LeaveRequest) {
         viewModelScope.launch {
-            employeeUseCaseFactory.widthDrawLeaveRequest(leaveRequest)
+            employeeUseCaseFactory.withDrawLeaveRequest(leaveRequest)
         }
     }
 

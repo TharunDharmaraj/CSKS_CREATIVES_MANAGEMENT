@@ -3,6 +3,7 @@ package com.example.csks_creatives.data.repositoryImplementation.remote
 import android.util.Log
 import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.LEAVES_SUB_COLLECTION
+import com.example.csks_creatives.data.utils.Constants.LEAVE_DURATION
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUESTS_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_APPROVAL_STATUS
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_DATE
@@ -35,6 +36,7 @@ class EmployeeRepositoryImplementation @Inject constructor(
                         LEAVE_REQUEST_DATE to leaveRequest.leaveDate,
                         LEAVE_REQUEST_REASON to leaveRequest.leaveReason,
                         LEAVE_REQUEST_POSTED_BY to leaveRequest.postedBy,
+                        LEAVE_DURATION to leaveRequest.leaveDuration,
                         LEAVE_REQUEST_APPROVAL_STATUS to leaveRequest.approvedStatus
                     ),
                     SetOptions.merge()
@@ -49,6 +51,7 @@ class EmployeeRepositoryImplementation @Inject constructor(
                         LEAVE_REQUEST_DATE to leaveRequest.leaveDate,
                         LEAVE_REQUEST_REASON to leaveRequest.leaveReason,
                         LEAVE_REQUEST_POSTED_BY to leaveRequest.postedBy,
+                        LEAVE_DURATION to leaveRequest.leaveDuration,
                         LEAVE_REQUEST_APPROVAL_STATUS to leaveRequest.approvedStatus
                     ),
                     SetOptions.merge()

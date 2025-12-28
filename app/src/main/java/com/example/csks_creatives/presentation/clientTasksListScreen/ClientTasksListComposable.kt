@@ -310,6 +310,7 @@ fun ClientTasksListComposable(
                             { viewModel.getTotalUnPaidCostForClient() }
                         )
                     }
+
                 }
             }
         }

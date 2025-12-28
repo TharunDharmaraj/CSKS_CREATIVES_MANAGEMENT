@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveDuration
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
 import com.example.csks_creatives.presentation.components.darkSlateBlue
@@ -378,6 +379,7 @@ fun LeaveRequestDialog(
             initialSelectedDateMillis = tomorrowMillis,
             selectableDates = FutureSelectableDates
         )
+        var isHalfDay by remember { mutableStateOf(false) }
 
         if (showDatePicker) {
             DatePickerDialog(
@@ -438,6 +440,17 @@ fun LeaveRequestDialog(
                         placeholder = { Text("Enter reason") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Leave Type (Half Day/Full Day)")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LeaveDurationToggle(
+                        isHalfDay = state.leaveDuration == LeaveDuration.HALF_DAY ,
+                        onToggleChange = { onEvent(
+                            LeaveRequestDialogEvent.OnLeaveDurationChanged(
+                                it
+                            )
+                        ) }
+                    )
                 }
             },
             confirmButton = {
@@ -454,6 +467,31 @@ fun LeaveRequestDialog(
                 dismissOnClickOutside = false,
                 dismissOnBackPress = false
             )
+        )
+    }
+}
+
+@Composable
+fun LeaveDurationToggle(
+    isHalfDay: Boolean,
+    onToggleChange: (Boolean) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Full Day",
+            modifier = Modifier.padding(end = 8.dp)
+        )
+
+        Switch(
+            checked = isHalfDay,
+            onCheckedChange = onToggleChange
+        )
+
+        Text(
+            text = "Half Day",
+            modifier = Modifier.padding(start = 8.dp)
         )
     }
 }
@@ -488,6 +526,9 @@ fun LeaveRequestCard(
                 Text("Reason: ${leave.leaveReason}")
                 Text(
                     "Status: ${if (leave.approvedStatus == LeaveApprovalStatus.APPROVED) "Approved" else if (leave.approvedStatus == LeaveApprovalStatus.UN_APPROVED) "Not Approved" else "Rejected"}",
+                )
+                Text(
+                    "Leave Duration: ${leave.leaveDuration.name.replace("_", " ")}",
                 )
             }
             if (leave.approvedStatus == LeaveApprovalStatus.UN_APPROVED) {
