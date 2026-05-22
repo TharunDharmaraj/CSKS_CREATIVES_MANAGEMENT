@@ -9,5 +9,7 @@ interface ClientsUseCaseFactory {
 
     suspend fun addClient(client: Client): ResultState<String>
 
-    suspend fun getClients(isForceFetchFromServer: Boolean = true): ResultState<List<Client>>
+    suspend fun getClients(isForceFetch: Boolean = false, limit: Long? = null): ResultState<List<Client>>
+
+    suspend fun getAllClients(): ResultState<List<Client>>
 }

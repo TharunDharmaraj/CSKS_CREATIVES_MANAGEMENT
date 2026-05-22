@@ -2,19 +2,69 @@ package com.example.csks_creatives.presentation.homeScreen
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,23 +72,46 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
+import com.example.csks_creatives.domain.model.client.Client
+import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskType
 import com.example.csks_creatives.domain.model.task.ClientTask
+import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveDuration
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPriority
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
 import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
+import com.example.csks_creatives.presentation.components.charCoal
+import com.example.csks_creatives.presentation.components.charCoalPurple
 import com.example.csks_creatives.presentation.components.darkSlateBlue
+import com.example.csks_creatives.presentation.components.goldenRod
+import com.example.csks_creatives.presentation.components.grey
 import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
+import com.example.csks_creatives.presentation.components.limeGreen
+import com.example.csks_creatives.presentation.components.red
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
+import com.example.csks_creatives.presentation.components.silverGrey
+import com.example.csks_creatives.presentation.components.transparent
+import com.example.csks_creatives.presentation.components.displayName
+import com.example.csks_creatives.presentation.components.icon
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
-import com.example.csks_creatives.presentation.financeScreen.FinanceScreenComposable
+import com.example.csks_creatives.presentation.components.ui.ModernDateView
+import com.example.csks_creatives.presentation.components.ui.PaginationLoader
+import com.example.csks_creatives.presentation.components.ui.isAtBottom
+import com.example.csks_creatives.presentation.components.vividCerulean
+import com.example.csks_creatives.presentation.components.white
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.AdminHomeScreenViewModel
-import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.*
+import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddClientDialogEvent
+import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AddEmployeeDialogEvent
+import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.AdminHomeScreenEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.navigation.AdminBottomNavigation
+import com.example.csks_creatives.presentation.taskDetailScreen.components.ModernTaskTextField
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
-import com.google.accompanist.pager.*
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
@@ -54,21 +127,28 @@ fun AdminHomeScreen(
         AdminBottomNavigation.Tasks,
         AdminBottomNavigation.Employees,
         AdminBottomNavigation.Clients,
-        AdminBottomNavigation.Finance,
+//        AdminBottomNavigation.Finance,
         AdminBottomNavigation.LeaveRequests
     )
 
     Scaffold(
+        containerColor = darkSlateBlue,
         topBar = {
             AppToolbar(
                 title = adminToolbarTitle.value,
                 canShowLogo = true,
                 canShowMenu = true,
-                menuItems = listOf(
-                    ToolbarOverFlowMenuItem("add_employee", "Add Employee"),
-                    ToolbarOverFlowMenuItem("add_client", "Add Client"),
-                    ToolbarOverFlowMenuItem("logout", "Logout")
-                ),
+                menuItems = buildList {
+                    val currentTab = navigationItems[pagerState.currentPage]
+                    if (currentTab != AdminBottomNavigation.LeaveRequests 
+//                        && currentTab != AdminBottomNavigation.Finance
+                        ) {
+                        add(ToolbarOverFlowMenuItem("force_fetch", "Force Fetch"))
+                    }
+                    add(ToolbarOverFlowMenuItem("add_employee", "Add Employee"))
+                    add(ToolbarOverFlowMenuItem("add_client", "Add Client"))
+                    add(ToolbarOverFlowMenuItem("logout", "Logout"))
+                },
                 canShowAddTaskButton = true,
                 onAddTaskIconClicked = {
                     navController.navigate("create_task")
@@ -81,6 +161,28 @@ fun AdminHomeScreen(
 
                         "add_client" -> {
                             viewModel.onHomeScreenEvent(AdminHomeScreenEvent.CreateClientButtonClick)
+                        }
+
+                        "force_fetch" -> {
+                            when (navigationItems[pagerState.currentPage]) {
+                                AdminBottomNavigation.Tasks -> viewModel.onHomeScreenEvent(
+                                    AdminHomeScreenEvent.ForceFetchTasks
+                                )
+
+                                AdminBottomNavigation.Employees -> viewModel.onHomeScreenEvent(
+                                    AdminHomeScreenEvent.ForceFetchEmployees
+                                )
+
+                                AdminBottomNavigation.Clients -> viewModel.onHomeScreenEvent(
+                                    AdminHomeScreenEvent.ForceFetchClients
+                                )
+
+                                AdminBottomNavigation.LeaveRequests -> viewModel.onHomeScreenEvent(
+                                    AdminHomeScreenEvent.ForceFetchLeaveRequests
+                                )
+
+                                else -> {}
+                            }
                         }
 
                         "logout" -> {
@@ -135,11 +237,23 @@ fun AdminHomeScreen(
         val visibilityState = viewModel.adminHomeScreenVisibilityState.collectAsState()
 
         LaunchedEffect(pagerState.currentPage) {
-            when (navigationItems[pagerState.currentPage]) {
-                AdminBottomNavigation.Employees -> viewModel.setHomeScreenTitle("Employees")
-                AdminBottomNavigation.Clients -> viewModel.setHomeScreenTitle("Clients")
-                AdminBottomNavigation.Tasks -> viewModel.setHomeScreenTitle("My Tasks")
-                AdminBottomNavigation.Finance -> viewModel.setHomeScreenTitle("Finance")
+            val currentTab = navigationItems[pagerState.currentPage]
+            when (currentTab) {
+                AdminBottomNavigation.Employees -> {
+                    viewModel.setHomeScreenTitle("Employees")
+                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleEmployeeSection)
+                }
+
+                AdminBottomNavigation.Clients -> {
+                    viewModel.setHomeScreenTitle("Clients")
+                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleClientSection)
+                }
+
+                AdminBottomNavigation.Tasks -> {
+                    viewModel.setHomeScreenTitle("My Tasks")
+                }
+
+//                AdminBottomNavigation.Finance -> viewModelewModel.setHomeScreenTitle("Finance")
                 AdminBottomNavigation.LeaveRequests -> viewModel.setHomeScreenTitle("Leave Requests")
             }
         }
@@ -163,12 +277,10 @@ fun AdminHomeScreen(
         ) { page ->
             when (navigationItems[page]) {
                 AdminBottomNavigation.Employees -> {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleEmployeeSection)
                     EmployeeListScreen(navController, viewModel)
                 }
 
                 AdminBottomNavigation.Clients -> {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleClientSection)
                     ClientListScreen(navController, viewModel)
                 }
 
@@ -176,9 +288,9 @@ fun AdminHomeScreen(
                     TaskListScreen(navController, viewModel)
                 }
 
-                AdminBottomNavigation.Finance -> {
-                    FinanceScreenComposable()
-                }
+//                AdminBottomNavigation.Finance -> {
+//                    FinanceScreenComposable()
+//                }
 
                 AdminBottomNavigation.LeaveRequests -> {
                     LeaveRequestListScreen(viewModel)
@@ -200,55 +312,66 @@ fun AdminHomeScreen(
 fun AddEmployeeDialog(viewModel: AdminHomeScreenViewModel) {
     val state = viewModel.addEmployeeDialogState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     AlertDialog(
         onDismissRequest = {
             viewModel.onEmployeeDialogEvent(AddEmployeeDialogEvent.CloseDialogButtonClicked)
         },
-        title = { Text("Add Employee") },
+        containerColor = charCoal,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Text(
+                "New Team Member",
+                style = MaterialTheme.typography.headlineSmall,
+                color = white,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
-            Column {
-                TextField(
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ModernTaskTextField(
                     value = state.value.employeeName,
-                    singleLine = true,
                     onValueChange = {
                         viewModel.onEmployeeDialogEvent(
-                            AddEmployeeDialogEvent.EmployeeNameTextFieldChanged(
-                                it
-                            )
+                            AddEmployeeDialogEvent.EmployeeNameTextFieldChanged(it)
                         )
                     },
-                    label = { Text("Employee Name") }
+                    label = "Employee Name",
+                    icon = Icons.Default.Person,
+                    focusManager = focusManager
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                TextField(
+                ModernTaskTextField(
                     value = state.value.employeePassword,
-                    singleLine = true,
                     onValueChange = {
                         viewModel.onEmployeeDialogEvent(
-                            AddEmployeeDialogEvent.EmployeeNamePasswordFieldChanged(
-                                it
-                            )
+                            AddEmployeeDialogEvent.EmployeeNamePasswordFieldChanged(it)
                         )
                     },
-                    label = { Text("Password") }
+                    label = "Secure Password",
+                    icon = Icons.Default.Lock,
+                    focusManager = focusManager
                 )
             }
         },
         confirmButton = {
-            Button(onClick = {
-                coroutineScope.launch {
-                    viewModel.onEmployeeDialogEvent(AddEmployeeDialogEvent.AddEmployeeButtonClicked)
-                }
-            }) {
-                Text("Add")
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.onEmployeeDialogEvent(AddEmployeeDialogEvent.AddEmployeeButtonClicked)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = vividCerulean),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Add Member", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            Button(onClick = {
+            TextButton(onClick = {
                 viewModel.onEmployeeDialogEvent(AddEmployeeDialogEvent.CloseDialogButtonClicked)
             }) {
-                Text("Cancel")
+                Text("Cancel", color = silverGrey)
             }
         },
         properties = DialogProperties(
@@ -262,36 +385,49 @@ fun AddEmployeeDialog(viewModel: AdminHomeScreenViewModel) {
 fun AddClientDialog(viewModel: AdminHomeScreenViewModel) {
     val state = viewModel.addClientDialogState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     AlertDialog(
         onDismissRequest = { viewModel.onClientDialogEvent(AddClientDialogEvent.CloseDialogButtonClicked) },
-        title = { Text("Add Client") },
+        containerColor = charCoal,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Text(
+                "Register Client",
+                style = MaterialTheme.typography.headlineSmall,
+                color = white,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
-            TextField(
+            ModernTaskTextField(
                 value = state.value.clientName,
-                singleLine = true,
                 onValueChange = {
                     viewModel.onClientDialogEvent(
-                        AddClientDialogEvent.ClientNameTextFieldChanged(
-                            it
-                        )
+                        AddClientDialogEvent.ClientNameTextFieldChanged(it)
                     )
                 },
-                label = { Text("Client Name") }
+                label = "Client Name",
+                icon = Icons.Default.Person,
+                focusManager = focusManager
             )
         },
         confirmButton = {
-            Button(onClick = {
-                coroutineScope.launch {
-                    viewModel.onClientDialogEvent(AddClientDialogEvent.AddClientButtonClicked)
-                }
-            }) {
-                Text("Add")
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.onClientDialogEvent(AddClientDialogEvent.AddClientButtonClicked)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = goldenRod),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Create Client", color = white, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            Button(onClick = { viewModel.onClientDialogEvent(AddClientDialogEvent.CloseDialogButtonClicked) }) {
-                Text("Cancel")
+            TextButton(onClick = { viewModel.onClientDialogEvent(AddClientDialogEvent.CloseDialogButtonClicked) }) {
+                Text("Cancel", color = silverGrey)
             }
         },
         properties = DialogProperties(
@@ -310,125 +446,167 @@ fun LeaveRequestTaskItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = charCoalPurple),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(16.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Posted by: ${leaveRequest.postedBy}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Date: ${
-                        formatTimeStampToGetJustDate(leaveRequest.leaveDate.toDate().time.toString())
-                    }",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Reason: ${leaveRequest.leaveReason}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(vividCerulean.copy(alpha = 0.1f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = vividCerulean,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = leaveRequest.postedBy,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = white,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    ModernDateView(leaveRequest.leaveDate.toDate().time.toString(), useRelativeTime = false)
+                }
             }
 
-            Column(
-                modifier = Modifier.width(IntrinsicSize.Min),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (leaveRequest.leaveDuration == LeaveDuration.HALF_DAY) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = vividCerulean.copy(alpha = 0.1f),
+                    border = BorderStroke(1.dp, vividCerulean.copy(alpha = 0.5f))
+                ) {
+                    Text(
+                        text = "HALF DAY",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = vividCerulean
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            Text(
+                text = leaveRequest.leaveReason,
+                style = MaterialTheme.typography.bodyMedium,
+                color = silverGrey,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
+                OutlinedButton(
                     onClick = onReject,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, red.copy(alpha = 0.5f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = red)
                 ) {
                     Text("Reject")
                 }
                 Button(
                     onClick = onApproval,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = limeGreen)
                 ) {
-                    Text("Approve")
+                    Text("Approve", color = white)
                 }
             }
         }
     }
 }
+//
+//@Composable
+//fun CardItem(
+//    title: String,
+//    cardBorder: BorderStroke? = null,
+//    subtitle: String? = null,
+//    onClick: () -> Unit
+//) {
+//    Card(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(8.dp)
+//            .clickable { onClick() },
+//        shape = RoundedCornerShape(12.dp),
+//        border = cardBorder ?: BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+//    ) {
+//        Column(
+//            modifier = Modifier.padding(16.dp)
+//        ) {
+//            Text(
+//                text = title,
+//                style = MaterialTheme.typography.titleMedium,
+//                color = MaterialTheme.colorScheme.onSurface
+//            )
+//            subtitle?.let {
+//                Text(
+//                    text = it,
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant
+//                )
+//            }
+//        }
+//    }
+//}
 
-@Composable
-fun CardItem(
-    title: String,
-    cardBorder: BorderStroke? = null,
-    subtitle: String? = null,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        border = cardBorder ?: BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            subtitle?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TaskCardItem(
     title: String,
     cardBorder: BorderStroke? = null,
-    subtitle: String? = null,
+    taskType: TaskType,
     priority: TaskPriority,
     onClick: () -> Unit,
     creationTime: String,
-    currentState: TaskStatusType
+    currentState: TaskStatusType,
+    estimate: Int
 ) {
     val statusColor = when (currentState) {
-        TaskStatusType.IN_PROGRESS -> Color.Yellow
+        TaskStatusType.IN_PROGRESS -> vividCerulean
         TaskStatusType.IN_REVIEW -> Color.Magenta
-        TaskStatusType.PAUSED -> Color.Red
-        else -> Color.Gray
+        TaskStatusType.PAUSED -> Color.Yellow
+        TaskStatusType.BACKLOG -> Color.Red
+        TaskStatusType.COMPLETED -> limeGreen
+        else -> grey
     }
 
     val showStatusChip =
         currentState != TaskStatusType.COMPLETED && currentState != TaskStatusType.BACKLOG
-    val textWeight = if (showStatusChip) 0.72f else 1f
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        border = cardBorder ?: BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = charCoalPurple),
+        border = cardBorder ?: BorderStroke(1.dp, charCoalPurple),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
@@ -441,72 +619,94 @@ fun TaskCardItem(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(textWeight)
+                    color = white,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
 
                 if (showStatusChip) {
-                    Box(
-                        modifier = Modifier
-                            .weight(0.28f)
-                            .wrapContentWidth(Alignment.End)
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = statusColor.copy(alpha = 0.1f),
+                        border = BorderStroke(1.dp, statusColor.copy(alpha = 0.5f))
                     ) {
-                        Surface(
-                            shape = RoundedCornerShape(50),
-                            color = statusColor.copy(alpha = 0.1f),
-                            border = BorderStroke(0.7.dp, statusColor)
-                        ) {
-                            Text(
-                                text = currentState.name,
-                                fontSize = 10.sp,
-                                color = statusColor,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
+                        Text(
+                            text = currentState.name,
+                            fontSize = 10.sp,
+                            color = statusColor,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Row 2: Subtitle + Date (left), Priority (right)
-            Row(
+            // Row 2: Metadata chips with wrapping
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (subtitle != null) {
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = getBorderColorBasedOnTaskPriority(priority).copy(alpha = 0.1f),
-                        border = BorderStroke(1.dp, getBorderColorBasedOnTaskPriority(priority)),
-                    ) {
-                        Text(
-                            text = priority.name,
-                            color = getBorderColorBasedOnTaskPriority(priority),
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-
-                Surface(shape = RoundedCornerShape(50)) {
+                    Icon(
+                        imageVector = taskType.icon,
+                        contentDescription = null,
+                        tint = silverGrey.copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = formatTimeStampToGetJustDate(creationTime),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall
+                        text = taskType.displayName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = silverGrey
                     )
                 }
+
+                val priorityColor = getBorderColorBasedOnTaskPriority(priority)
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = priorityColor.copy(alpha = 0.1f),
+                    border = BorderStroke(1.5.dp, priorityColor.copy(alpha = 0.5f)),
+                ) {
+                    Text(
+                        text = priority.name,
+                        color = priorityColor,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                
+                // Effort Badge
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = vividCerulean.copy(alpha = 0.1f),
+                    border = BorderStroke(1.dp, vividCerulean.copy(alpha = 0.3f))
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = vividCerulean,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${estimate}h",
+                            color = vividCerulean,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                ModernDateView(creationTime)
             }
         }
     }
@@ -516,7 +716,8 @@ fun TaskCardItem(
 fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
     val state by viewModel.adminHomeScreenState.collectAsState()
     val isLoading by viewModel.adminHomeScreenLoadingState.collectAsState()
-    if (isLoading.isLeaveRequestsLoading) {
+
+    if (isLoading.isLeaveRequestsLoading && state.activeLeaveRequests.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -561,11 +762,190 @@ fun LeaveRequestListScreen(viewModel: AdminHomeScreenViewModel) {
 
 
 @Composable
-fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScreenViewModel) {
-    val state = viewModel.adminHomeScreenState.collectAsState()
-    val isLoading = viewModel.adminHomeScreenLoadingState.collectAsState().value.isClientsLoading
+fun EmployeeCard(
+    employee: Employee,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = charCoalPurple),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Avatar with initials
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .background(
+                        color = vividCerulean.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = vividCerulean.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(14.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = employee.employeeName.take(2).uppercase(),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = vividCerulean,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-    if (isLoading) {
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = employee.employeeName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = white,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Spacer(modifier = Modifier.height(6.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Task Count Badge - Modern and Professional
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = limeGreen.copy(alpha = 0.12f),
+                        border = BorderStroke(1.dp, limeGreen.copy(alpha = 0.25f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DoneAll,
+                                contentDescription = null,
+                                tint = limeGreen,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "${employee.numberOfTasksCompleted.ifEmpty { "0" }} Tasks",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = white.copy(alpha = 0.9f),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    
+                    if (employee.joinedTime.isNotEmpty()) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Joined ",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = silverGrey.copy(alpha = 0.5f)
+                            )
+                            ModernDateView(
+                                timeStamp = employee.joinedTime,
+                                useRelativeTime = false,
+                                showTime = false
+                            )
+                        }
+                    }
+                }
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = silverGrey.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+@Composable
+fun ClientCard(
+    client: Client,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = charCoalPurple),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .background(
+                        color = goldenRod.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = goldenRod.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(14.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = goldenRod,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = client.clientName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = white,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Client ID: ${client.clientId.take(6).uppercase()}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = silverGrey.copy(alpha = 0.7f)
+                )
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = silverGrey.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+@Composable
+fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScreenViewModel) {
+    val state by viewModel.adminHomeScreenState.collectAsState()
+    val isLoadingState by viewModel.adminHomeScreenLoadingState.collectAsState()
+    val isLoading = isLoadingState.isClientsLoading
+
+    if (isLoading && state.clientList.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -573,7 +953,7 @@ fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScree
             LoadingProgress()
         }
     } else {
-        if (state.value.clientList.isEmpty()) {
+        if (state.clientList.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -583,21 +963,23 @@ fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScree
                 Text(
                     text = "No Clients found, tap on Add clients",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = white.copy(alpha = 0.6f)
                 )
             }
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                items(state.value.clientList.size) { index ->
-                    CardItem(
-                        title = state.value.clientList[index].clientName,
-                        onClick = { navController.navigate("client_detail/${state.value.clientList[index].clientId}") },
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+                items(state.clientList.size) { index ->
+                    ClientCard(
+                        client = state.clientList[index],
+                        onClick = { navController.navigate("client_detail/${state.clientList[index].clientId}") },
                     )
                 }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
     }
@@ -605,10 +987,11 @@ fun ClientListScreen(navController: NavHostController, viewModel: AdminHomeScree
 
 @Composable
 fun EmployeeListScreen(navController: NavHostController, viewModel: AdminHomeScreenViewModel) {
-    val state = viewModel.adminHomeScreenState.collectAsState()
-    val isLoading = viewModel.adminHomeScreenLoadingState.collectAsState().value.isEmployeesLoading
+    val state by viewModel.adminHomeScreenState.collectAsState()
+    val isLoadingState by viewModel.adminHomeScreenLoadingState.collectAsState()
+    val isLoading = isLoadingState.isEmployeesLoading
 
-    if (isLoading) {
+    if (isLoading && state.employeeList.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -616,7 +999,7 @@ fun EmployeeListScreen(navController: NavHostController, viewModel: AdminHomeScr
             LoadingProgress()
         }
     } else {
-        if (state.value.employeeList.isEmpty()) {
+        if (state.employeeList.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -626,21 +1009,23 @@ fun EmployeeListScreen(navController: NavHostController, viewModel: AdminHomeScr
                 Text(
                     text = "No Employees found, tap on Add Employees",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = white.copy(alpha = 0.6f)
                 )
             }
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                items(state.value.employeeList.size) { index ->
-                    CardItem(
-                        title = state.value.employeeList[index].employeeName,
-                        onClick = { navController.navigate("employee_detail/${state.value.employeeList[index].employeeId}") }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+                items(state.employeeList.size) { index ->
+                    EmployeeCard(
+                        employee = state.employeeList[index],
+                        onClick = { navController.navigate("employee_detail/${state.employeeList[index].employeeId}") }
                     )
                 }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
     }
@@ -656,20 +1041,31 @@ fun TaskListScreen(navController: NavHostController, viewModel: AdminHomeScreenV
     val scope = rememberCoroutineScope()
     val tabTitles = listOf("Active", "Backlog", "Completed")
 
+    LaunchedEffect(pagerState.currentPage) {
+        when (pagerState.currentPage) {
+            0 -> viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleActiveTaskSection)
+            1 -> viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleBacklogTaskSection)
+            2 -> viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleCompletedTaskSection)
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
-            containerColor = darkSlateBlue,
-            contentColor = MaterialTheme.colorScheme.primary
+            containerColor = transparent,
+            contentColor = vividCerulean,
+            divider = {}
         ) {
             tabTitles.forEachIndexed { index, title ->
                 Tab(
-                    text = { Text(title) },
+                    text = { Text(title, fontSize = 12.sp, fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal) },
                     selected = pagerState.currentPage == index,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } }
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         HorizontalPager(
             count = tabTitles.size,
@@ -678,49 +1074,61 @@ fun TaskListScreen(navController: NavHostController, viewModel: AdminHomeScreenV
         ) { page ->
             when (page) {
                 0 -> {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleActiveTaskSection)
                     TaskListContent(
                         tasks = state.activeTaskList,
                         tasksListName = "Active Tasks",
                         isLoading = loadingState.isActiveTasksLoading,
+                        isPaginationLoading = state.isPaginationLoading,
+                        isEndReached = state.isActiveTasksEndReached,
                         navController = navController,
                         order = state.tasksOrder,
                         orderChangeEvent = { dateOrder ->
                             viewModel.onHomeScreenEvent(
                                 AdminHomeScreenEvent.ToggleOrderDate(dateOrder)
                             )
+                        },
+                        onLoadMore = {
+                            viewModel.onHomeScreenEvent(AdminHomeScreenEvent.LoadMoreActiveTasks)
                         }
                     )
                 }
 
                 1 -> {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleBacklogTaskSection)
                     TaskListContent(
                         tasks = state.backlogTaskList,
                         tasksListName = "Backlog Tasks",
                         isLoading = loadingState.isBacklogTasksLoading,
+                        isPaginationLoading = state.isPaginationLoading,
+                        isEndReached = state.isBacklogTasksEndReached,
                         navController = navController,
                         order = state.tasksOrder,
                         orderChangeEvent = { dateOrder ->
                             viewModel.onHomeScreenEvent(
                                 AdminHomeScreenEvent.ToggleOrderDate(dateOrder)
                             )
+                        },
+                        onLoadMore = {
+                            viewModel.onHomeScreenEvent(AdminHomeScreenEvent.LoadMoreBacklogTasks)
                         }
                     )
                 }
 
                 2 -> {
-                    viewModel.onHomeScreenEvent(AdminHomeScreenEvent.ToggleCompletedTaskSection)
                     TaskListContent(
                         tasks = state.completedTasksList,
                         tasksListName = "Completed Tasks",
                         isLoading = loadingState.isCompletedTasksLoading,
+                        isPaginationLoading = state.isPaginationLoading,
+                        isEndReached = state.isCompletedTasksEndReached,
                         navController = navController,
                         order = state.tasksOrder,
                         orderChangeEvent = { dateOrder ->
                             viewModel.onHomeScreenEvent(
                                 AdminHomeScreenEvent.ToggleOrderDate(dateOrder)
                             )
+                        },
+                        onLoadMore = {
+                            viewModel.onHomeScreenEvent(AdminHomeScreenEvent.LoadMoreCompletedTasks)
                         }
                     )
                 }
@@ -734,12 +1142,29 @@ fun TaskListContent(
     tasks: List<ClientTask>,
     tasksListName: String = "tasks",
     isLoading: Boolean,
+    isPaginationLoading: Boolean = false,
+    isEndReached: Boolean = false,
     order: DateOrder,
     navController: NavHostController,
-    orderChangeEvent: (DateOrder) -> Unit
+    orderChangeEvent: (DateOrder) -> Unit,
+    onLoadMore: () -> Unit = {}
 ) {
+    val listState = rememberLazyListState()
+
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            listState.isAtBottom()
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore.value, isLoading, isPaginationLoading, isEndReached) {
+        if (shouldLoadMore.value && !isLoading && !isPaginationLoading && !isEndReached) {
+            onLoadMore()
+        }
+    }
+
     when {
-        isLoading -> {
+        isLoading && tasks.isEmpty() -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -757,12 +1182,17 @@ fun TaskListContent(
                     .padding(top = 32.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No $tasksListName found", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = "No $tasksListName found",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = white
+                )
             }
         }
 
         else -> {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -774,7 +1204,7 @@ fun TaskListContent(
                 items(tasks.size) { index ->
                     TaskCardItem(
                         title = tasks[index].taskName,
-                        subtitle = tasks[index].taskType.name,
+                        taskType = tasks[index].taskType,
                         creationTime = tasks[index].taskCreationTime,
                         currentState = tasks[index].currentStatus,
                         cardBorder = BorderStroke(
@@ -782,13 +1212,20 @@ fun TaskListContent(
                             color = getBorderColorBasedOnTaskPriority(
                                 tasks[index].taskPriority,
                                 isTaskCompleted = tasks[index].currentStatus == TaskStatusType.COMPLETED
-                            )
+                            ).copy(alpha = 0.5f)
                         ),
                         priority = tasks[index].taskPriority,
+                        estimate = tasks[index].taskEstimate,
                         onClick = {
                             navController.navigate("task_detail/${tasks[index].taskId}/$ADMIN_NAME")
                         }
                     )
+                }
+
+                if (isPaginationLoading) {
+                    item {
+                        PaginationLoader()
+                    }
                 }
             }
         }
@@ -804,7 +1241,8 @@ fun DateOrderComposable(taskDateOrder: DateOrder, onTaskDateOrderChange: (DateOr
         Text(
             text = "Sort by Date Created",
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = white
         )
         IconButton(
             onClick = {
@@ -816,7 +1254,8 @@ fun DateOrderComposable(taskDateOrder: DateOrder, onTaskDateOrderChange: (DateOr
         ) {
             Icon(
                 imageVector = if (taskDateOrder is DateOrder.Ascending) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                contentDescription = "Sort Order"
+                contentDescription = "Sort Order",
+                tint = vividCerulean
             )
         }
     }

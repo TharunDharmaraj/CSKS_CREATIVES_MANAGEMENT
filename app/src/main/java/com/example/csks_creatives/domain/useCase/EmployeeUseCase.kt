@@ -19,6 +19,18 @@ class EmployeeUseCase @Inject constructor(
     private val employeeRepository: EmployeeRepository
 ) : EmployeeUseCaseFactory {
     private val logTag = "EmployeeUseCase"
+    private var lastForceFetchTime = 0L
+    private val forceFetchCooldown = 10000L // 10 seconds
+
+    private fun canPerformForceFetch(): Boolean {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastForceFetchTime < forceFetchCooldown) {
+            return false
+        }
+        lastForceFetchTime = currentTime
+        return true
+    }
+
     override fun create(): EmployeeUseCase {
         return EmployeeUseCase(employeeRepository)
     }
@@ -55,11 +67,15 @@ class EmployeeUseCase @Inject constructor(
         }
     }
 
-    override suspend fun getAllLeavesTaken(employeeId: String): Flow<ResultState<List<LeaveRequest>>> =
+    override suspend fun getAllLeavesTaken(
+        employeeId: String,
+        isForceFetch: Boolean
+    ): Flow<ResultState<List<LeaveRequest>>> =
         flow {
+            if (isForceFetch && !canPerformForceFetch()) return@flow
             emit(ResultState.Loading)
             try {
-                employeeRepository.getAllLeaveRequestsForEmployee(employeeId)
+                employeeRepository.getAllLeaveRequestsForEmployee(employeeId, limit = null)
                     .collect { leaveRequests ->
                         emit(ResultState.Success(leaveRequests))
                     }
@@ -72,11 +88,15 @@ class EmployeeUseCase @Inject constructor(
             }
         }.flowOn(Dispatchers.IO)
 
-    override suspend fun getAllLeaveRequestsGrouped(employeeId: String): Flow<ResultState<LeaveRequestsGrouped>> =
+    override suspend fun getAllLeaveRequestsGrouped(
+        employeeId: String,
+        isForceFetch: Boolean
+    ): Flow<ResultState<LeaveRequestsGrouped>> =
         flow {
+            if (isForceFetch && !canPerformForceFetch()) return@flow
             emit(ResultState.Loading)
             try {
-                employeeRepository.getAllApprovedAndUnApprovedRequestsForEmployee(employeeId)
+                employeeRepository.getAllApprovedAndUnApprovedRequestsForEmployee(employeeId, limit = null)
                     .collect { groupedLeaveRequests ->
                         val sortedGrouped = LeaveRequestsGrouped(
                             approved = groupedLeaveRequests.approved.sortedByDescending { it.leaveDate },

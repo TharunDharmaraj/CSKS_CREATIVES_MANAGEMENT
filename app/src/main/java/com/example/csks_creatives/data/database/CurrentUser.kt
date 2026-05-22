@@ -6,7 +6,8 @@ import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 
 @Entity(tableName = "currentUser")
 data class CurrentUser(
-    @PrimaryKey val loginTime: String,
+    @PrimaryKey val id: Int = 1, // Fixed ID to ensure only one row exists
+    val loginTime: String,
     val userRole: UserRole = UserRole.Employee,
     val adminName: String,
     val employeeId: String
@@ -24,7 +25,7 @@ interface CurrentUserDao {
     suspend fun getCurrentUser(): CurrentUser?
 }
 
-@Database(entities = [CurrentUser::class], version = 1, exportSchema = false)
+@Database(entities = [CurrentUser::class], version = 2, exportSchema = false)
 @TypeConverters(Converter::class)
 abstract class CurrentUserDatabase : RoomDatabase() {
     abstract val currentUserDao: CurrentUserDao

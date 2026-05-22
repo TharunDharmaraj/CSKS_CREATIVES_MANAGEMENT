@@ -92,15 +92,17 @@ object Constants {
     const val PAUSED = "PAUSED"
     const val COMPLETED = "COMPLETED"
 
-    // Task Paid Status
-    const val FULLY_PAID = "FULLY_PAID"
-    const val PARTIALLY_PAID = "PARTIALLY_PAID"
-    const val NOT_PAID = "NOT_PAID"
-
     // Admin Name
     const val ADMIN_NAME = "Kishor"
 
     //FCM
     const val FCM_TOKEN_FIELD = "fcmToken"
     const val FCM_TOKEN_LAST_UPDATED_FIELD = "fcmTokenLastUpdated" // Just Used for debugging purposes
+
+    // Pagination
+    const val DEFAULT_TASK_FETCH_LIMIT = 7L
+
+    // SharedPreferences
+    const val TASK_PREFERENCES = "task_prefs"
+    const val COMPLETED_TASKS_COUNT_PREFIX = "completed_tasks_count_"
 }

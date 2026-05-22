@@ -1,5 +1,6 @@
 package com.example.csks_creatives.presentation.employeeDetailsScreen.viewModel.state
 
+import com.example.csks_creatives.data.utils.Constants.DEFAULT_TASK_FETCH_LIMIT
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
@@ -12,7 +13,7 @@ data class EmployeeDetailsScreenState(
     val employeePassword: String = EMPTY_STRING,
     val employeeJoinedTime: String = EMPTY_STRING,
     val totalNumberOfTasksCompleted: String = EMPTY_STRING,
-    val completedTasksOrder: DateOrder = DateOrder.Ascending,
+    val completedTasksOrder: DateOrder = DateOrder.Descending,
     val isSearchBarVisible: Boolean = true,
     val isCompletedTasksSectionVisible: Boolean = true,
     val isActiveTasksSectionVisible: Boolean = true,
@@ -22,5 +23,9 @@ data class EmployeeDetailsScreenState(
     val tasksInProgress: List<ClientTaskOverview> = emptyList(),
     val approvedLeavesList: List<LeaveRequest> = emptyList(),
     val unApprovedLeavesList: List<LeaveRequest> = emptyList(),
-    val rejectedLeavesList: List<LeaveRequest> = emptyList()
+    val   rejectedLeavesList: List<LeaveRequest> = emptyList(),
+    val isPaginationLoading: Boolean = false,
+    val isEndReached: Boolean = false,
+    val tasksLimit: Long = DEFAULT_TASK_FETCH_LIMIT,
+    val isCompletedCountLoading: Boolean = false
 )

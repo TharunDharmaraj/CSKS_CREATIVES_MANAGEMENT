@@ -43,19 +43,19 @@ class MainViewModel @Inject constructor(
                     it.copy(
                         userRole = currentUserFromLocalCache.userRole,
                         employeeId = currentUserFromLocalCache.employeeId,
-                        adminName = currentUserFromLocalCache.adminName
+                        adminName = currentUserFromLocalCache.adminName,
+                        isUserFetched = true
                     )
                 }
             } else {
                 val currentUser = userPersistenceUseCase.getCurrentUser()
-                if (currentUser != null) {
-                    _mainState.update {
-                        it.copy(
-                            userRole = currentUser.userRole,
-                            employeeId = currentUser.employeeId,
-                            adminName = currentUser.adminName
-                        )
-                    }
+                _mainState.update {
+                    it.copy(
+                        userRole = currentUser?.userRole ?: it.userRole,
+                        employeeId = currentUser?.employeeId ?: "",
+                        adminName = currentUser?.adminName ?: "",
+                        isUserFetched = true
+                    )
                 }
             }
         }

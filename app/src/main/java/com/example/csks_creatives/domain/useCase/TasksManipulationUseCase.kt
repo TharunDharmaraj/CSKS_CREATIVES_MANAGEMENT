@@ -82,7 +82,7 @@ class TasksManipulationUseCase @Inject constructor(
             }
             if (currentTask.currentStatus != initialTask.currentStatus) {
                 changeTaskStatus(currentTask.taskId, currentTask.currentStatus)
-                // (Only possible by ADMIN))Moving a task from Completed to Backlog/In Progress -> Delete from CompletedTasksList and Add into Active tasks list
+                // (Only possible by ADMIN) Moving a task from Completed to Backlog/In Progress -> Delete from CompletedTasksList and Add into Active tasks list
                 if (initialTask.currentStatus == TaskStatusType.COMPLETED) {
                     adminRepository.removeCompletedTaskFromEmployeeDetails(
                         currentTask.employeeId,

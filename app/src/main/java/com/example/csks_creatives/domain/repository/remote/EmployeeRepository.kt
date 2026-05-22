@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.Flow
 interface EmployeeRepository {
     suspend fun postLeaveRequest(leaveRequest: LeaveRequest)
 
-    suspend fun getAllLeaveRequestsForEmployee(employeeId: String): Flow<List<LeaveRequest>>
+    suspend fun getAllLeaveRequestsForEmployee(employeeId: String, limit: Long? = null): Flow<List<LeaveRequest>>
 
-    suspend fun getAllApprovedAndUnApprovedRequestsForEmployee(employeeId: String): Flow<LeaveRequestsGrouped>
+    suspend fun getAllApprovedAndUnApprovedRequestsForEmployee(employeeId: String, limit: Long? = null): Flow<LeaveRequestsGrouped>
 
     suspend fun widthDrawLeaveRequest(employeeId: String, leaveRequest: LeaveRequest)
 

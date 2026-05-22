@@ -2,6 +2,7 @@ package com.example.csks_creatives.presentation.clientTasksListScreen.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.csks_creatives.data.utils.Constants.DEFAULT_TASK_FETCH_LIMIT
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
@@ -14,7 +15,13 @@ import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.s
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
@@ -23,9 +30,6 @@ import javax.inject.Inject
 class ClientTasksListViewModel @Inject constructor(
     private val tasksUseCaseFactory: TasksUseCaseFactory
 ) : ViewModel() {
-    init {
-        tasksUseCaseFactory.create()
-    }
 
     private val _allTasksForClientFromFireStore = MutableStateFlow<List<ClientTask>>(emptyList())
 
@@ -42,6 +46,8 @@ class ClientTasksListViewModel @Inject constructor(
 
     private val _clientTasksListState = MutableStateFlow(ClientTasksListState())
     val clientsTasksListState = _clientTasksListState.asStateFlow()
+
+    private var clientTasksJob: Job? = null
 
     fun onEvent(clientTaskListScreenEvent: ClientTasksListScreenEvent) {
         when (clientTaskListScreenEvent) {
@@ -126,6 +132,18 @@ class ClientTasksListViewModel @Inject constructor(
                     )
                 }
             }
+
+            ClientTasksListScreenEvent.ForceFetchTasks -> {
+                if (_clientTasksListState.value.isLoading) return
+                _clientTasksListState.update { it.copy(tasksList = emptyList(), tasksLimit = DEFAULT_TASK_FETCH_LIMIT) }
+                getClientTasks(_clientTasksListState.value.tasksOrder, _clientTasksListState.value.clientId, true)
+            }
+
+            ClientTasksListScreenEvent.LoadMoreTasks -> {
+                if (_clientTasksListState.value.isEndReached || _clientTasksListState.value.isPaginationLoading) return
+                _clientTasksListState.update { it.copy(tasksLimit = it.tasksLimit + DEFAULT_TASK_FETCH_LIMIT) }
+                getClientTasks(_clientTasksListState.value.tasksOrder, _clientTasksListState.value.clientId)
+            }
         }
     }
 
@@ -152,19 +170,31 @@ class ClientTasksListViewModel @Inject constructor(
         }
     }
 
-    private fun getClientTasks(order: DateOrder, clientId: String) {
-        viewModelScope.launch {
+    private fun getClientTasks(order: DateOrder, clientId: String, isForceFetch: Boolean = false) {
+        clientTasksJob?.cancel()
+        val limit = if (isForceFetch) null else _clientTasksListState.value.tasksLimit
+        if (!isForceFetch && _clientTasksListState.value.tasksLimit > DEFAULT_TASK_FETCH_LIMIT) {
+            _clientTasksListState.update { it.copy(isPaginationLoading = true) }
+        } else {
             _clientTasksListState.update { it.copy(isLoading = true) }
-            tasksUseCaseFactory.getTasksForClient(order, clientId).collect { result ->
+        }
+
+        clientTasksJob = viewModelScope.launch {
+            tasksUseCaseFactory.getTasksForClient(order, clientId, isForceFetch, limit).collect { result ->
                 if (result is ResultState.Success) {
                     val clientTasksList = result.data
                     _allTasksForClientFromFireStore.value = clientTasksList
-                    _clientTasksListState.value = _clientTasksListState.value.copy(
-                        tasksList = clientTasksList,
-                        isAllTasksVisible = true,
-                        isUnpaidTasksVisible = false,
-                        isLoading = false
-                    )
+                    val isEndReached = if (limit != null) clientTasksList.size < limit else true
+                    _clientTasksListState.update {
+                        it.copy(
+                            tasksList = clientTasksList,
+                            isAllTasksVisible = true,
+                            isUnpaidTasksVisible = false,
+                            isLoading = false,
+                            isPaginationLoading = false,
+                            isEndReached = isEndReached
+                        )
+                    }
                     if (clientTasksList.isNotEmpty()) {
                         _clientTasksListState.value = _clientTasksListState.value.copy(
                             isFilterTasksIconVisible = true
@@ -335,8 +365,7 @@ class ClientTasksListViewModel @Inject constructor(
 
     fun editClientName(clientName: String, clientId: String) {
         viewModelScope.launch {
-            val result = tasksUseCaseFactory.editClientName(clientId, clientName)
-            when (result) {
+            when (val result = tasksUseCaseFactory.editClientName(clientId, clientName)) {
                 is ResultState.Error -> {
                     _uiEvent.emit(ToastUiEvent.ShowToast(result.message))
                 }
@@ -361,4 +390,8 @@ class ClientTasksListViewModel @Inject constructor(
 
     fun getTaskElapsedTime(clientTask: ClientTask) =
         tasksUseCaseFactory.getTimeTakenForCompletedTask(clientTask)
+
+    init {
+        tasksUseCaseFactory.create()
+    }
 }

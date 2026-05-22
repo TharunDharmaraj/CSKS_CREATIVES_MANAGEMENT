@@ -10,6 +10,7 @@ import com.example.csks_creatives.data.utils.Constants.EMPLOYEE_EMPLOYEE_PASSWOR
 import com.example.csks_creatives.data.utils.Constants.LEAVES_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUESTS_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_APPROVAL_STATUS
+import com.example.csks_creatives.data.utils.Constants.LEAVE_REQUEST_DATE
 import com.example.csks_creatives.data.utils.Constants.TASKS_COMPLETED_SUB_COLLECTION
 import com.example.csks_creatives.data.utils.Constants.TASKS_IN_PROGRESS_OR_COMPLETED_SUB_COLLECTION_TASK_ID
 import com.example.csks_creatives.data.utils.Constants.TASKS_IN_PROGRESS_SUB_COLLECTION
@@ -18,7 +19,12 @@ import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.repository.remote.AdminRepository
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -68,41 +74,40 @@ class AdminRepositoryImplementation @Inject constructor(
         }
     }
 
-    override suspend fun getEmployeeDetails(employeeId: String): Flow<Employee> = callbackFlow {
+    override suspend fun getEmployeeDetails(employeeId: String, limit: Long?): Flow<Employee> = callbackFlow {
         val documentPath = getEmployeePathForId(employeeId)
         val listener = documentPath.addSnapshotListener { documentSnapShot, error ->
             if (error != null) {
                 close(error)
                 return@addSnapshotListener
             }
-            var employeeDetails: Employee
             if (documentSnapShot != null) {
-                var updatedEmployeeDetails = Employee()
-                val employeeDetailsFetchJob = adminRepoCoroutineScope.launch {
-                    employeeDetails = documentSnapShot.toObject<Employee>() ?: Employee()
-                    val listOfTasksInProgress = getTasksInProgress(documentPath)
-                    val listOfTasksCompleted = getTasksCompleted(documentPath)
-                    updatedEmployeeDetails = employeeDetails.copy(
-                        tasksCompleted = listOfTasksCompleted,
-                        tasksInProgress = listOfTasksInProgress,
-                        numberOfTasksCompleted = listOfTasksCompleted.size.toString()
-                    )
-                    Log.d(
-                        logTag + "GetDetails",
-                        "Employee Details for employeeId Exists $employeeDetails"
-                    )
-                }
-                employeeDetailsFetchJob.invokeOnCompletion {
-                    trySend(updatedEmployeeDetails)
+                val employeeDetailsFetchJob = this@callbackFlow.launch {
+                    try {
+                        val employeeDetails = documentSnapShot.toObject<Employee>() ?: Employee()
+                        val listOfTasksInProgress = getTasksInProgress(documentPath, limit)
+                        val listOfTasksCompleted = getTasksCompleted(documentPath, limit)
+                        val updatedEmployeeDetails = employeeDetails.copy(
+                            tasksCompleted = listOfTasksCompleted,
+                             tasksInProgress = listOfTasksInProgress
+                        )
+                        trySend(updatedEmployeeDetails)
+                    } catch (e: Exception) {
+                    }
                 }
             }
         }
-        awaitClose { listener.remove() }
+        awaitClose { 
+            listener.remove()
+        }
     }
 
-    private suspend fun getTasksInProgress(documentPath: DocumentReference): List<String> {
-        val tasksInProgressReference =
-            documentPath.collection(TASKS_IN_PROGRESS_SUB_COLLECTION).get().await()
+    private suspend fun getTasksInProgress(documentPath: DocumentReference, limit: Long?): List<String> {
+        var query: Query = documentPath.collection(TASKS_IN_PROGRESS_SUB_COLLECTION)
+        if (limit != null) {
+            query = query.orderBy(FieldPath.documentId(), Query.Direction.DESCENDING).limit(limit)
+        }
+        val tasksInProgressReference = query.get().await()
         val tasksInProgressList = mutableListOf<String>()
         tasksInProgressReference.documents.forEach { documentSnapshot ->
             val taskId =
@@ -115,9 +120,12 @@ class AdminRepositoryImplementation @Inject constructor(
         return tasksInProgressList
     }
 
-    private suspend fun getTasksCompleted(documentPath: DocumentReference): List<String> {
-        val completedTasksReference =
-            documentPath.collection(TASKS_COMPLETED_SUB_COLLECTION).get().await()
+    private suspend fun getTasksCompleted(documentPath: DocumentReference, limit: Long?): List<String> {
+        var query: Query = documentPath.collection(TASKS_COMPLETED_SUB_COLLECTION)
+        if (limit != null) {
+            query = query.orderBy(FieldPath.documentId(), Query.Direction.DESCENDING).limit(limit)
+        }
+        val completedTasksReference = query.get().await()
         val completedTasksList = mutableListOf<String>()
         completedTasksReference.documents.forEach { documentSnapshot ->
             val taskId =
@@ -130,9 +138,13 @@ class AdminRepositoryImplementation @Inject constructor(
         return completedTasksList
     }
 
-    override suspend fun getEmployees(): List<Employee> {
+    override suspend fun getEmployees(limit: Long?): List<Employee> {
         return try {
-            val snapshot = firestore.collection(EMPLOYEE_COLLECTION).get().await()
+            var query: Query = firestore.collection(EMPLOYEE_COLLECTION)
+            if (limit != null) {
+                query = query.orderBy(EMPLOYEE_EMPLOYEE_JOINED_TIME, Query.Direction.DESCENDING).limit(limit)
+            }
+            val snapshot = query.get().await()
             Log.d(
                 logTag + "Get",
                 "Successfully fetched Employees list size: ${snapshot.documents.size}"
@@ -247,9 +259,13 @@ class AdminRepositoryImplementation @Inject constructor(
         }
     }
 
-    override suspend fun getAllActiveLeaveRequests() = callbackFlow {
+    override suspend fun getAllActiveLeaveRequests(limit: Long?) = callbackFlow {
+        var query: Query = getActiveLeaveRequestsReference()
+        if (limit != null) {
+            query = query.orderBy(LEAVE_REQUEST_DATE, Query.Direction.DESCENDING).limit(limit)
+        }
         val listenerRegistration =
-            getActiveLeaveRequestsReference().addSnapshotListener { snapshot, error ->
+            query.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.e(logTag, "Error fetching active leaves: ", error)
                     close(error)
@@ -309,6 +325,17 @@ class AdminRepositoryImplementation @Inject constructor(
                 logTag + "rejectLeaveRequest",
                 "Error ${exception.message}  in marking rejected leaveId: $leaveRequestId employeeId: $employeeId"
             )
+        }
+    }
+
+    override suspend fun updateEmployeeCompletedTasksCount(employeeId: String, count: String) {
+        try {
+            getEmployeePathForId(employeeId).update(
+                EMPLOYEE_EMPLOYEE_NUMBER_OF_TASKS_COMPLETED, count
+            ).await()
+            Log.d(logTag, "Successfully updated completed tasks count for $employeeId to $count")
+        } catch (e: Exception) {
+            Log.e(logTag, "Error updating completed tasks count for $employeeId: ${e.message}")
         }
     }
 

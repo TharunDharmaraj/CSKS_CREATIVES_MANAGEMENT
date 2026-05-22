@@ -17,7 +17,7 @@ object DatabaseModule {
     private fun getClientsDatabase(context: Context): ClientsDataBase {
         return clientsDatabaseInstance ?: synchronized(this) {
             Room.databaseBuilder(context, ClientsDataBase::class.java, "ClientsDataBase")
-                .fallbackToDestructiveMigration().build().also { clientsDatabaseInstance = it }
+                .fallbackToDestructiveMigration(true).build().also { clientsDatabaseInstance = it }
         }
     }
 
@@ -26,7 +26,7 @@ object DatabaseModule {
     private fun getEmployeesDatabase(context: Context): EmployeesDatabase {
         return employeesDatabaseInstance ?: synchronized(this) {
             Room.databaseBuilder(context, EmployeesDatabase::class.java, "EmployeesDataBase")
-                .fallbackToDestructiveMigration().build().also { employeesDatabaseInstance = it }
+                .fallbackToDestructiveMigration(true).build().also { employeesDatabaseInstance = it }
         }
     }
 
@@ -35,7 +35,8 @@ object DatabaseModule {
     private fun getCurrentUserDatabase(context: Context): CurrentUserDatabase {
         return currentUserDatabaseInstance ?: synchronized(this) {
             Room.databaseBuilder(context, CurrentUserDatabase::class.java, "CurrentUserDatabase")
-                .fallbackToDestructiveMigration().build().also { currentUserDatabaseInstance = it }
+                .fallbackToDestructiveMigration(true)
+                .build().also { currentUserDatabaseInstance = it }
         }
     }
 

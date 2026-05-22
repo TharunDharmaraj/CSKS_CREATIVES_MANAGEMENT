@@ -7,6 +7,6 @@ data class FinanceMetric(
     val totalFullyPaidCost: Int = 0,
     val totalPartiallyPaidCost: Int = 0,
     val totalUnpaidCost: Int = 0,
-    val year: Int = 2025,
+    val year: Int = 2026,
     val month: Int = FinanceMonths.JANUARY.monthId
 )

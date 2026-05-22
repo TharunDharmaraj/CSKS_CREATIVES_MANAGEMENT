@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -13,9 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.csks_creatives.domain.model.task.TaskStatusHistory
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import com.example.csks_creatives.presentation.components.*
 import java.time.Duration
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -33,87 +37,106 @@ fun TaskStatusHistoryComposable(
 
     Column(
         modifier = Modifier
-            .padding(vertical = 16.dp)
             .fillMaxSize()
+            .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        orderedHistory.forEach { entry ->
+        Text(
+            text = "Status Timeline",
+            style = MaterialTheme.typography.titleMedium,
+            color = vividCerulean,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        orderedHistory.forEachIndexed { index, entry ->
             val isCurrentStatus = entry.taskStatusType == currentStatusType
+            val statusColor = when (entry.taskStatusType) {
+                TaskStatusType.BACKLOG -> red
+                TaskStatusType.IN_PROGRESS -> vividCerulean
+                TaskStatusType.IN_REVIEW -> Color.Magenta
+                TaskStatusType.PAUSED -> goldenRod
+                TaskStatusType.COMPLETED -> limeGreen
+                else -> silverGrey
+            }
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp)
-                    .border(
-                        width = if (isCurrentStatus) 2.dp else 0.dp,
-                        color = if (isCurrentStatus) MaterialTheme.colorScheme.primary else Color.Transparent,
-                        shape = RoundedCornerShape(12.dp)
-                    ),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = if (isCurrentStatus) 6.dp else 2.dp
-                ),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isCurrentStatus)
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    else
-                        Color(0xFF1E1E1E)
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
             ) {
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                // Timeline indicator
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.width(32.dp)
                 ) {
-                    Icon(
-                        imageVector = when (entry.taskStatusType) {
-                            TaskStatusType.BACKLOG -> Icons.Default.Lock
-                            TaskStatusType.IN_PROGRESS -> Icons.Default.PlayArrow
-                            TaskStatusType.IN_REVIEW -> Icons.Default.Build
-                            TaskStatusType.PAUSED -> Icons.Default.Home
-                            TaskStatusType.COMPLETED -> Icons.Default.CheckCircle
-                            else -> Icons.Default.MailOutline
-                        },
-                        contentDescription = null,
-                        tint = if (isCurrentStatus)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = entry.taskStatusType.name.replace("_", " ")
-                                    .replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(
+                                if (isCurrentStatus) statusColor else statusColor.copy(alpha = 0.3f),
+                                CircleShape
                             )
-                            if (isCurrentStatus) {
-                                Spacer(modifier = Modifier.width(8.dp))
+                            .border(
+                                width = 2.dp,
+                                color = if (isCurrentStatus) white else Color.Transparent,
+                                shape = CircleShape
+                            )
+                    )
+                    if (index < orderedHistory.size - 1) {
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .height(60.dp)
+                                .background(silverGrey.copy(alpha = 0.1f))
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isCurrentStatus) charCoalPurple else charCoalPurple.copy(alpha = 0.6f)
+                    ),
+                    border = if (isCurrentStatus) BorderStroke(1.dp, statusColor.copy(alpha = 0.5f)) else null,
+                    elevation = CardDefaults.cardElevation(defaultElevation = if (isCurrentStatus) 4.dp else 0.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = entry.taskStatusType.name.replace("_", " "),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = if (isCurrentStatus) statusColor else white,
+                                fontWeight = if (isCurrentStatus) FontWeight.Bold else FontWeight.Medium
+                            )
+                            Text(
+                                text = "Time Spent: ${entry.getDurationString()}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = silverGrey
+                            )
+                        }
+
+                        if (isCurrentStatus) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = statusColor.copy(alpha = 0.1f),
+                            ) {
                                 Text(
-                                    text = "Current",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier
-                                        .background(
-                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                    text = "ACTIVE",
+                                    color = statusColor,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
                         }
-
-                        Text(
-                            text = "Time spent: ${entry.getDurationString()}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
                     }
                 }
             }
@@ -141,37 +164,42 @@ fun TaskStatusHistoryComposable(
                 CompletedSummary("Completed Time Could not be Displayed")
             }
         }
+        
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
 @Composable
 fun CompletedSummary(summaryText: String) {
-    Spacer(modifier = Modifier.height(12.dp))
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1B5E20)) // dark green
+            .padding(vertical = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = limeGreen.copy(alpha = 0.1f)),
+        border = BorderStroke(1.dp, limeGreen.copy(alpha = 0.3f))
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.padding(20.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Total Task Duration",
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.White
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = limeGreen,
+                modifier = Modifier.size(32.dp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Total Completion Time",
+                style = MaterialTheme.typography.labelMedium,
+                color = silverGrey
+            )
             Text(
                 text = summaryText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.9f)
+                style = MaterialTheme.typography.titleLarge,
+                color = limeGreen,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -187,8 +215,8 @@ fun formatDuration(totalElapsedTime: Long): String {
     val minutes = (duration.toMinutes() % 60)
 
     return buildString {
-        if (days > 0) append("$days day${if (days > 1) "s" else ""} ")
-        if (hours > 0) append("$hours hr${if (hours > 1) "s" else ""} ")
-        if (minutes > 0) append("$minutes min${if (minutes > 1) "s" else ""}")
+        if (days > 0) append("$days d ")
+        if (hours > 0) append("$hours h ")
+        if (minutes > 0) append("$minutes m")
     }.trim().ifEmpty { "Less than a minute" }
 }

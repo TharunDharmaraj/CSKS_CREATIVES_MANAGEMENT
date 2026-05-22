@@ -89,20 +89,35 @@ object Utils {
 
     fun formatTimeStamp(timeStampInMilliSeconds: String): String {
         if (timeStampInMilliSeconds.isEmpty()) return "TimeStamp Empty"
-        val timeFormat = SimpleDateFormat("HH:mm:ss MMM dd yyyy", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun formatTimeStampToGetJustDate(timeStampInMilliSeconds: String): String {
         if (timeStampInMilliSeconds.isEmpty()) return "Date Empty"
-        val timeFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         return timeFormat.format(Date(timeStampInMilliSeconds.toLong()))
     }
 
     fun getFormattedDateTimeFormat(timeStampInMilliSeconds: String): String {
         if (timeStampInMilliSeconds.isEmpty()) return "Task Creation Time Empty"
-        val dateFormat = SimpleDateFormat("MMM dd yyyy HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault())
         return dateFormat.format(Date(timeStampInMilliSeconds.toLong()))
+    }
+
+    fun getTimeAgo(timeStampInMilliSeconds: String): String {
+        if (timeStampInMilliSeconds.isEmpty()) return ""
+        val time = timeStampInMilliSeconds.toLong()
+        val now = System.currentTimeMillis()
+        val diff = now - time
+
+        return when {
+            diff < 60 * 1000 -> "Just now"
+            diff < 60 * 60 * 1000 -> "${diff / (60 * 1000)}m ago"
+            diff < 24 * 60 * 60 * 1000 -> "${diff / (60 * 60 * 1000)}h ago"
+            diff < 48 * 60 * 60 * 1000 -> "Yesterday"
+            else -> formatTimeStampToGetJustDate(timeStampInMilliSeconds)
+        }
     }
 
     fun getMonthName(month: Int): String {

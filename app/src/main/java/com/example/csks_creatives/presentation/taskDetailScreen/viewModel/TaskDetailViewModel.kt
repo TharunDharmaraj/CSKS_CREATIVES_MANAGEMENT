@@ -29,13 +29,6 @@ class TaskDetailViewModel @Inject constructor(
     private val adminUseCaseFactory: AdminUseCaseFactory,
     private val commentsUseCaseFactory: CommentsUseCaseFactory
 ) : ViewModel() {
-    init {
-        tasksUseCaseFactory.create()
-        tasksManipulationUseCaseFactory.create()
-        clientsUseCaseFactory.create()
-        adminUseCaseFactory.create()
-        commentsUseCaseFactory.create()
-    }
 
     private val _uiEvent = MutableSharedFlow<TaskCreationUiEvent>()
     val uiEvent: SharedFlow<TaskCreationUiEvent> = _uiEvent.asSharedFlow()
@@ -50,9 +43,6 @@ class TaskDetailViewModel @Inject constructor(
 
     private val _taskCommentState = MutableStateFlow(TaskCommentState())
     val taskCommentState = _taskCommentState.asStateFlow()
-
-    private val _isTaskDeletionDialogVisible = MutableStateFlow(false)
-    val isTaskDeletionDialogVisible = _isTaskDeletionDialogVisible.asStateFlow()
 
     private val _visibilityState = MutableStateFlow(TaskDetailsSectionVisibilityState())
     val visibilityState = _visibilityState.asStateFlow()
@@ -334,7 +324,7 @@ class TaskDetailViewModel @Inject constructor(
 
     private fun fetchClients() {
         viewModelScope.launch {
-            when (val result = clientsUseCaseFactory.getClients(isForceFetchFromServer = false)) {
+            when (val result = clientsUseCaseFactory.getClients(isForceFetch = false)) {
                 is ResultState.Success -> _dropDownListState.value.clientsList = result.data
                 is ResultState.Error -> Log.e("TaskDetailViewModel", "Error fetching clients")
                 else -> Unit
@@ -345,7 +335,7 @@ class TaskDetailViewModel @Inject constructor(
     private fun fetchEmployees() {
         viewModelScope.launch {
             when (val result =
-                adminUseCaseFactory.getEmployeesList(isForceFetchFromServer = false)) {
+                adminUseCaseFactory.getEmployeesList(isForceFetch = false)) {
                 is ResultState.Success -> _dropDownListState.value.employeeList = result.data
                 is ResultState.Error -> Log.e("TaskDetailViewModel", "Error fetching employees")
                 else -> Unit
@@ -468,7 +458,7 @@ class TaskDetailViewModel @Inject constructor(
         val remainingAmount =
             _taskDetailState.value.taskCost - _taskDetailState.value.taskPaymentsHistory.sumOf { it.amount }
         tasksManipulationUseCaseFactory.addPartialTaskAmount(taskId, amount, remainingAmount)
-            .let { it ->
+            .let {
                 when (it) {
                     is ResultState.Error -> {
                         _uiEvent.emit(ShowToast(it.message))
@@ -492,4 +482,12 @@ class TaskDetailViewModel @Inject constructor(
 
     fun postTaskDeletionDialogValue(value: Boolean) =
         _visibilityState.update { it.copy(isTaskDeletionDialogVisible = value) }
+
+    init {
+        tasksUseCaseFactory.create()
+        tasksManipulationUseCaseFactory.create()
+        clientsUseCaseFactory.create()
+        adminUseCaseFactory.create()
+        commentsUseCaseFactory.create()
+    }
 }

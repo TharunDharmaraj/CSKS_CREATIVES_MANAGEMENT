@@ -44,15 +44,13 @@ class MainActivity : ComponentActivity() {
                 SetStatusAndNavigationBarColor(darkSlateBlue)
 
                 val navController = rememberNavController()
-                val mainState by viewModel.mainState.collectAsState()
-                val isNavigated = rememberSaveable { mutableStateOf(false) }
 
                 var backPressedTime by remember { mutableLongStateOf(0L) }
                 val context = LocalContext.current
 
                 val currentRoute = navController.currentBackStackEntry?.destination?.route
                 val isAtHomeScreen =
-                    currentRoute?.startsWith("employee_home") == true || currentRoute == "admin_home" || currentRoute == "login"
+                    currentRoute?.startsWith("employee_home") == true || currentRoute == "admin_home" || currentRoute == "login" || currentRoute == "gate"
 
                 BackHandler(enabled = isAtHomeScreen) {
                     val currentTime = System.currentTimeMillis()
@@ -62,30 +60,6 @@ class MainActivity : ComponentActivity() {
                         backPressedTime = currentTime
                     } else {
                         (context as? Activity)?.finish()
-                    }
-                }
-
-                // Navigation logic
-                LaunchedEffect(mainState) {
-                    if (!isNavigated.value && (mainState.employeeId.isNotEmpty() || mainState.adminName.isNotEmpty())) {
-                        when {
-                            mainState.employeeId.isNotEmpty() -> {
-                                navController.navigate("employee_home/${mainState.employeeId}") {
-                                    popUpTo("login") { inclusive = true }
-                                }
-                            }
-
-                            mainState.adminName.isNotEmpty() -> {
-                                navController.navigate("admin_home") {
-                                    popUpTo("login") { inclusive = true }
-                                }
-                            }
-
-                            else -> {
-                                navController.navigate("login")
-                            }
-                        }
-                        isNavigated.value = true
                     }
                 }
 

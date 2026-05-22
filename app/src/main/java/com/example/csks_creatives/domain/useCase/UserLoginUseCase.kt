@@ -5,6 +5,7 @@ import com.example.csks_creatives.data.database.CurrentUser
 import com.example.csks_creatives.domain.model.user.User
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
 import com.example.csks_creatives.domain.repository.remote.LoginRepository
+import com.example.csks_creatives.domain.utils.SecurityUtils.encrypt
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,10 @@ class UserLoginUseCase @Inject constructor(
     suspend operator fun invoke(username: String, password: String): Result<User> {
         if (username.isBlank() || password.isBlank())
             return Result.failure(Exception("Username or password cannot be empty"))
-        return loginRepository.login(formatLoginDetails(username), formatLoginDetails(password))
+        
+        val formattedUsername = formatLoginDetails(username)
+        val hashedPassword = encrypt(formatLoginDetails(password))
+        return loginRepository.login(formattedUsername, hashedPassword)
     }
 
     suspend fun insertCurrentUserDetails(user: User) {
@@ -36,8 +40,8 @@ class UserLoginUseCase @Inject constructor(
             val loginTime = getCurrentTimeAsString()
             withContext(Dispatchers.IO) {
                 val currentUser = CurrentUser(
-                    userRole = userRole,
                     loginTime = loginTime,
+                    userRole = userRole,
                     adminName = adminId,
                     employeeId = employeeId
                 )

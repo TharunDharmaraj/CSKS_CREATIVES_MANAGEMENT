@@ -14,21 +14,34 @@ interface TasksUseCaseFactory {
 
     suspend fun editClientName(clientId: String, clientName: String): ResultState<String>
 
-    fun getTasksForClient(order: DateOrder, clientId: String): Flow<ResultState<List<ClientTask>>>
+    fun getTasksForClient(order: DateOrder, clientId: String, isForceFetch: Boolean = false, limit: Long? = null): Flow<ResultState<List<ClientTask>>>
 
     fun getTasksForEmployee(
         employeeId: String,
-        order: DateOrder
+        order: DateOrder,
+        isForceFetch: Boolean = false,
+        limit: Long? = null
     ): Flow<ResultState<Pair<List<ClientTask>, List<ClientTask>>>>
 
     fun getActiveTasksForEmployee(
         employeeId: String,
-        order: DateOrder
+        order: DateOrder,
+        isForceFetch: Boolean = false,
+        limit: Long? = null
     ): Flow<ResultState<List<ClientTask>>>
 
     fun getCompletedTasksForEmployee(
         employeeId: String,
-        order: DateOrder
+        order: DateOrder,
+        isForceFetch: Boolean = false,
+        limit: Long? = null
+    ): Flow<ResultState<List<ClientTask>>>
+
+    fun getBacklogTasksForEmployee(
+        employeeId: String,
+        order: DateOrder,
+        isForceFetch: Boolean = false,
+        limit: Long? = null
     ): Flow<ResultState<List<ClientTask>>>
 
     suspend fun createTask(task: ClientTask): ResultState<String>
@@ -37,11 +50,11 @@ interface TasksUseCaseFactory {
 
     suspend fun getTaskOverView(taskId: String): Flow<ResultState<ClientTaskOverview>>
 
-    suspend fun getAllActiveTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>>
+    suspend fun getAllActiveTasks(tasksOrder: DateOrder, isForceFetch: Boolean = false, limit: Long? = null): Flow<ResultState<List<ClientTask>>>
 
-    suspend fun getAllBacklogTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>>
+    suspend fun getAllBacklogTasks(tasksOrder: DateOrder, isForceFetch: Boolean = false, limit: Long? = null): Flow<ResultState<List<ClientTask>>>
 
-    suspend fun getAllCompletedTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>>
+    suspend fun getAllCompletedTasks(tasksOrder: DateOrder, isForceFetch: Boolean = false, limit: Long? = null): Flow<ResultState<List<ClientTask>>>
 
     fun getUniqueTaskOverViewList(
         taskOverViewData: ClientTaskOverview,

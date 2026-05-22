@@ -12,12 +12,13 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 - ⏱️ Employee performance tracking via task time logs
 - 🗂️ Task status workflow (similar to Jira): Backlog → In Progress → Review → Revision → Completed
 - 🧮 Payment tracking with support for Partial / Full payments
-- 📅 Leave request & approval system
+- 📅 Leave request & approval system with support for Full Day / Half Day requests
 - 🔍 Filter and search tasks by status, priority, or keywords
 - 💾 Offline-first with persistent login via local cache
 - 📈 Client-wise and Admin-wise monthly/yearly financial insights
+- 🚀 Optimized performance with pagination (7 records/fetch) and manual "Force Fetch" override
 
----
+---0
 
 ## 👥 User Roles
 > Login is required for both roles. Session is cached locally until logout.
@@ -73,6 +74,9 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 
 ### 🗓️ Leave Management
 - Approve or reject employee leave requests
+- View leave duration (Full Day vs. Half Day) with visual badges
+- Track weighted leave totals (Half Day = 0.5, Full Day = 1.0)
+- View monthly summaries of actual days taken
 
 ### 🔔 Notifications
 - When:
@@ -91,9 +95,10 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 - Comment on tasks
 
 ### 🗓️ Leave Management
-- Request leave
+- Request leave with duration selection (Full Day / Half Day)
 - Re-request if rejected
 - Withdraw future leave requests
+- View real-time status and duration badges
 
 ### 🔔 Notifications
 - When:
@@ -121,6 +126,9 @@ Designed to manage employees, tasks, and finances for [CSKS Creatives](https://c
 - Data Sources:
   - **Remote:** Firebase Firestore  
   - **Local:** RoomDB (Offline-first architecture)
+- **Optimization Logic:**
+  - Default paginated fetching (7 records) to reduce Firestore read costs and improve UI responsiveness.
+  - Manual "Force Fetch" override (with 10s cooldown) to bypass cache/pagination when immediate data sync is required.
 
 ### 🧩 Dependency Injection
 - Managed using **Dagger Hilt**

@@ -37,7 +37,7 @@ fun ClientCostBreakDown(
                 )
             }
         )
-    ) { mutableStateMapOf<Int, Boolean>() }
+    ) { mutableStateMapOf() }
 
     val monthExpandedStates = rememberSaveable(
         saver = mapSaver(
@@ -51,7 +51,7 @@ fun ClientCostBreakDown(
                 )
             }
         )
-    ) { mutableStateMapOf<Pair<Int, Int>, Boolean>() }
+    ) { mutableStateMapOf() }
 
     LazyColumn(
         modifier = Modifier

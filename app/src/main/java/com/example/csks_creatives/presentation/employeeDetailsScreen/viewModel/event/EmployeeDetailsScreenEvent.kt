@@ -10,4 +10,7 @@ sealed class EmployeeDetailsScreenEvent {
     object ToggleCompletedTasksSectionVisibility : EmployeeDetailsScreenEvent()
     object ToggleActiveTasksSectionVisibility : EmployeeDetailsScreenEvent()
     object OnEmployeeTaskItemClicked : EmployeeDetailsScreenEvent()
+    object ForceFetchTasks : EmployeeDetailsScreenEvent()
+    object LoadMoreTasks : EmployeeDetailsScreenEvent()
+    object FetchCompletedTasksCount : EmployeeDetailsScreenEvent()
 }

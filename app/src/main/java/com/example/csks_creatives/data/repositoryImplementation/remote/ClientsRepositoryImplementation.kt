@@ -7,6 +7,7 @@ import com.example.csks_creatives.data.utils.Constants.CLIENT_NAME
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.repository.remote.ClientsRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -18,12 +19,16 @@ class ClientsRepositoryImplementation @Inject constructor(
 ) : ClientsRepository {
     private val logTag = "ClientsRepository"
 
-    override suspend fun getClientList(): List<Client> {
+    override suspend fun getClientList(limit: Long?): List<Client> {
         return try {
-            val snapshot = firestore.collection(CLIENT_COLLECTION).get().await()
+            var query: Query = firestore.collection(CLIENT_COLLECTION)
+            if (limit != null) {
+                query = query.orderBy(CLIENT_NAME, Query.Direction.ASCENDING).limit(limit)
+            }
+            val snapshot = query.get().await()
             Log.d(
                 logTag + "Get",
-                "Successfully fetched client list size: ${snapshot.documents}"
+                "Successfully fetched client list size: ${snapshot.documents.size}"
             )
             return snapshot.documents.mapNotNull { it.toObject(Client::class.java) }
         } catch (exception: Exception) {

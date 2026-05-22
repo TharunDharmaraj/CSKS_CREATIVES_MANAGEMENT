@@ -13,13 +13,17 @@ interface AdminUseCaseFactory {
 
     suspend fun deleteEmployee(employeeId: String): ResultState<String>
 
-    suspend fun getEmployeeDetails(employeeId: String): Flow<ResultState<Employee>>
+    suspend fun getEmployeeDetails(employeeId: String, isForceFetch: Boolean = false, limit: Long? = null): Flow<ResultState<Employee>>
 
-    suspend fun getEmployeesList(isForceFetchFromServer: Boolean = true): ResultState<List<Employee>>
+    suspend fun getEmployeesList(isForceFetch: Boolean = false, limit: Long? = null): ResultState<List<Employee>>
 
-    suspend fun getAllActiveLeaveRequests(): Flow<ResultState<List<LeaveRequest>>>
+    suspend fun getAllActiveLeaveRequests(isForceFetch: Boolean = false): Flow<ResultState<List<LeaveRequest>>>
 
     suspend fun markLeaveRequestAsApproved(leaveRequest: LeaveRequest): ResultState<String>
 
     suspend fun markLeaveRequestAsRejected(leaveRequest: LeaveRequest): ResultState<String>
+
+    suspend fun getLocalEmployeeCompletedTasksCount(employeeId: String): String
+
+    suspend fun forceUpdateEmployeeCompletedTasksCount(employeeId: String): ResultState<Long>
 }

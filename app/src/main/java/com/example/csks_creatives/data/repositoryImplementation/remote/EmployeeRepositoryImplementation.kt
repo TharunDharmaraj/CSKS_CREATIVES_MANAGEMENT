@@ -14,6 +14,7 @@ import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.employee.LeaveRequestsGrouped
 import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.repository.remote.EmployeeRepository
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.channels.awaitClose
@@ -68,9 +69,40 @@ class EmployeeRepositoryImplementation @Inject constructor(
         }
     }
 
-    override suspend fun getAllLeaveRequestsForEmployee(employeeId: String) = callbackFlow {
-        val listenerRegistration = getLeaveCollectionReference(employeeId)
-            .addSnapshotListener { snapshot, error ->
+    override suspend fun getAllLeaveRequestsForEmployee(employeeId: String, limit: Long?) = callbackFlow {
+        var query: Query = getLeaveCollectionReference(employeeId)
+        if (limit != null) {
+            query = query.orderBy(LEAVE_REQUEST_DATE, Query.Direction.DESCENDING).limit(limit)
+        }
+        val listenerRegistration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e(logTag, "Error fetching leaves: ", error)
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val leaveList = snapshot.documents.mapNotNull { leave ->
+                    leave.toObject(LeaveRequest::class.java)
+                }
+
+                trySend(leaveList).isSuccess
+            }
+        }
+
+        awaitClose {
+            listenerRegistration.remove()
+            Log.d(logTag, "Firestore listener removed for employeeId: $employeeId")
+        }
+    }
+
+    override suspend fun getAllApprovedAndUnApprovedRequestsForEmployee(employeeId: String, limit: Long?) =
+        callbackFlow {
+            var query: Query = getLeaveCollectionReference(employeeId)
+            if (limit != null) {
+                query = query.orderBy(LEAVE_REQUEST_DATE, Query.Direction.DESCENDING).limit(limit)
+            }
+            val listenerRegistration = query.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.e(logTag, "Error fetching leaves: ", error)
                     close(error)
@@ -82,41 +114,16 @@ class EmployeeRepositoryImplementation @Inject constructor(
                         leave.toObject(LeaveRequest::class.java)
                     }
 
-                    trySend(leaveList).isSuccess
+                    val approved =
+                        leaveList.filter { it.approvedStatus == LeaveApprovalStatus.APPROVED }
+                    val unapproved =
+                        leaveList.filter { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
+                    val rejected =
+                        leaveList.filter { it.approvedStatus == LeaveApprovalStatus.REJECTED }
+
+                    trySend(LeaveRequestsGrouped(approved, unapproved, rejected)).isSuccess
                 }
             }
-
-        awaitClose {
-            listenerRegistration.remove()
-            Log.d(logTag, "Firestore listener removed for employeeId: $employeeId")
-        }
-    }
-
-    override suspend fun getAllApprovedAndUnApprovedRequestsForEmployee(employeeId: String) =
-        callbackFlow {
-            val listenerRegistration = getLeaveCollectionReference(employeeId)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) {
-                        Log.e(logTag, "Error fetching leaves: ", error)
-                        close(error)
-                        return@addSnapshotListener
-                    }
-
-                    if (snapshot != null) {
-                        val leaveList = snapshot.documents.mapNotNull { leave ->
-                            leave.toObject(LeaveRequest::class.java)
-                        }
-
-                        val approved =
-                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.APPROVED }
-                        val unapproved =
-                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
-                        val rejected =
-                            leaveList.filter { it.approvedStatus == LeaveApprovalStatus.REJECTED }
-
-                        trySend(LeaveRequestsGrouped(approved, unapproved, rejected)).isSuccess
-                    }
-                }
 
             awaitClose {
                 listenerRegistration.remove()

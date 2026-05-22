@@ -1,18 +1,50 @@
 package com.example.csks_creatives.presentation.clientTasksListScreen
 
 import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,16 +57,30 @@ import com.example.csks_creatives.presentation.clientTasksListScreen.components.
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.ClientTasksListViewModel
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.ClientTasksListScreenEvent
 import com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.event.EditClientNameDialogEvent
+import com.example.csks_creatives.presentation.components.charCoal
+import com.example.csks_creatives.presentation.components.darkSlateBlue
+import com.example.csks_creatives.presentation.components.goldenRod
+import com.example.csks_creatives.presentation.components.limeGreen
+import com.example.csks_creatives.presentation.components.red
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
+import com.example.csks_creatives.presentation.components.silverGrey
+import com.example.csks_creatives.presentation.components.transparent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
+import com.example.csks_creatives.presentation.components.ui.PaginationLoader
 import com.example.csks_creatives.presentation.components.ui.TaskItem
+import com.example.csks_creatives.presentation.components.ui.isAtBottom
+import com.example.csks_creatives.presentation.components.vividCerulean
+import com.example.csks_creatives.presentation.components.white
+import com.example.csks_creatives.presentation.taskDetailScreen.components.ModernTaskTextField
 import com.example.csks_creatives.presentation.toolbar.AppToolbar
 import com.example.csks_creatives.presentation.toolbar.ToolbarOverFlowMenuItem
-import com.google.accompanist.pager.*
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ClientTasksListComposable(
     clientId: String,
@@ -46,6 +92,19 @@ fun ClientTasksListComposable(
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
     val toolbarTitle = viewModel.clientName.collectAsState().value
+
+    val listState = rememberLazyListState()
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            listState.isAtBottom()
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore.value, state.value.isLoading, state.value.isPaginationLoading, state.value.isEndReached, pagerState.currentPage) {
+        if (shouldLoadMore.value && !state.value.isLoading && !state.value.isPaginationLoading && !state.value.isEndReached && pagerState.currentPage == 0) {
+            viewModel.onEvent(ClientTasksListScreenEvent.LoadMoreTasks)
+        }
+    }
 
     val tabTitles = listOf("Tasks", "Amounts")
 
@@ -68,6 +127,7 @@ fun ClientTasksListComposable(
     }
 
     Scaffold(
+        containerColor = darkSlateBlue,
         topBar = {
             AppToolbar(
                 title = "Client $toolbarTitle",
@@ -75,10 +135,13 @@ fun ClientTasksListComposable(
                 canShowSearch = state.value.canShowSearchIcon,
                 canShowFilterTasks = state.value.isFilterTasksIconVisible,
                 canShowBackIcon = true,
-                menuItems = listOf(
-                    ToolbarOverFlowMenuItem("editClient", "Edit Client Name"),
-                    ToolbarOverFlowMenuItem("logout", "Logout")
-                ),
+                menuItems = buildList {
+                    add(ToolbarOverFlowMenuItem("editClient", "Edit Client Name"))
+                    if (pagerState.currentPage == 0) {
+                        add(ToolbarOverFlowMenuItem("force_fetch", "Force Fetch"))
+                    }
+                    add(ToolbarOverFlowMenuItem("logout", "Logout"))
+                },
                 onFilterTasksIconClicked = {
                     viewModel.onEvent(ClientTasksListScreenEvent.ToggleFilterTasksClicked)
                 },
@@ -87,14 +150,21 @@ fun ClientTasksListComposable(
                 },
                 onBackClicked = { navController.popBackStack() },
                 onMenuItemClicked = { itemId ->
-                    if (itemId == "logout") {
-                        viewModel.emitLogoutEvent(true)
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
+                    when (itemId) {
+                        "logout" -> {
+                            viewModel.emitLogoutEvent(true)
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
-                    }
-                    if (itemId == "editClient") {
-                        viewModel.makeEmployeeEditDialogVisible()
+
+                        "editClient" -> {
+                            viewModel.makeEmployeeEditDialogVisible()
+                        }
+
+                        "force_fetch" -> {
+                            viewModel.onEvent(ClientTasksListScreenEvent.ForceFetchTasks)
+                        }
                     }
                 }
             )
@@ -103,10 +173,14 @@ fun ClientTasksListComposable(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
                 .padding(paddingValue)
         ) {
-            TabRow(selectedTabIndex = pagerState.currentPage) {
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor = transparent,
+                contentColor = vividCerulean,
+                divider = {}
+            ) {
                 tabTitles.forEachIndexed { index, title ->
                     Tab(
                         selected = pagerState.currentPage == index,
@@ -115,7 +189,7 @@ fun ClientTasksListComposable(
                                 pagerState.animateScrollToPage(index)
                             }
                         },
-                        text = { Text(title) }
+                        text = { Text(title, fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal) }
                     )
                 }
             }
@@ -131,7 +205,7 @@ fun ClientTasksListComposable(
                                 LoadingProgress()
                             }
                         } else {
-                            Column {
+                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                 if (state.value.isFilterSectionVisible) {
                                     Column {
                                         if (state.value.isSearchBarVisible) {
@@ -145,26 +219,35 @@ fun ClientTasksListComposable(
                                                     )
                                                 },
                                                 label = { Text("Search Task") },
-                                                modifier = Modifier.fillMaxWidth(),
+                                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                                                 leadingIcon = {
                                                     Icon(
                                                         Icons.Default.Search,
-                                                        contentDescription = "Search"
+                                                        contentDescription = "Search",
+                                                        tint = vividCerulean
                                                     )
                                                 },
-                                                singleLine = true
+                                                colors = OutlinedTextFieldDefaults.colors(
+                                                    focusedTextColor = white,
+                                                    unfocusedTextColor = white,
+                                                    focusedBorderColor = vividCerulean,
+                                                    unfocusedBorderColor = silverGrey.copy(alpha = 0.3f)
+                                                ),
+                                                singleLine = true,
+                                                shape = RoundedCornerShape(12.dp)
                                             )
-                                            Spacer(modifier = Modifier.height(8.dp))
                                         }
 
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
                                             Text(
-                                                text = "Sort by Date Created",
-                                                fontSize = 18.sp,
-                                                fontWeight = FontWeight.Bold
+                                                text = "Sort by Date",
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = white
                                             )
                                             IconButton(
                                                 onClick = {
@@ -180,115 +263,92 @@ fun ClientTasksListComposable(
                                             ) {
                                                 Icon(
                                                     imageVector = if (state.value.tasksOrder is DateOrder.Ascending) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                                                    contentDescription = "Sort Order"
+                                                    contentDescription = "Sort Order",
+                                                    tint = vividCerulean
                                                 )
                                             }
                                         }
 
-                                        Spacer(modifier = Modifier.height(8.dp))
-
                                         LazyRow(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceEvenly
+                                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
                                             item {
-                                                Button(
-                                                    onClick = {
-                                                        viewModel.onEvent(
-                                                            ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter
-                                                        )
-                                                    },
-                                                    colors = ButtonDefaults.buttonColors(
-                                                        containerColor = if (state.value.isPaidTasksVisible) Color.Green else Color.Gray
+                                                FilterChip(
+                                                    selected = state.value.isPaidTasksVisible,
+                                                    onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ShowOnlyPaidTasksFilter) },
+                                                    label = { Text("Paid") },
+                                                    colors = FilterChipDefaults.filterChipColors(
+                                                        selectedContainerColor = limeGreen.copy(alpha = 0.2f),
+                                                        selectedLabelColor = limeGreen
                                                     )
-                                                ) {
-                                                    Text(text = "Show Paid")
-                                                }
-
-                                                Button(
-                                                    onClick = {
-                                                        viewModel.onEvent(
-                                                            ClientTasksListScreenEvent.ShowOnlyPartiallyPaidTasksFilter
-                                                        )
-                                                    },
-                                                    colors = ButtonDefaults.buttonColors(
-                                                        containerColor = if (state.value.isPartiallyPaidTasksVisible) Color.Yellow else Color.Gray
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                FilterChip(
+                                                    selected = state.value.isPartiallyPaidTasksVisible,
+                                                    onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ShowOnlyPartiallyPaidTasksFilter) },
+                                                    label = { Text("Partial") },
+                                                    colors = FilterChipDefaults.filterChipColors(
+                                                        selectedContainerColor = goldenRod.copy(alpha = 0.2f),
+                                                        selectedLabelColor = goldenRod
                                                     )
-                                                ) {
-                                                    Text(text = "Show Partial")
-                                                }
-
-                                                Button(
-                                                    onClick = {
-                                                        viewModel.onEvent(
-                                                            ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter
-                                                        )
-                                                    },
-                                                    colors = ButtonDefaults.buttonColors(
-                                                        containerColor = if (state.value.isUnpaidTasksVisible) Color.Red else Color.Gray
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                FilterChip(
+                                                    selected = state.value.isUnpaidTasksVisible,
+                                                    onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ShowOnlyUnPaidTasksFilter) },
+                                                    label = { Text("Unpaid") },
+                                                    colors = FilterChipDefaults.filterChipColors(
+                                                        selectedContainerColor = red.copy(alpha = 0.2f),
+                                                        selectedLabelColor = red
                                                     )
-                                                ) {
-                                                    Text(text = "Show Unpaid")
-                                                }
+                                                )
                                             }
                                         }
-
-                                        Spacer(modifier = Modifier.height(8.dp))
 
                                         Text(
                                             text = "Filter by Status",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = silverGrey,
+                                            modifier = Modifier.padding(top = 8.dp)
                                         )
-                                        LazyRow {
+                                        LazyRow(modifier = Modifier.padding(vertical = 8.dp)) {
                                             items(TaskStatusType.entries.size) { index ->
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier
-                                                        .padding(end = 8.dp)
-                                                        .clickable {
-                                                            viewModel.onEvent(
-                                                                ClientTasksListScreenEvent.ToggleStatusFilter(
-                                                                    TaskStatusType.entries[index]
-                                                                )
-                                                            )
-                                                        }
-                                                ) {
-                                                    Checkbox(
-                                                        checked = state.value.selectedStatuses.contains(
-                                                            TaskStatusType.entries[index]
-                                                        ),
-                                                        onCheckedChange = {
-                                                            viewModel.onEvent(
-                                                                ClientTasksListScreenEvent.ToggleStatusFilter(
-                                                                    TaskStatusType.entries[index]
-                                                                )
-                                                            )
-                                                        }
+                                                val status = TaskStatusType.entries[index]
+                                                val isSelected = state.value.selectedStatuses.contains(status)
+                                                FilterChip(
+                                                    selected = isSelected,
+                                                    onClick = { viewModel.onEvent(ClientTasksListScreenEvent.ToggleStatusFilter(status)) },
+                                                    label = { Text(status.name) },
+                                                    modifier = Modifier.padding(end = 8.dp),
+                                                    colors = FilterChipDefaults.filterChipColors(
+                                                        selectedContainerColor = vividCerulean.copy(alpha = 0.2f),
+                                                        selectedLabelColor = vividCerulean
                                                     )
-                                                    Text(text = TaskStatusType.entries[index].name)
-                                                }
+                                                )
                                             }
                                         }
-
                                         Spacer(modifier = Modifier.height(8.dp))
                                     }
                                 }
 
-                                if (state.value.tasksList.isEmpty()) {
+                                if (state.value.tasksList.isEmpty() && !state.value.isLoading) {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = "No tasks found for client",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Gray
+                                            fontSize = 16.sp,
+                                            color = silverGrey
                                         )
                                     }
                                 } else {
-                                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    LazyColumn(
+                                        state = listState,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
                                         items(state.value.tasksList.size) { index ->
                                             TaskItem(
                                                 task = state.value.tasksList[index],
@@ -298,6 +358,10 @@ fun ClientTasksListComposable(
                                                 taskElapsedTime = viewModel.getTaskElapsedTime(state.value.tasksList[index])
                                             )
                                         }
+                                        if (state.value.isPaginationLoading) {
+                                            item { PaginationLoader() }
+                                        }
+                                        item { Spacer(modifier = Modifier.height(16.dp)) }
                                     }
                                 }
                             }
@@ -305,10 +369,12 @@ fun ClientTasksListComposable(
                     }
 
                     1 -> {
-                        ClientCostBreakDown(
-                            { viewModel.getYearlyAndMonthlyCostBreakdown() },
-                            { viewModel.getTotalUnPaidCostForClient() }
-                        )
+                        Box(modifier = Modifier.padding(16.dp)) {
+                            ClientCostBreakDown(
+                                { viewModel.getYearlyAndMonthlyCostBreakdown() },
+                                { viewModel.getTotalUnPaidCostForClient() }
+                            )
+                        }
                     }
 
                 }
@@ -324,14 +390,23 @@ fun ClientTasksListComposable(
 fun RenameClientDialog(viewModel: ClientTasksListViewModel) {
     val state = viewModel.editClientNameDialogState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     AlertDialog(
         onDismissRequest = { viewModel.onEditDialogEvent(EditClientNameDialogEvent.CancelClicked) },
-        title = { Text("Rename Client") },
+        containerColor = charCoal,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Text(
+                "Rename Client",
+                style = MaterialTheme.typography.headlineSmall,
+                color = white,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
-            TextField(
+            ModernTaskTextField(
                 value = state.value.clientName,
-                singleLine = true,
                 onValueChange = {
                     viewModel.onEditDialogEvent(
                         EditClientNameDialogEvent.OnClientNameTextEdit(
@@ -339,21 +414,27 @@ fun RenameClientDialog(viewModel: ClientTasksListViewModel) {
                         )
                     )
                 },
-                label = { Text("Client Name") }
+                label = "Client Name",
+                icon = Icons.Default.Person,
+                focusManager = focusManager
             )
         },
         confirmButton = {
-            Button(onClick = {
-                coroutineScope.launch {
-                    viewModel.onEditDialogEvent(EditClientNameDialogEvent.SaveClicked)
-                }
-            }) {
-                Text("Add")
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.onEditDialogEvent(EditClientNameDialogEvent.SaveClicked)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = vividCerulean),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Save Changes", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            Button(onClick = { viewModel.onEditDialogEvent(EditClientNameDialogEvent.CancelClicked) }) {
-                Text("Cancel")
+            TextButton(onClick = { viewModel.onEditDialogEvent(EditClientNameDialogEvent.CancelClicked) }) {
+                Text("Cancel", color = silverGrey)
             }
         },
         properties = DialogProperties(

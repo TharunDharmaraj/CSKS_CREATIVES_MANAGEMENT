@@ -1,11 +1,11 @@
 package com.example.csks_creatives.domain.utils
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 object LogoutEvent {
-    private val _logoutEventFlow = MutableStateFlow<Boolean>(false)
-    val logoutEventFlow = _logoutEventFlow.asStateFlow()
+    private val _logoutEventFlow = MutableSharedFlow<Boolean>()
+    val logoutEventFlow = _logoutEventFlow.asSharedFlow()
 
     suspend fun emitLogoutEvent(isUserLoggedOut: Boolean){
         _logoutEventFlow.emit(isUserLoggedOut)

@@ -16,8 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.csks_creatives.presentation.components.*
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.financeScreen.viewModel.FinanceScreenViewModel
@@ -62,17 +65,20 @@ fun FinanceScreenComposable(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { viewModel.onEvent(FinanceScreenEvent.ToggleLifeTimeFinanceSection) }
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Lifetime Finance Summary",
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        color = white,
+                        fontWeight = FontWeight.Bold
                     )
                     Icon(
                         imageVector = if (state.isLifeTimeFinanceCardVisible) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Toggle Lifetime"
+                        contentDescription = "Toggle Lifetime",
+                        tint = vividCerulean
                     )
                 }
 
@@ -90,6 +96,7 @@ fun FinanceScreenComposable(
 
             /** YEARLY CARDS **/
             items(state.yearlyCardsList.size) { index ->
+                val yearlyData = state.yearlyCardsList[index]
                 Column {
                     Row(
                         modifier = Modifier
@@ -97,35 +104,38 @@ fun FinanceScreenComposable(
                             .clickable {
                                 viewModel.onEvent(
                                     FinanceScreenEvent.ToggleYearlyFinanceSection(
-                                        state.yearlyCardsList[index].year
+                                        yearlyData.year
                                     )
                                 )
                             }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 12.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Year: ${state.yearlyCardsList[index].year}",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "Year: ${yearlyData.year}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = vividCerulean,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Icon(
-                            imageVector = if (state.yearlyCardsList[index].isYearCardVisible) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Toggle Year"
+                            imageVector = if (yearlyData.isYearCardVisible) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Toggle Year",
+                            tint = vividCerulean
                         )
                     }
 
-                    AnimatedVisibility(visible = state.yearlyCardsList[index].isYearCardVisible) {
+                    AnimatedVisibility(visible = yearlyData.isYearCardVisible) {
                         Column {
                             FinanceCard(
-                                total = state.yearlyCardsList[index].totalCost,
-                                paid = state.yearlyCardsList[index].totalCostPaid,
-                                partiallyPaid = state.yearlyCardsList[index].totalCostPartiallyPaid,
-                                unpaid = state.yearlyCardsList[index].totalCostUnPaid
+                                total = yearlyData.totalCost,
+                                paid = yearlyData.totalCostPaid,
+                                partiallyPaid = yearlyData.totalCostPartiallyPaid,
+                                unpaid = yearlyData.totalCostUnPaid
                             )
 
                             /** MONTHLY CARDS **/
-                            state.yearlyCardsList[index].monthlyFinanceCardList.forEach { monthCard ->
+                            yearlyData.monthlyFinanceCardList.forEach { monthCard ->
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Row(
@@ -144,11 +154,14 @@ fun FinanceScreenComposable(
                                 ) {
                                     Text(
                                         text = "Month: ${monthCard.month.name}",
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = silverGrey,
+                                        fontWeight = FontWeight.Medium
                                     )
                                     Icon(
                                         imageVector = if (monthCard.isMonthlyCardVisible) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                        contentDescription = "Toggle Month"
+                                        contentDescription = "Toggle Month",
+                                        tint = silverGrey
                                     )
                                 }
 
@@ -182,19 +195,33 @@ fun FinanceCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = charCoalPurple
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, white.copy(alpha = 0.05f))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Tasks Total Cost: ₹$total")
-            Text("Received Cost: ₹${paid + partiallyPaid}")
-            Spacer(Modifier.height(8.dp))
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(text = "Total Value", style = MaterialTheme.typography.labelSmall, color = silverGrey)
+                    Text(text = "₹$total", style = MaterialTheme.typography.titleLarge, color = white, fontWeight = FontWeight.Bold)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(text = "Revenue", style = MaterialTheme.typography.labelSmall, color = silverGrey)
+                    Text(text = "₹${paid + partiallyPaid}", style = MaterialTheme.typography.titleLarge, color = limeGreen, fontWeight = FontWeight.Bold)
+                }
+            }
+            
+            Spacer(Modifier.height(20.dp))
+            HorizontalDivider(color = white.copy(alpha = 0.05f))
 
             FinancePieChart(
                 paid = paid,
@@ -230,7 +257,7 @@ fun FinancePieChart(
             var startAngle = -90f
 
             drawArc(
-                color = Color(0xFF2E7D32), // Green for Paid
+                color = limeGreen,
                 startAngle = startAngle,
                 sweepAngle = paidAngle,
                 useCenter = true
@@ -238,7 +265,7 @@ fun FinancePieChart(
             startAngle += paidAngle
 
             drawArc(
-                color = Color(0xFFC62828), // Red for Unpaid
+                color = red,
                 startAngle = startAngle,
                 sweepAngle = unpaidAngle,
                 useCenter = true
@@ -246,36 +273,44 @@ fun FinancePieChart(
             startAngle += unpaidAngle
 
             drawArc(
-                color = Color(0xFFFFA000), // Amber for Partially Paid
+                color = goldenRod,
                 startAngle = startAngle,
                 sweepAngle = partiallyPaidAngle,
                 useCenter = true
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            PaymentLegend(color = Color(0xFF2E7D32), label = "Fully Paid: ₹$paid")
-            PaymentLegend(color = Color(0xFFC62828), label = "Unpaid Tasks Cost: ₹$unpaid")
-            PaymentLegend(color = Color(0xFFFFA000), label = "Partially Paid: ₹$partiallyPaid")
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            PaymentLegend(color = limeGreen, label = "Fully Paid", amount = paid)
+            PaymentLegend(color = goldenRod, label = "Partially Paid", amount = partiallyPaid)
+            PaymentLegend(color = red, label = "Unpaid Balance", amount = unpaid)
         }
     }
 }
 
 
 @Composable
-fun PaymentLegend(color: Color, label: String) {
+fun PaymentLegend(color: Color, label: String, amount: Int) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .background(color, shape = CircleShape)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = label, style = MaterialTheme.typography.bodySmall)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .background(color, shape = CircleShape)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(text = label, style = MaterialTheme.typography.bodyMedium, color = silverGrey)
+        }
+        Text(text = "₹$amount", style = MaterialTheme.typography.bodyLarge, color = white, fontWeight = FontWeight.SemiBold)
     }
 }

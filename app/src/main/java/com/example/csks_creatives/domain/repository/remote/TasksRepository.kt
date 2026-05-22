@@ -11,17 +11,21 @@ interface TasksRepository {
 
     suspend fun getTaskOverView(taskId: String): Flow<ClientTaskOverview>
 
-    fun getTasksForClient(clientId: String): Flow<List<ClientTask>>
+    fun getTasksForClient(clientId: String, limit: Long? = null): Flow<List<ClientTask>>
 
-    suspend fun getTasksForEmployee(employeeId: String): Flow<List<ClientTask>>
+    suspend fun getTasksForEmployee(employeeId: String, limit: Long? = null): Flow<List<ClientTask>>
 
-    suspend fun getActiveTasksForEmployee(employeeId: String): Flow<List<ClientTask>>
+    suspend fun getActiveTasksForEmployee(employeeId: String, limit: Long? = null): Flow<List<ClientTask>>
 
-    suspend fun getCompletedTasksForEmployee(employeeId: String): Flow<List<ClientTask>>
+    suspend fun getCompletedTasksForEmployee(employeeId: String, limit: Long? = null): Flow<List<ClientTask>>
 
-    suspend fun getActiveTasks(): Flow<List<ClientTask>>
+    suspend fun getCompletedTasksCountForEmployee(employeeId: String): Long
 
-    suspend fun getCompletedTasks(): Flow<List<ClientTask>>
+    suspend fun getBacklogTasksForEmployee(employeeId: String, limit: Long? = null): Flow<List<ClientTask>>
 
-    suspend fun getTasksInBackLog(): Flow<List<ClientTask>>
+    suspend fun getActiveTasks(limit: Long? = null): Flow<List<ClientTask>>
+
+    suspend fun getCompletedTasks(limit: Long? = null): Flow<List<ClientTask>>
+
+    suspend fun getTasksInBackLog(limit: Long? = null): Flow<List<ClientTask>>
 }

@@ -39,10 +39,10 @@ data class ClientTask(
     @PropertyName(TASK_FULLY_PAID_DATE) val taskFullyPaidDate: String = EMPTY_STRING,
     @PropertyName(TASK_TYPE) val taskType: TaskType = TaskType.SHORTS_VIDEO,
     @PropertyName(TASK_PRIORITY) val taskPriority: TaskPriority = TaskPriority.MEDIUM,
-    @PropertyName(TASK_DIRECTION_APP) val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS,
-    @PropertyName(TASK_UPLOAD_OUTPUT) val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES,
+    @PropertyName(TASK_DIRECTION_APP) val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.SLACK,
+    @PropertyName(TASK_UPLOAD_OUTPUT) val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES_1,
     @PropertyName(TASK_CURRENT_STATUS) val currentStatus: TaskStatusType = TaskStatusType.BACKLOG, // Current Task Status
-    @PropertyName(TASK_STATUS_HISTORY_SUB_COLLECTION) val statusHistory: List<TaskStatusHistory>, // Status History EG : Backlog - 3 days, In-Progress - 2 days etc..
+    @PropertyName(TASK_STATUS_HISTORY_SUB_COLLECTION) val statusHistory: List<TaskStatusHistory>, // Status History EG : Backlog - 3 days, In-Progress - 2 days etc.
     @PropertyName(TASK_PAYMENTS_INFO_SUB_COLLECTION) val paymentHistory: List<PaymentInfo> // Payments Info History - Only available for Partially paid tasks
 ) {
     constructor() : this(
@@ -58,8 +58,8 @@ data class ClientTask(
         EMPTY_STRING,
         TaskType.SHORTS_VIDEO,
         TaskPriority.MEDIUM,
-        TaskDirectionApp.TEAMS,
-        TaskUploadOutput.CSKS_CREATIVES,
+        TaskDirectionApp.SLACK,
+        TaskUploadOutput.CSKS_CREATIVES_1,
         TaskStatusType.BACKLOG,
         emptyList(),
         emptyList()

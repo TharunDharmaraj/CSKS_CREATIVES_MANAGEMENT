@@ -7,5 +7,9 @@ interface EmployeesLocalRepository {
 
     suspend fun getEmployees(): List<EmployeeItem>
 
+    suspend fun getEmployeeById(employeeId: String): EmployeeItem?
+
+    suspend fun updateCompletedTasksCount(employeeId: String, count: String)
+
     suspend fun deleteAllEmployees()
 }

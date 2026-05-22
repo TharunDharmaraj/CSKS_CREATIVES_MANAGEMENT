@@ -9,9 +9,9 @@ interface AdminRepository {
 
     suspend fun deleteEmployee(employeeId: String)
 
-    suspend fun getEmployeeDetails(employeeId: String): Flow<Employee>
+    suspend fun getEmployeeDetails(employeeId: String, limit: Long? = null): Flow<Employee>
 
-    suspend fun getEmployees(): List<Employee>
+    suspend fun getEmployees(limit: Long? = null): List<Employee>
 
     suspend fun checkEmployeeIdExists(employeeId: String): Boolean
 
@@ -23,9 +23,11 @@ interface AdminRepository {
 
     suspend fun removeCompletedTaskFromEmployeeDetails(employeeId: String, taskId: String)
 
-    suspend fun getAllActiveLeaveRequests(): Flow<List<LeaveRequest>>
+    suspend fun getAllActiveLeaveRequests(limit: Long? = null): Flow<List<LeaveRequest>>
 
     suspend fun markLeaveRequestAsApproved(leaveRequestId: String, employeeId: String)
 
     suspend fun markLeaveRequestAsRejected(leaveRequestId: String, employeeId: String)
+
+    suspend fun updateEmployeeCompletedTasksCount(employeeId: String, count: String)
 }

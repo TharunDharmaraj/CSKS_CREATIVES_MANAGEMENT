@@ -1,32 +1,36 @@
 package com.example.csks_creatives.presentation.loginScreen.components
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.text.font.FontWeight
-import com.example.csks_creatives.presentation.components.Constants.LOGIN_BUTTON_BORDER_STROKE
-import com.example.csks_creatives.presentation.components.Constants.LOGIN_BUTTON_TEXT
-import com.example.csks_creatives.presentation.components.Constants.LOGIN_SCREEN_FIELDS_SIZE
-import com.example.csks_creatives.presentation.components.tealGreen
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.csks_creatives.presentation.components.vividCerulean
+import com.example.csks_creatives.presentation.components.white
 
 @Composable
 fun BottomLoginButton(onClick: () -> Unit) {
     Button(
-        modifier = Modifier.width(LOGIN_SCREEN_FIELDS_SIZE),
-        border = BorderStroke(LOGIN_BUTTON_BORDER_STROKE, tealGreen),
-        colors = ButtonColors(
-            contentColor = tealGreen,
-            containerColor = Transparent,
-            disabledContainerColor = tealGreen,
-            disabledContentColor = tealGreen,
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = vividCerulean,
+            contentColor = white
         ),
-        onClick = {
-            onClick()
-        }
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
     ) {
-        Text(LOGIN_BUTTON_TEXT, fontWeight = FontWeight.Bold)
+        Text(
+            text = "Sign In",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp
+        )
     }
 }

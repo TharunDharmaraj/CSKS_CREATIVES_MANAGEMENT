@@ -8,7 +8,7 @@ enum class TaskStatusType(val order: Int) {
     PAUSED(4),
     COMPLETED(5),
 
-    // Added for backward Compatability
+    // Added for backward Compatibility
     REVISION_1(100),
     REVISION_2(101),
     REVISION_3(102),

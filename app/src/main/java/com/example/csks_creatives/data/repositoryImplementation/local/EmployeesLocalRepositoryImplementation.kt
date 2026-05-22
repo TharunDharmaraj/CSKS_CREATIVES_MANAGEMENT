@@ -14,5 +14,11 @@ class EmployeesLocalRepositoryImplementation @Inject constructor(
 
     override suspend fun getEmployees(): List<EmployeeItem> = employeesDao.getAllEmployees()
 
+    override suspend fun getEmployeeById(employeeId: String): EmployeeItem? =
+        employeesDao.getEmployeeById(employeeId)
+
+    override suspend fun updateCompletedTasksCount(employeeId: String, count: String) =
+        employeesDao.updateCompletedTasksCount(employeeId, count)
+
     override suspend fun deleteAllEmployees() = employeesDao.deleteAllClients()
 }

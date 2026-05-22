@@ -12,4 +12,6 @@ sealed interface ClientTasksListScreenEvent {
     data class OnSearchTextChanged(val searchText: String) : ClientTasksListScreenEvent
     data class Order(val order: DateOrder) : ClientTasksListScreenEvent
     data class ToggleStatusFilter(val status: TaskStatusType) : ClientTasksListScreenEvent
+    object ForceFetchTasks : ClientTasksListScreenEvent
+    object LoadMoreTasks : ClientTasksListScreenEvent
 }

@@ -1,6 +1,8 @@
 package com.example.csks_creatives.presentation.toolbar
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -15,7 +17,7 @@ import com.example.csks_creatives.R
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPaidStatus
 import com.example.csks_creatives.presentation.components.darkSlateBlue
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AppToolbar(
     title: String,
@@ -46,7 +48,14 @@ fun AppToolbar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = darkSlateBlue,
         ),
-        title = { Text(title, fontWeight = FontWeight.SemiBold) },
+        title = {
+            Text(
+                text = title,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
+        },
         navigationIcon = {
             if (canShowBackIcon) {
                 IconButton(onClick = onBackClicked) {

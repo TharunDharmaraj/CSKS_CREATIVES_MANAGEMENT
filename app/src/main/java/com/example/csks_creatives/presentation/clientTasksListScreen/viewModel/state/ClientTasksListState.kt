@@ -2,6 +2,7 @@ package com.example.csks_creatives.presentation.clientTasksListScreen.viewModel.
 
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
+import com.example.csks_creatives.data.utils.Constants.DEFAULT_TASK_FETCH_LIMIT
 import com.example.csks_creatives.domain.utils.Utils.EMPTY_STRING
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 
@@ -9,7 +10,7 @@ data class ClientTasksListState(
     val clientId: String = EMPTY_STRING,
     val tasksList: List<ClientTask> = emptyList(),
     val isLoading: Boolean = false,
-    val tasksOrder: DateOrder = DateOrder.Ascending,
+    val tasksOrder: DateOrder = DateOrder.Descending,
     val canShowSearchIcon: Boolean = false,
     val isSearchBarVisible: Boolean = false,
     val isFilterTasksIconVisible: Boolean = false,
@@ -20,5 +21,8 @@ data class ClientTasksListState(
     val isPartiallyPaidTasksVisible: Boolean = false,
     val isEditClientNameDialogVisible: Boolean = false,
     val searchText: String = EMPTY_STRING,
-    val selectedStatuses: Set<TaskStatusType> = emptySet()
+    val selectedStatuses: Set<TaskStatusType> = emptySet(),
+    val isPaginationLoading: Boolean = false,
+    val isEndReached: Boolean = false,
+    val tasksLimit: Long = DEFAULT_TASK_FETCH_LIMIT
 )

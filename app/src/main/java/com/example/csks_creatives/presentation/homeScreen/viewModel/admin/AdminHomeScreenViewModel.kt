@@ -3,11 +3,13 @@ package com.example.csks_creatives.presentation.homeScreen.viewModel.admin
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.csks_creatives.data.utils.Constants.DEFAULT_TASK_FETCH_LIMIT
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
 import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveApprovalStatus
 import com.example.csks_creatives.domain.model.utills.sealed.ResultState
+import com.example.csks_creatives.domain.useCase.UserPersistenceUseCase
 import com.example.csks_creatives.domain.useCase.factories.*
 import com.example.csks_creatives.domain.utils.LogoutEvent
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
@@ -15,6 +17,7 @@ import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.event.*
 import com.example.csks_creatives.presentation.homeScreen.viewModel.admin.state.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,16 +26,11 @@ import javax.inject.Inject
 class AdminHomeScreenViewModel @Inject constructor(
     private val adminUseCaseFactory: AdminUseCaseFactory,
     private val clientsUseCaseFactory: ClientsUseCaseFactory,
-    private val tasksUseCaseFactory: TasksUseCaseFactory
+    private val tasksUseCaseFactory: TasksUseCaseFactory,
+    private val userPersistenceUseCase: UserPersistenceUseCase
 ) : ViewModel() {
-    init {
-        adminUseCaseFactory.create()
-        clientsUseCaseFactory.create()
-        tasksUseCaseFactory.create()
-        fetchActiveLeaveRequests()
-    }
 
-    private val _homeScreenTitleState = MutableStateFlow("Welcome, Admin")
+    private val _homeScreenTitleState = MutableStateFlow("Welcome, Kishor!")
     val homeScreenTitle = _homeScreenTitleState.asStateFlow()
 
     private val _adminHomeScreenState = MutableStateFlow(AdminHomeScreenState())
@@ -64,6 +62,14 @@ class AdminHomeScreenViewModel @Inject constructor(
     private var isCompletedTasksFetched = false
     private var isBacklogTasksFetched = false
 
+    private var activeTasksJob: Job? = null
+    private var backlogTasksJob: Job? = null
+    private var completedTasksJob: Job? = null
+
+    private var employeesJob: Job? = null
+    private var clientsJob: Job? = null
+    private var leaveRequestsJob: Job? = null
+
     fun onHomeScreenEvent(adminHomeScreenEvent: AdminHomeScreenEvent) {
         when (adminHomeScreenEvent) {
             AdminHomeScreenEvent.CreateEmployeeButtonClick -> {
@@ -77,61 +83,32 @@ class AdminHomeScreenViewModel @Inject constructor(
             }
 
             AdminHomeScreenEvent.ToggleClientSection -> {
-                _adminHomeScreenVisibilityState.value = _adminHomeScreenVisibilityState.value.copy(
-                    isClientSectionVisible = !_adminHomeScreenVisibilityState.value.isClientSectionVisible
-                )
-                if (_adminHomeScreenVisibilityState.value.isClientSectionVisible and isClientsFetched.not()) {
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isClientsLoading = !_adminHomeScreenLoadingState.value.isClientsLoading
-                    )
-                    fetchClients()
-                }
+                _adminHomeScreenVisibilityState.update { it.copy(isClientSectionVisible = true) }
+                fetchClients(isForceFetch = true)
             }
 
             AdminHomeScreenEvent.ToggleEmployeeSection -> {
-                _adminHomeScreenVisibilityState.value = _adminHomeScreenVisibilityState.value.copy(
-                    isEmployeeSectionVisible = !_adminHomeScreenVisibilityState.value.isEmployeeSectionVisible
-                )
-                if (_adminHomeScreenVisibilityState.value.isEmployeeSectionVisible and isEmployeesFetched.not()) {
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isEmployeesLoading = !_adminHomeScreenLoadingState.value.isEmployeesLoading
-                    )
-                    fetchEmployees()
-                }
+                _adminHomeScreenVisibilityState.update { it.copy(isEmployeeSectionVisible = true) }
+                fetchEmployees(isForceFetch = true)
             }
 
             AdminHomeScreenEvent.ToggleActiveTaskSection -> {
-                _adminHomeScreenVisibilityState.value = _adminHomeScreenVisibilityState.value.copy(
-                    isActiveTaskSectionVisible = !_adminHomeScreenVisibilityState.value.isActiveTaskSectionVisible
-                )
-                if (_adminHomeScreenVisibilityState.value.isActiveTaskSectionVisible and isActiveTasksFetched.not()) {
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isActiveTasksLoading = !_adminHomeScreenLoadingState.value.isActiveTasksLoading
-                    )
+                _adminHomeScreenVisibilityState.update { it.copy(isActiveTaskSectionVisible = true) }
+                if (isActiveTasksFetched.not()) {
                     fetchActiveTasks()
                 }
             }
 
             AdminHomeScreenEvent.ToggleBacklogTaskSection -> {
-                _adminHomeScreenVisibilityState.value = _adminHomeScreenVisibilityState.value.copy(
-                    isBacklogTaskSectionVisible = !_adminHomeScreenVisibilityState.value.isBacklogTaskSectionVisible
-                )
-                if (_adminHomeScreenVisibilityState.value.isBacklogTaskSectionVisible and isBacklogTasksFetched.not()) {
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isBacklogTasksLoading = !_adminHomeScreenLoadingState.value.isBacklogTasksLoading
-                    )
+                _adminHomeScreenVisibilityState.update { it.copy(isBacklogTaskSectionVisible = true) }
+                if (isBacklogTasksFetched.not()) {
                     fetchBacklogTasks()
                 }
             }
 
             AdminHomeScreenEvent.ToggleCompletedTaskSection -> {
-                _adminHomeScreenVisibilityState.value = _adminHomeScreenVisibilityState.value.copy(
-                    isCompletedTaskSectionVisible = !_adminHomeScreenVisibilityState.value.isCompletedTaskSectionVisible
-                )
-                if (_adminHomeScreenVisibilityState.value.isCompletedTaskSectionVisible and isCompletedTasksFetched.not()) {
-                    _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                        isCompletedTasksLoading = !_adminHomeScreenLoadingState.value.isCompletedTasksLoading
-                    )
+                _adminHomeScreenVisibilityState.update { it.copy(isCompletedTaskSectionVisible = true) }
+                if (isCompletedTasksFetched.not()) {
                     fetchCompletedTasks()
                 }
             }
@@ -142,6 +119,68 @@ class AdminHomeScreenViewModel @Inject constructor(
                         isLeaveRequestsSectionVisible = !_adminHomeScreenVisibilityState.value.isLeaveRequestsSectionVisible
                     )
                 }
+            }
+
+            AdminHomeScreenEvent.ForceFetchTasks -> {
+                if (_adminHomeScreenLoadingState.value.isActiveTasksLoading || 
+                    _adminHomeScreenLoadingState.value.isBacklogTasksLoading || 
+                    _adminHomeScreenLoadingState.value.isCompletedTasksLoading) return
+                
+                _adminHomeScreenState.update { 
+                    it.copy(
+                        activeTaskList = emptyList(),
+                        backlogTaskList = emptyList(),
+                        completedTasksList = emptyList(),
+                        activeTasksLimit = DEFAULT_TASK_FETCH_LIMIT,
+                        backlogTasksLimit = DEFAULT_TASK_FETCH_LIMIT,
+                        completedTasksLimit = DEFAULT_TASK_FETCH_LIMIT
+                    ) 
+                }
+                fetchActiveTasks(isForceFetch = true)
+                fetchBacklogTasks(isForceFetch = true)
+                fetchCompletedTasks(isForceFetch = true)
+            }
+
+            AdminHomeScreenEvent.ForceFetchEmployees -> {
+                if (_adminHomeScreenLoadingState.value.isEmployeesLoading) return
+                _adminHomeScreenState.update { it.copy(employeeList = emptyList()) }
+                fetchEmployees(isForceFetch = true)
+            }
+
+            AdminHomeScreenEvent.ForceFetchClients -> {
+                if (_adminHomeScreenLoadingState.value.isClientsLoading) return
+                _adminHomeScreenState.update { it.copy(clientList = emptyList()) }
+                fetchClients(isForceFetch = true)
+            }
+
+            AdminHomeScreenEvent.ForceFetchLeaveRequests -> {
+                if (_adminHomeScreenLoadingState.value.isLeaveRequestsLoading) return
+                _adminHomeScreenState.update { it.copy(activeLeaveRequests = emptyList()) }
+                fetchActiveLeaveRequests(isForceFetch = true)
+            }
+
+            AdminHomeScreenEvent.LoadMoreEmployees -> {
+                if (_adminHomeScreenState.value.isEmployeesEndReached || _adminHomeScreenState.value.isPaginationLoading) return
+                _adminHomeScreenState.update { it.copy(employeesLimit = it.employeesLimit + DEFAULT_TASK_FETCH_LIMIT) }
+                fetchEmployees()
+            }
+
+            is AdminHomeScreenEvent.LoadMoreActiveTasks -> {
+                if (_adminHomeScreenState.value.isActiveTasksEndReached || _adminHomeScreenState.value.isPaginationLoading) return
+                _adminHomeScreenState.update { it.copy(activeTasksLimit = it.activeTasksLimit + DEFAULT_TASK_FETCH_LIMIT) }
+                fetchActiveTasks()
+            }
+
+            is AdminHomeScreenEvent.LoadMoreBacklogTasks -> {
+                if (_adminHomeScreenState.value.isBacklogTasksEndReached || _adminHomeScreenState.value.isPaginationLoading) return
+                _adminHomeScreenState.update { it.copy(backlogTasksLimit = it.backlogTasksLimit + DEFAULT_TASK_FETCH_LIMIT) }
+                fetchBacklogTasks()
+            }
+
+            is AdminHomeScreenEvent.LoadMoreCompletedTasks -> {
+                if (_adminHomeScreenState.value.isCompletedTasksEndReached || _adminHomeScreenState.value.isPaginationLoading) return
+                _adminHomeScreenState.update { it.copy(completedTasksLimit = it.completedTasksLimit + DEFAULT_TASK_FETCH_LIMIT) }
+                fetchCompletedTasks()
             }
 
             is AdminHomeScreenEvent.ToggleOrderDate -> {
@@ -157,7 +196,7 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     private fun updateTasksOrder(order: DateOrder) {
         if (order == DateOrder.Descending) {
-            _adminHomeScreenState.update { it ->
+            _adminHomeScreenState.update {
                 it.copy(
                     activeTaskList = _adminHomeScreenState.value.activeTaskList.sortedByDescending { task -> task.taskCreationTime },
                     backlogTaskList = _adminHomeScreenState.value.backlogTaskList.sortedByDescending { task -> task.taskCreationTime },
@@ -165,7 +204,7 @@ class AdminHomeScreenViewModel @Inject constructor(
                 )
             }
         } else {
-            _adminHomeScreenState.update { it ->
+            _adminHomeScreenState.update {
                 it.copy(
                     activeTaskList = _adminHomeScreenState.value.activeTaskList.sortedBy { task -> task.taskCreationTime },
                     backlogTaskList = _adminHomeScreenState.value.backlogTaskList.sortedBy { task -> task.taskCreationTime },
@@ -248,62 +287,78 @@ class AdminHomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun fetchEmployees() {
-        viewModelScope.launch {
-            _adminHomeScreenLoadingState.update {
-                it.copy(
-                    isEmployeesLoading = true
-                )
-            }
-            val result = adminUseCaseFactory.getEmployeesList(isForceFetchFromServer = true)
+    private fun fetchEmployees(isForceFetch: Boolean = false) {
+        employeesJob?.cancel()
+        employeesJob = viewModelScope.launch {
+            _adminHomeScreenLoadingState.update { it.copy(isEmployeesLoading = true) }
+
+            val result = adminUseCaseFactory.getEmployeesList(isForceFetch = isForceFetch, limit = null)
             if (result is ResultState.Success) {
-                _adminHomeScreenState.value =
-                    _adminHomeScreenState.value.copy(employeeList = result.data)
-                _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                    isEmployeesLoading = false
-                )
+                _adminHomeScreenState.update {
+                    it.copy(
+                        employeeList = result.data,
+                        isEmployeesEndReached = true,
+                        isPaginationLoading = false
+                    )
+                }
+                _adminHomeScreenLoadingState.update { it.copy(isEmployeesLoading = false) }
                 isEmployeesFetched = true
             }
         }
     }
 
-    private fun fetchClients() {
-        viewModelScope.launch {
-            _adminHomeScreenLoadingState.update {
-                it.copy(
-                    isClientsLoading = true
-                )
-            }
-            val result = clientsUseCaseFactory.getClients(isForceFetchFromServer = true)
+    private fun fetchClients(isForceFetch: Boolean = false) {
+        clientsJob?.cancel()
+        clientsJob = viewModelScope.launch {
+            _adminHomeScreenLoadingState.update { it.copy(isClientsLoading = true) }
+
+            val result = if (isForceFetch) clientsUseCaseFactory.getAllClients() 
+                         else clientsUseCaseFactory.getClients(isForceFetch = false, limit = null)
+            
             when (result) {
-                is ResultState.Error -> TODO()
-                ResultState.Loading -> {
-                    _adminHomeScreenLoadingState
+                is ResultState.Error -> {
+                     _adminHomeScreenState.update { it.copy(isPaginationLoading = false) }
+                     _adminHomeScreenLoadingState.update { it.copy(isClientsLoading = false) }
                 }
+                ResultState.Loading -> {}
 
                 is ResultState.Success<List<Client>> -> {
-                    _adminHomeScreenState.value =
-                        _adminHomeScreenState.value.copy(clientList = result.data)
-                    _adminHomeScreenLoadingState.value =
-                        _adminHomeScreenLoadingState.value.copy(
-                            isClientsLoading = false
+                    _adminHomeScreenState.update {
+                        it.copy(
+                            clientList = result.data,
+                            isClientsEndReached = true,
+                            isPaginationLoading = false
                         )
+                    }
+                    _adminHomeScreenLoadingState.update { it.copy(isClientsLoading = false) }
                     isClientsFetched = true
                 }
             }
         }
     }
 
-    private fun fetchActiveTasks() {
-        viewModelScope.launch {
-            _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
-                isActiveTasksLoading = true
-            )
-            tasksUseCaseFactory.getAllActiveTasks(_adminHomeScreenState.value.tasksOrder)
+    private fun fetchActiveTasks(isForceFetch: Boolean = false) {
+        activeTasksJob?.cancel()
+        activeTasksJob = viewModelScope.launch {
+            val limit = if (isForceFetch) null else _adminHomeScreenState.value.activeTasksLimit
+            if (!isForceFetch && _adminHomeScreenState.value.activeTasksLimit > DEFAULT_TASK_FETCH_LIMIT) {
+                _adminHomeScreenState.update { it.copy(isPaginationLoading = true) }
+            } else {
+                _adminHomeScreenLoadingState.value = _adminHomeScreenLoadingState.value.copy(
+                    isActiveTasksLoading = true
+                )
+            }
+            tasksUseCaseFactory.getAllActiveTasks(_adminHomeScreenState.value.tasksOrder, isForceFetch, limit)
                 .collect { result ->
                     if (result is ResultState.Success) {
-                        _adminHomeScreenState.value =
-                            _adminHomeScreenState.value.copy(activeTaskList = result.data)
+                        val isEndReached = if (limit != null) result.data.size < limit else true
+                        _adminHomeScreenState.update {
+                            it.copy(
+                                activeTaskList = result.data,
+                                isActiveTasksEndReached = isEndReached,
+                                isPaginationLoading = false
+                            )
+                        }
                         _adminHomeScreenLoadingState.value =
                             _adminHomeScreenLoadingState.value.copy(
                                 isActiveTasksLoading = false
@@ -314,15 +369,19 @@ class AdminHomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun fetchActiveLeaveRequests() {
-        viewModelScope.launch {
-            adminUseCaseFactory.getAllActiveLeaveRequests().collect { result ->
+    private fun fetchActiveLeaveRequests(isForceFetch: Boolean = false) {
+        leaveRequestsJob?.cancel()
+        leaveRequestsJob = viewModelScope.launch {
+            _adminHomeScreenLoadingState.update { it.copy(isLeaveRequestsLoading = true) }
+
+            adminUseCaseFactory.getAllActiveLeaveRequests(isForceFetch).collect { result ->
                 if (result is ResultState.Success) {
                     hasUnapprovedLeaves.value =
                         result.data.any { it.approvedStatus == LeaveApprovalStatus.UN_APPROVED }
                     _adminHomeScreenState.update {
                         it.copy(
-                            activeLeaveRequests = result.data
+                            activeLeaveRequests = result.data,
+                            isPaginationLoading = false
                         )
                     }
                     _adminHomeScreenLoadingState.update {
@@ -336,18 +395,26 @@ class AdminHomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun fetchCompletedTasks() {
-        viewModelScope.launch {
-            _adminHomeScreenLoadingState.update {
-                it.copy(
-                    isCompletedTasksLoading = true
-                )
+    private fun fetchCompletedTasks(isForceFetch: Boolean = false) {
+        completedTasksJob?.cancel()
+        completedTasksJob = viewModelScope.launch {
+            val limit = if (isForceFetch) null else _adminHomeScreenState.value.completedTasksLimit
+            if (!isForceFetch && _adminHomeScreenState.value.completedTasksLimit > DEFAULT_TASK_FETCH_LIMIT) {
+                _adminHomeScreenState.update { it.copy(isPaginationLoading = true) }
+            } else {
+                _adminHomeScreenLoadingState.update { it.copy(isCompletedTasksLoading = true) }
             }
-            tasksUseCaseFactory.getAllCompletedTasks(_adminHomeScreenState.value.tasksOrder)
+            tasksUseCaseFactory.getAllCompletedTasks(_adminHomeScreenState.value.tasksOrder, isForceFetch, limit)
                 .collect { result ->
                     if (result is ResultState.Success) {
-                        _adminHomeScreenState.value =
-                            _adminHomeScreenState.value.copy(completedTasksList = result.data)
+                        val isEndReached = if (limit != null) result.data.size < limit else true
+                        _adminHomeScreenState.update {
+                            it.copy(
+                                completedTasksList = result.data,
+                                isCompletedTasksEndReached = isEndReached,
+                                isPaginationLoading = false
+                            )
+                        }
                         _adminHomeScreenLoadingState.value =
                             _adminHomeScreenLoadingState.value.copy(
                                 isCompletedTasksLoading = false
@@ -358,18 +425,26 @@ class AdminHomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun fetchBacklogTasks() {
-        viewModelScope.launch {
-            _adminHomeScreenLoadingState.update {
-                it.copy(
-                    isBacklogTasksLoading = true
-                )
+    private fun fetchBacklogTasks(isForceFetch: Boolean = false) {
+        backlogTasksJob?.cancel()
+        backlogTasksJob = viewModelScope.launch {
+            val limit = if (isForceFetch) null else _adminHomeScreenState.value.backlogTasksLimit
+            if (!isForceFetch && _adminHomeScreenState.value.backlogTasksLimit > DEFAULT_TASK_FETCH_LIMIT) {
+                _adminHomeScreenState.update { it.copy(isPaginationLoading = true) }
+            } else {
+                _adminHomeScreenLoadingState.update { it.copy(isBacklogTasksLoading = true) }
             }
-            tasksUseCaseFactory.getAllBacklogTasks(_adminHomeScreenState.value.tasksOrder)
+            tasksUseCaseFactory.getAllBacklogTasks(_adminHomeScreenState.value.tasksOrder, isForceFetch, limit)
                 .collect { result ->
                     if (result is ResultState.Success) {
-                        _adminHomeScreenState.value =
-                            _adminHomeScreenState.value.copy(backlogTaskList = result.data)
+                        val isEndReached = if (limit != null) result.data.size < limit else true
+                        _adminHomeScreenState.update {
+                            it.copy(
+                                backlogTaskList = result.data,
+                                isBacklogTasksEndReached = isEndReached,
+                                isPaginationLoading = false
+                            )
+                        }
                         _adminHomeScreenLoadingState.value =
                             _adminHomeScreenLoadingState.value.copy(
                                 isBacklogTasksLoading = false
@@ -382,6 +457,9 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     fun emitLogoutEvent(isUserLoggedOut: Boolean) {
         viewModelScope.launch {
+            if (isUserLoggedOut) {
+                userPersistenceUseCase.deleteCurrentUser()
+            }
             LogoutEvent.emitLogoutEvent(isUserLoggedOut)
         }
     }
@@ -410,5 +488,12 @@ class AdminHomeScreenViewModel @Inject constructor(
 
     fun setHomeScreenTitle(title: String) {
         _homeScreenTitleState.value = title
+    }
+
+    init {
+        adminUseCaseFactory.create()
+        clientsUseCaseFactory.create()
+        tasksUseCaseFactory.create()
+        fetchActiveLeaveRequests()
     }
 }

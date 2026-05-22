@@ -19,10 +19,6 @@ import javax.inject.Inject
 class FinanceScreenViewModel @Inject constructor(
     private val financeUseCaseFactory: FinanceUseCaseFactory
 ) : ViewModel() {
-    init {
-        financeUseCaseFactory.create()
-        getFinancials()
-    }
 
     private val _financeScreenState = MutableStateFlow(FinanceScreenState())
     val financeScreenState = _financeScreenState.asStateFlow()
@@ -132,5 +128,10 @@ class FinanceScreenViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    init {
+        financeUseCaseFactory.create()
+        getFinancials()
     }
 }

@@ -14,7 +14,7 @@ data class ClientTaskOverview(
     val taskType: TaskType = TaskType.SHORTS_VIDEO,
     val taskPriority: TaskPriority = TaskPriority.MEDIUM,
     val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS,
-    val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES,
+    val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES_1,
     val currentStatus: TaskStatusType = TaskStatusType.BACKLOG,
     val taskElapsedTime: Long = 0L
 )

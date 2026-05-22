@@ -12,4 +12,12 @@ sealed class AdminHomeScreenEvent {
     object ToggleActiveTaskSection : AdminHomeScreenEvent()
     object ToggleCompletedTaskSection : AdminHomeScreenEvent()
     object ToggleActiveLeavesSection : AdminHomeScreenEvent()
+    object ForceFetchTasks : AdminHomeScreenEvent()
+    object ForceFetchEmployees : AdminHomeScreenEvent()
+    object ForceFetchClients : AdminHomeScreenEvent()
+    object ForceFetchLeaveRequests : AdminHomeScreenEvent()
+    object LoadMoreEmployees : AdminHomeScreenEvent()
+    object LoadMoreActiveTasks : AdminHomeScreenEvent()
+    object LoadMoreBacklogTasks : AdminHomeScreenEvent()
+    object LoadMoreCompletedTasks : AdminHomeScreenEvent()
 }

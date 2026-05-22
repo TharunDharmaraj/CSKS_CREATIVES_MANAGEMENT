@@ -10,6 +10,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.csks_creatives.domain.model.utills.sealed.UserRole
+import com.example.csks_creatives.presentation.components.darkSlateBlue
 import com.example.csks_creatives.presentation.taskDetailScreen.components.TaskDetailComposable
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.TaskDetailViewModel
 import com.example.csks_creatives.presentation.taskDetailScreen.viewModel.event.TaskCreationUiEvent
@@ -47,6 +48,7 @@ fun TaskDetailsComposable(
         viewModel.initialize(userRole, isTaskCreation, taskId, employeeId)
     }
     Scaffold(
+        containerColor = darkSlateBlue,
         topBar = {
             val actionButtonText: String
             val title: String

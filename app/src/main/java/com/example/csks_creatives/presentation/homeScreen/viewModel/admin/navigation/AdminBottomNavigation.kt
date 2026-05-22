@@ -9,6 +9,6 @@ sealed class AdminBottomNavigation(val title: String, val icon: ImageVector) {
     object Employees : AdminBottomNavigation("Employees", Icons.Outlined.Person)
     object Clients : AdminBottomNavigation("Clients", ClientIcon)
     object Tasks : AdminBottomNavigation("Tasks", AllTasksIcon)
-    object Finance : AdminBottomNavigation("Money", bankIcon)
+//    object Finance : AdminBottomNavigation("Money", bankIcon)
     object LeaveRequests : AdminBottomNavigation("Leaves", icon = LeaveRequestIcon)
 }

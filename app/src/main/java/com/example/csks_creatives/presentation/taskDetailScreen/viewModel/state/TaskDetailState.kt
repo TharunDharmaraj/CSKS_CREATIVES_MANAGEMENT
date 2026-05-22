@@ -16,7 +16,7 @@ data class TaskDetailState(
     val taskType: TaskType = TaskType.SHORTS_VIDEO, // Editable for admin, Viewable for employee
     val taskPriority: TaskPriority = TaskPriority.MEDIUM, //  Editable for Admin, Viewable for Employee
     val taskDirectionApp: TaskDirectionApp = TaskDirectionApp.TEAMS, // Where the employee should find task related files. Editable for Admin, Viewable for Employee
-    val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES, // Where the tasks should be uploaded once complete.  Editable for Admin, Viewable for Employee
+    val taskUploadOutput: TaskUploadOutput = TaskUploadOutput.CSKS_CREATIVES_1, // Where the tasks should be uploaded once complete.  Editable for Admin, Viewable for Employee
     val taskCurrentStatus: TaskStatusType = TaskStatusType.BACKLOG, // Read Only for Both Admin and Employee
     val taskPartialPaymentsAmount: Int = 0, // Partial Payment amount numeric field, that will be displayed once partial payment option is selected
     val taskPaymentsHistory: List<PaymentInfo> = emptyList(), // Payment Info - Read only by Admin, updated only for Partial Payments

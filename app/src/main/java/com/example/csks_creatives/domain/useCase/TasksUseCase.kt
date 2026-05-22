@@ -1,9 +1,6 @@
 package com.example.csks_creatives.domain.useCase
 
-import android.annotation.SuppressLint
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
+import com.example.csks_creatives.data.utils.Constants.DEFAULT_TASK_FETCH_LIMIT
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.task.ClientTaskOverview
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
@@ -17,7 +14,6 @@ import com.example.csks_creatives.domain.utils.Utils.getCurrentTimeAsString
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import java.time.Duration
 import javax.inject.Inject
 
 class TasksUseCase @Inject constructor(
@@ -25,6 +21,7 @@ class TasksUseCase @Inject constructor(
     private val adminRepository: AdminRepository,
     private val clientsRepository: ClientsRepository
 ) : TasksUseCaseFactory {
+
     override fun create(): TasksUseCase {
         return TasksUseCase(tasksRepository, adminRepository, clientsRepository)
     }
@@ -45,11 +42,14 @@ class TasksUseCase @Inject constructor(
 
     override fun getTasksForClient(
         order: DateOrder,
-        clientId: String
+        clientId: String,
+        isForceFetch: Boolean,
+        limit: Long?
     ): Flow<ResultState<List<ClientTask>>> = flow {
         emit(ResultState.Loading)
         try {
-            tasksRepository.getTasksForClient(clientId)
+            val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+            tasksRepository.getTasksForClient(clientId, finalLimit)
                 .collect { tasks ->
                     val orderedTasks = if (order == DateOrder.Ascending) {
                         tasks.sortedBy { it.taskCreationTime }
@@ -65,11 +65,14 @@ class TasksUseCase @Inject constructor(
 
     override fun getTasksForEmployee(
         employeeId: String,
-        order: DateOrder
+        order: DateOrder,
+        isForceFetch: Boolean,
+        limit: Long?
     ): Flow<ResultState<Pair<List<ClientTask>, List<ClientTask>>>> = flow {
         emit(ResultState.Loading)
         try {
-            tasksRepository.getTasksForEmployee(employeeId)
+            val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+            tasksRepository.getTasksForEmployee(employeeId, finalLimit)
                 .collect { tasks ->
                     var activeTasks = tasks.getActiveTasks()
                     var completedTasks = tasks.getCompletedTasks()
@@ -94,11 +97,14 @@ class TasksUseCase @Inject constructor(
 
     override fun getActiveTasksForEmployee(
         employeeId: String,
-        order: DateOrder
+        order: DateOrder,
+        isForceFetch: Boolean,
+        limit: Long?
     ): Flow<ResultState<List<ClientTask>>> = flow {
         emit(ResultState.Loading)
         try {
-            tasksRepository.getActiveTasksForEmployee(employeeId)
+            val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+            tasksRepository.getActiveTasksForEmployee(employeeId, finalLimit)
                 .collect { tasks ->
                     val sorted = when (order) {
                         DateOrder.Ascending -> tasks.sortedBy { it.taskCreationTime }
@@ -113,11 +119,14 @@ class TasksUseCase @Inject constructor(
 
     override fun getCompletedTasksForEmployee(
         employeeId: String,
-        order: DateOrder
+        order: DateOrder,
+        isForceFetch: Boolean,
+        limit: Long?
     ): Flow<ResultState<List<ClientTask>>> = flow {
         emit(ResultState.Loading)
         try {
-            tasksRepository.getCompletedTasksForEmployee(employeeId)
+            val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+            tasksRepository.getCompletedTasksForEmployee(employeeId, finalLimit)
                 .collect { tasks ->
                     val sorted = when (order) {
                         DateOrder.Ascending -> tasks.sortedBy { it.taskCreationTime }
@@ -127,6 +136,28 @@ class TasksUseCase @Inject constructor(
                 }
         } catch (e: Exception) {
             emit(ResultState.Error("Failed to fetch completed tasks: ${e.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    override fun getBacklogTasksForEmployee(
+        employeeId: String,
+        order: DateOrder,
+        isForceFetch: Boolean,
+        limit: Long?
+    ): Flow<ResultState<List<ClientTask>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+            tasksRepository.getBacklogTasksForEmployee(employeeId, finalLimit)
+                .collect { tasks ->
+                    val sorted = when (order) {
+                        DateOrder.Ascending -> tasks.sortedBy { it.taskCreationTime }
+                        DateOrder.Descending -> tasks.sortedByDescending { it.taskCreationTime }
+                    }
+                    emit(ResultState.Success(sorted))
+                }
+        } catch (e: Exception) {
+            emit(ResultState.Error("Failed to fetch backlog tasks: ${e.message}"))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -183,16 +214,31 @@ class TasksUseCase @Inject constructor(
             }
         }.flowOn(Dispatchers.IO)
 
-    override suspend fun getAllActiveTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>> {
-        return getTasksWithOrder({ tasksRepository.getActiveTasks() }, tasksOrder, "active")
+    override suspend fun getAllActiveTasks(
+        tasksOrder: DateOrder,
+        isForceFetch: Boolean,
+        limit: Long?
+    ): Flow<ResultState<List<ClientTask>>> {
+        val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+        return getTasksWithOrder({ tasksRepository.getActiveTasks(finalLimit) }, tasksOrder, "active")
     }
 
-    override suspend fun getAllBacklogTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>> {
-        return getTasksWithOrder({ tasksRepository.getTasksInBackLog() }, tasksOrder, "backlog")
+    override suspend fun getAllBacklogTasks(
+        tasksOrder: DateOrder,
+        isForceFetch: Boolean,
+        limit: Long?
+    ): Flow<ResultState<List<ClientTask>>> {
+        val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+        return getTasksWithOrder({ tasksRepository.getTasksInBackLog(finalLimit) }, tasksOrder, "backlog")
     }
 
-    override suspend fun getAllCompletedTasks(tasksOrder: DateOrder): Flow<ResultState<List<ClientTask>>> {
-        return getTasksWithOrder({ tasksRepository.getCompletedTasks() }, tasksOrder, "completed")
+    override suspend fun getAllCompletedTasks(
+        tasksOrder: DateOrder,
+        isForceFetch: Boolean,
+        limit: Long?
+    ): Flow<ResultState<List<ClientTask>>> {
+        val finalLimit = if (isForceFetch) null else (limit ?: DEFAULT_TASK_FETCH_LIMIT)
+        return getTasksWithOrder({ tasksRepository.getCompletedTasks(finalLimit) }, tasksOrder, "completed")
     }
 
     private fun getTasksWithOrder(
@@ -226,7 +272,6 @@ class TasksUseCase @Inject constructor(
         tasksInProgressList: List<ClientTaskOverview>
     ) = tasksInProgressList.filter { it.taskId != completedTaskId.taskId }
 
-    @SuppressLint("NewApi")
     override fun getTimeTakenForActiveTask(
         taskId: String,
         tasksInProgress: List<ClientTaskOverview>
@@ -238,10 +283,9 @@ class TasksUseCase @Inject constructor(
                 }
             }
         }
-        return "123456"
+        return "N/A"
     }
 
-    @SuppressLint("NewApi")
     override fun getTimeTakenForCompletedTask(
         taskId: String,
         tasksCompleted: List<ClientTaskOverview>
@@ -251,10 +295,9 @@ class TasksUseCase @Inject constructor(
                 return formatDuration(task.taskElapsedTime)
             }
         }
-        return "123456789"
+        return "N/A"
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun getTimeTakenForCompletedTask(clientTask: ClientTask): String {
         if (clientTask.currentStatus == TaskStatusType.COMPLETED) {
             val intermediateStatuses = clientTask.statusHistory.filter {
@@ -279,19 +322,21 @@ class TasksUseCase @Inject constructor(
         } else return EMPTY_STRING
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun formatDuration(totalElapsedTime: Long): String {
+    private fun formatDuration(totalElapsedTime: Long): String {
         if (totalElapsedTime <= 0) return "Less than a minute"
 
-        val duration = Duration.ofMillis(totalElapsedTime)
-        val days = duration.toDays()
-        val hours = (duration.toHours() % 24)
-        val minutes = (duration.toMinutes() % 60)
+        val seconds = totalElapsedTime / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+        val days = hours / 24
+
+        val remainingHours = hours % 24
+        val remainingMinutes = minutes % 60
 
         return buildString {
             if (days > 0) append("$days day${if (days > 1) "s" else ""} ")
-            if (hours > 0) append("$hours hr${if (hours > 1) "s" else ""} ")
-            if (minutes > 0) append("$minutes min${if (minutes > 1) "s" else ""}")
+            if (remainingHours > 0) append("$remainingHours hr${if (remainingHours > 1) "s" else ""} ")
+            if (remainingMinutes > 0) append("$remainingMinutes min${if (remainingMinutes > 1) "s" else ""}")
         }.trim().ifEmpty { "Less than a minute" }
     }
 }

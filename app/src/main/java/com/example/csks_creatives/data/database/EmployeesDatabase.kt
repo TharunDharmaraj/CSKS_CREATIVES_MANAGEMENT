@@ -22,6 +22,12 @@ interface EmployeesDao {
     @Query("SELECT * from EmployeesList order by employeeName ASC")
     fun getAllEmployees(): List<EmployeeItem>
 
+    @Query("SELECT * from EmployeesList WHERE employeeId = :employeeId")
+    suspend fun getEmployeeById(employeeId: String): EmployeeItem?
+
+    @Query("UPDATE EmployeesList SET numberOfTasksCompleted = :count WHERE employeeId = :employeeId")
+    suspend fun updateCompletedTasksCount(employeeId: String, count: String)
+
     @Query("DELETE from EmployeesList")
     fun deleteAllClients()
 }

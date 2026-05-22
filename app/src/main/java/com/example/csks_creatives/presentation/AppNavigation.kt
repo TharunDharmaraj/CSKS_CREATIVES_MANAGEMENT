@@ -13,13 +13,16 @@ import com.example.csks_creatives.presentation.clientTasksListScreen.ClientTasks
 import com.example.csks_creatives.presentation.employeeDetailsScreen.EmployeeDetailsScreen
 import com.example.csks_creatives.presentation.homeScreen.AdminHomeScreen
 import com.example.csks_creatives.presentation.homeScreen.EmployeeHomeScreenComposable
+import com.example.csks_creatives.presentation.loginScreen.AuthGate
 import com.example.csks_creatives.presentation.loginScreen.LoginScreen
 import com.example.csks_creatives.presentation.taskDetailScreen.TaskDetailsComposable
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "gate") {
+        composable("gate") { AuthGate(navController) }
+
         composable("login") { LoginScreen(viewModel = hiltViewModel(), navController) }
 
         composable("employee_home/{employeeId}") { backStackEntry ->

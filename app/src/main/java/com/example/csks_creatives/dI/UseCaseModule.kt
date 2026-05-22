@@ -16,11 +16,13 @@ object UseCaseModule {
     @Provides
     fun provideAdminUseCaseFactory(
         adminRepository: AdminRepository,
-        employeesLocalRepository: EmployeesLocalRepository
+        employeesLocalRepository: EmployeesLocalRepository,
+        tasksRepository: TasksRepository
     ): AdminUseCaseFactory {
         return AdminUseCase(
             adminRepository = adminRepository,
-            employeesLocalRepository = employeesLocalRepository
+            employeesLocalRepository = employeesLocalRepository,
+            tasksRepository = tasksRepository
         )
     }
 

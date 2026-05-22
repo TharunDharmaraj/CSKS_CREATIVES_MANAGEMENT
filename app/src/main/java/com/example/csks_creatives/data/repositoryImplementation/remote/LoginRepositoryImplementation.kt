@@ -34,6 +34,7 @@ class LoginRepositoryImplementation @Inject constructor(
 
     override suspend fun login(username: String, password: String): Result<User> {
         return try {
+            // 1. Try Admin Login (Encrypted)
             val adminSnapshot = firestore.collection(ADMIN_COLLECTION)
                 .whereEqualTo(ADMIN_USERNAME, username)
                 .whereEqualTo(ADMIN_PASSWORD, password)
@@ -41,18 +42,10 @@ class LoginRepositoryImplementation @Inject constructor(
                 .await()
 
             if (adminSnapshot.isEmpty.not()) {
-                val adminDoc = adminSnapshot.documents.first()
-                setCurrentUserAsAdmin(
-                    CurrentLoginUser(
-                        userRole = UserRole.Employee,
-                        adminName = adminDoc.id,
-                        employeeId = EMPTY_STRING
-                    )
-                )
-                Log.d(logTag, "UserRole is Admin")
-                return Result.success(User(adminDoc.id, username, UserRole.Admin))
+                return handleAdminSuccess(adminSnapshot, username)
             }
 
+            // 2. Try Employee Login (Encrypted)
             val employeeSnapshot = firestore.collection(EMPLOYEE_COLLECTION)
                 .whereEqualTo(EMPLOYEE_EMPLOYEE_NAME, username)
                 .whereEqualTo(EMPLOYEE_EMPLOYEE_PASSWORD, password)
@@ -60,16 +53,40 @@ class LoginRepositoryImplementation @Inject constructor(
                 .await()
 
             if (employeeSnapshot.isEmpty.not()) {
-                val employeeDoc = employeeSnapshot.documents.first()
-                setCurrentUserAsEmployee(
-                    CurrentLoginUser(
-                        userRole = UserRole.Employee,
-                        adminName = EMPTY_STRING,
-                        employeeId = employeeDoc.id
-                    )
-                )
-                Log.d(logTag, "UserRole is Employee")
-                return Result.success(User(employeeDoc.id, username, UserRole.Employee))
+                return handleEmployeeSuccess(employeeSnapshot, username)
+            }
+
+            // 3. Fallback: Try Plain Text (for legacy support during transition)
+            // We need the raw password here. However, the UseCase already encrypted it.
+            // Wait, the UseCase calls encrypt(password).
+            // To support fallback, the repository needs the plain password OR the UseCase needs to pass both.
+            // But the requirement is "if hashed doesn't match, use unhashed".
+            // Since we use AES, it's reversible. I can decrypt it here to try the fallback.
+            
+            val plainPassword = com.example.csks_creatives.domain.utils.SecurityUtils.decrypt(password)
+            if (plainPassword != password) { // If it was actually encrypted
+
+                // Try Admin Plain Text
+                val adminLegacySnapshot = firestore.collection(ADMIN_COLLECTION)
+                    .whereEqualTo(ADMIN_USERNAME, username)
+                    .whereEqualTo(ADMIN_PASSWORD, plainPassword)
+                    .get()
+                    .await()
+                
+                if (adminLegacySnapshot.isEmpty.not()) {
+                    return handleAdminSuccess(adminLegacySnapshot, username)
+                }
+                
+                // Try Employee Plain Text
+                val employeeLegacySnapshot = firestore.collection(EMPLOYEE_COLLECTION)
+                    .whereEqualTo(EMPLOYEE_EMPLOYEE_NAME, username)
+                    .whereEqualTo(EMPLOYEE_EMPLOYEE_PASSWORD, plainPassword)
+                    .get()
+                    .await()
+                
+                if (employeeLegacySnapshot.isEmpty.not()) {
+                    return handleEmployeeSuccess(employeeLegacySnapshot, username)
+                }
             }
 
             Log.d(logTag, "Invalid Credentials")
@@ -78,6 +95,32 @@ class LoginRepositoryImplementation @Inject constructor(
             Log.d(logTag, "Exception ${exception.message} ")
             Result.failure(exception)
         }
+    }
+
+    private fun handleAdminSuccess(snapshot: com.google.firebase.firestore.QuerySnapshot, username: String): Result<User> {
+        val adminDoc = snapshot.documents.first()
+        setCurrentUserAsAdmin(
+            CurrentLoginUser(
+                userRole = UserRole.Admin,
+                adminName = adminDoc.id,
+                employeeId = EMPTY_STRING
+            )
+        )
+        Log.d(logTag, "UserRole is Admin")
+        return Result.success(User(adminDoc.id, username, UserRole.Admin))
+    }
+
+    private fun handleEmployeeSuccess(snapshot: com.google.firebase.firestore.QuerySnapshot, username: String): Result<User> {
+        val employeeDoc = snapshot.documents.first()
+        setCurrentUserAsEmployee(
+            CurrentLoginUser(
+                userRole = UserRole.Employee,
+                adminName = EMPTY_STRING,
+                employeeId = employeeDoc.id
+            )
+        )
+        Log.d(logTag, "UserRole is Employee")
+        return Result.success(User(employeeDoc.id, username, UserRole.Employee))
     }
 
     override suspend fun saveFCMToken(employeeId: String) {
