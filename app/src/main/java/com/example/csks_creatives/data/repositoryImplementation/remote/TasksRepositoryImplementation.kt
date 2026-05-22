@@ -311,6 +311,7 @@ class TasksRepositoryImplementation @Inject constructor(
         return getTasks(query)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun getTasks(query: Query): Flow<List<ClientTask>> = callbackFlow {
         // Use a limited dispatcher for fetching tasks to prevent saturating the IO pool
         // and ensure that write operations (like createTask) can still execute promptly.

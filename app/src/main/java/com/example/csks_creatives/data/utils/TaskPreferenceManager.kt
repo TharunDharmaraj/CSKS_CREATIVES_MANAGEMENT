@@ -6,6 +6,7 @@ import com.example.csks_creatives.data.utils.Constants.TASK_PREFERENCES
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
 class TaskPreferenceManager @Inject constructor(
@@ -14,7 +15,7 @@ class TaskPreferenceManager @Inject constructor(
     private val prefs = context.getSharedPreferences(TASK_PREFERENCES, Context.MODE_PRIVATE)
 
     fun saveCompletedTasksCount(employeeId: String, count: String) {
-        prefs.edit().putString(COMPLETED_TASKS_COUNT_PREFIX + employeeId, count).apply()
+        prefs.edit { putString(COMPLETED_TASKS_COUNT_PREFIX + employeeId, count) }
     }
 
     fun getCompletedTasksCount(employeeId: String): String {

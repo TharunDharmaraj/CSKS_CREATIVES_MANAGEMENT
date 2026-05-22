@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,16 +19,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -75,26 +73,25 @@ import com.example.csks_creatives.data.utils.Constants.ADMIN_NAME
 import com.example.csks_creatives.domain.model.client.Client
 import com.example.csks_creatives.domain.model.employee.Employee
 import com.example.csks_creatives.domain.model.employee.LeaveRequest
-import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskType
 import com.example.csks_creatives.domain.model.task.ClientTask
 import com.example.csks_creatives.domain.model.utills.enums.employee.LeaveDuration
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskPriority
 import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskStatusType
-import com.example.csks_creatives.domain.utils.Utils.formatTimeStampToGetJustDate
+import com.example.csks_creatives.domain.model.utills.enums.tasks.TaskType
 import com.example.csks_creatives.presentation.components.charCoal
 import com.example.csks_creatives.presentation.components.charCoalPurple
 import com.example.csks_creatives.presentation.components.darkSlateBlue
+import com.example.csks_creatives.presentation.components.displayName
 import com.example.csks_creatives.presentation.components.goldenRod
 import com.example.csks_creatives.presentation.components.grey
 import com.example.csks_creatives.presentation.components.helper.ColorHelper.getBorderColorBasedOnTaskPriority
+import com.example.csks_creatives.presentation.components.icon
 import com.example.csks_creatives.presentation.components.limeGreen
 import com.example.csks_creatives.presentation.components.red
 import com.example.csks_creatives.presentation.components.sealed.DateOrder
 import com.example.csks_creatives.presentation.components.sealed.ToastUiEvent
 import com.example.csks_creatives.presentation.components.silverGrey
 import com.example.csks_creatives.presentation.components.transparent
-import com.example.csks_creatives.presentation.components.displayName
-import com.example.csks_creatives.presentation.components.icon
 import com.example.csks_creatives.presentation.components.ui.LoadingProgress
 import com.example.csks_creatives.presentation.components.ui.ModernDateView
 import com.example.csks_creatives.presentation.components.ui.PaginationLoader
@@ -180,8 +177,6 @@ fun AdminHomeScreen(
                                 AdminBottomNavigation.LeaveRequests -> viewModel.onHomeScreenEvent(
                                     AdminHomeScreenEvent.ForceFetchLeaveRequests
                                 )
-
-                                else -> {}
                             }
                         }
 

@@ -128,7 +128,7 @@ fun EmployeeHomeScreenComposable(
         contentWindowInsets = WindowInsets(0),
         topBar = {
             AppToolbar(
-                title = "$employeeId",
+                title = employeeId,
                 canShowLogo = true,
                 canShowSearch = false,
                 canShowMenu = true,

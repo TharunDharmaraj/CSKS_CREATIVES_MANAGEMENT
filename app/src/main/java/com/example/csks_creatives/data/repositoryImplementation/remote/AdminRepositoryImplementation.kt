@@ -38,7 +38,6 @@ class AdminRepositoryImplementation @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : AdminRepository {
     private val logTag = "AdminRepository"
-    private val adminRepoCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override suspend fun createEmployee(employee: Employee) {
         val employeeId = employee.employeeId
@@ -82,7 +81,7 @@ class AdminRepositoryImplementation @Inject constructor(
                 return@addSnapshotListener
             }
             if (documentSnapShot != null) {
-                val employeeDetailsFetchJob = this@callbackFlow.launch {
+                this@callbackFlow.launch {
                     try {
                         val employeeDetails = documentSnapShot.toObject<Employee>() ?: Employee()
                         val listOfTasksInProgress = getTasksInProgress(documentPath, limit)
